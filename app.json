@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "TaxShax",
-    "slug": "TaxShax",
+    "slug": "itaxeasy-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/favicon_48.png",
@@ -25,7 +25,7 @@
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon_48.png"
-    },    
+    },
     "plugins": [
       "expo-router",
       [

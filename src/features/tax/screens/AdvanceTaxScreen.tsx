@@ -31,10 +31,8 @@ export default function AdvanceTaxScreen() {
 
   const handleExport = async () => {
     try {
-      const file = await exportPDF();
-      if (file) {
-        Alert.alert('Success', 'PDF Generated');
-      }
+      await exportPDF();
+      Alert.alert('Success', 'PDF Generated');
     } catch {
       Alert.alert('Error', 'PDF failed');
     }

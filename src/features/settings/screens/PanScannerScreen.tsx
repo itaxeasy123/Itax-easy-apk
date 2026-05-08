@@ -16,8 +16,8 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { scanPAN } from "@services/ocrService";
-import { extractPanDetails } from "@utils/panParser";
+import { scanPAN } from "../../../services/ocrService";
+import { extractPanDetails } from "../../../utils/panParser";
 import { usePanStore } from "../../../store/panStore";
 import PanCamera from "../../../components/PanCamera";
 
@@ -57,7 +57,9 @@ export default function PanScannerScreen() {
     try {
       setLoading(true);
       const response = await scanPAN(file);
-      const parsed = extractPanDetails(response.data);
+      const parsed = extractPanDetails(
+        ((response as { data?: unknown }).data ?? []) as any[]
+      );
       setPan(parsed);
       setImage(file);
     } catch (e) {

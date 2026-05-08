@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View, Image} from 'react-native';
+import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
 
 import AuthInput from '../components/AuthInput';
 import AuthScaffold, { AuthIllustration, PrimaryButton } from '../components/AuthScaffold';
@@ -16,18 +16,22 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     try {
+      setLoading(true);
       setError('');
 
       if (!validateEmail(email)) {
         setError('Please enter a valid email address.');
+        setLoading(false);
         return;
       }
 
       if (!password.trim()) {
         setError('Please enter your password.');
+        setLoading(false);
         return;
       }
 
@@ -69,6 +73,8 @@ export default function LoginScreen() {
           404: 'User not found.',
         })
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,12 +84,12 @@ export default function LoginScreen() {
         <Image
           accessibilityLabel="iTaxEasy logo"
           resizeMode="contain"
-          source={require('../../../../assets/images/login.jpeg')}
+          source={require('../../../../assets/images/icon2.png')}
           style={styles.logo}
         />
       </View>
       <View style={styles.hero}>
-         <Text style={styles.title}>Let&apos;s get started</Text>
+        <Text style={styles.title}>Let&apos;s get started</Text>
         <Text style={styles.subtitle}>Access your account securely.</Text>
       </View>
 
@@ -112,7 +118,7 @@ export default function LoginScreen() {
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <PrimaryButton label="Login" onPress={handleLogin} />
+      <PrimaryButton label="Login" loading={loading} onPress={handleLogin} />
 
       <View style={styles.signupRow}>
         <View style={styles.line} />
@@ -133,7 +139,7 @@ const styles = StyleSheet.create({
     color: '#347BE5',
     fontSize: 20,
     fontWeight: '700',
-   textAlign: 'center',
+    textAlign: 'center',
   },
   hero: { marginBottom: 8 },
   subtitle: {
@@ -169,13 +175,13 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginBottom: 2,
   },
-   logoWrap: {
+  logoWrap: {
     alignItems: 'center',
     marginBottom: 10,
     marginTop: 2,
   },
   logo: {
-    height: 84,
-    width: 84,
+    height: 100,
+    width: 100,
   },
 });

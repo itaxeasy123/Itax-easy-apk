@@ -23,43 +23,51 @@ export default function SignupScreen() {
   });
   const [isGenderOpen, setIsGenderOpen] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const updateField =
     (field: keyof typeof form) =>
-    (value: string) =>
-      setForm((current) => ({ ...current, [field]: value }));
+      (value: string) =>
+        setForm((current) => ({ ...current, [field]: value }));
 
   const handleSignup = async () => {
     try {
+      setLoading(true);
       setError('');
 
       if (!form.fullName.trim()) {
         setError('Please enter your full name.');
+        setLoading(false);
         return;
       }
 
       if (!validateEmail(form.email)) {
         setError('Please enter a valid email address.');
+        setLoading(false);
         return;
       }
 
       if (!form.gender) {
         setError('Please select a gender.');
+        setLoading(false);
         return;
       }
 
       if (!form.mobileNumber.trim()) {
         setError('Please enter your mobile number.');
+        setLoading(false);
         return;
       }
 
       if (!validatePassword(form.password)) {
         setError('Password must be at least 6 characters long.');
+        setLoading(false);
         return;
       }
 
       if (form.password !== form.confirmPassword) {
         setError('Password and confirm password do not match.');
+        setLoading(false);
         return;
       }
 
@@ -82,20 +90,22 @@ export default function SignupScreen() {
           400: 'Please check the entered details and try again.',
         })
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <AuthScaffold headerTitle="Signup" onBackPress={() => router.back()}>
       <View style={styles.logoWrap}>
-              <Image
-                accessibilityLabel="iTaxEasy logo"
-                resizeMode="contain"
-                source={require('../../../../assets/images/login.jpeg')}
-                style={styles.logo}
-              />
-            </View>
-      <View style={styles.hero}>       
+        <Image
+          accessibilityLabel="iTaxEasy logo"
+          resizeMode="contain"
+          source={require('../../../../assets/images/icon2.png')}
+          style={styles.logo}
+        />
+      </View>
+      <View style={styles.hero}>
         <Text style={styles.title}>Create an account</Text>
         <Text style={styles.subtitle}>Join iTaxEasy and manage your tax journey easily.</Text>
       </View>
@@ -183,7 +193,7 @@ export default function SignupScreen() {
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <PrimaryButton label="Signup" onPress={handleSignup} />
+      <PrimaryButton label="Signup" loading={loading} onPress={handleSignup} />
 
       <Text style={styles.bottomText}>
         Have an account?{' '}
@@ -291,7 +301,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   logo: {
-    height: 84,
-    width: 84,
+    height: 100,
+    width: 100,
   },
 });

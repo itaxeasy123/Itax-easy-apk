@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -39,18 +40,41 @@ function interpolateColor(start: string, end: string, progress: number) {
 function GradientPanel() {
   return (
     <View style={StyleSheet.absoluteFillObject}>
-      {Array.from({ length: 28 }, (_, index) => {
-        const progress = index / 27;
+      {Array.from({ length: 32 }, (_, index) => {
+        const progress = index / 31;
         return (
           <View
             key={`gradient-${index}`}
             style={{
-              backgroundColor: interpolateColor('#4480DF', '#4FD0BA', progress),
+              backgroundColor: interpolateColor('#3D7BE0', '#4FD0BA', progress),
               flex: 1,
             }}
           />
         );
       })}
+      {/* Decorative premium blobs */}
+      <View
+        style={{
+          position: 'absolute',
+          top: -20,
+          right: -40,
+          width: 140,
+          height: 140,
+          borderRadius: 70,
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: -30,
+          left: -20,
+          width: 100,
+          height: 100,
+          borderRadius: 50,
+          backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        }}
+      />
     </View>
   );
 }
@@ -119,13 +143,23 @@ export function SignupIllustration() {
 export function PrimaryButton({
   label,
   onPress,
+  loading = false,
 }: {
   label: string;
   onPress: () => void;
+  loading?: boolean;
 }) {
   return (
-    <Pressable onPress={onPress} style={styles.primaryButton}>
-      <Text style={styles.primaryButtonText}>{label}</Text>
+    <Pressable
+      disabled={loading}
+      onPress={onPress}
+      style={[styles.primaryButton, loading && { opacity: 0.8 }]}
+    >
+      {loading ? (
+        <ActivityIndicator color="#FFFFFF" size="small" />
+      ) : (
+        <Text style={styles.primaryButtonText}>{label}</Text>
+      )}
     </Pressable>
   );
 }
@@ -151,9 +185,10 @@ export default function AuthScaffold({
 }: AuthScaffoldProps) {
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <GradientPanel />
+      {/* header: no fixed height — SafeAreaView sizes from content, gradient fills behind */}
+      <View style={styles.headerWrapper}>
         <SafeAreaView edges={['top']} style={styles.safeArea}>
+          <GradientPanel />
           <View style={styles.headerRow}>
             {onBackPress ? (
               <Pressable
@@ -162,7 +197,7 @@ export default function AuthScaffold({
                 onPress={onBackPress}
                 style={styles.backButton}
               >
-                <Feather color="#FFFFFF" name="chevron-left" size={18} />
+                <Feather color="#FFFFFF" name="chevron-left" size={20} />
               </Pressable>
             ) : null}
             {headerTitle ? <Text style={styles.headerTitle}>{headerTitle}</Text> : null}
@@ -198,36 +233,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     flex: 1,
   },
-  header: {
-    height: 92,
+  headerWrapper: {
+    // overflow:hidden keeps gradient edges clean without fixing a height
     overflow: 'hidden',
+    backgroundColor: '#4480DF',
   },
   safeArea: {
-    flex: 1,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
+    paddingBottom: 30, // Much larger header padding
   },
   headerRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 6,
-    paddingTop: 16,
+    gap: 12,
+    minHeight: 64, // Taller header row
   },
   backButton: {
     marginLeft: 2,
-    marginTop: 5,
   },
   headerTitle: {
     color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '700',
-    marginTop: 5,
+    fontSize: 26, // Larger title
+    fontWeight: '600', // Extra bold
+    letterSpacing: -0.5,
   },
   keyboardWrap: {
     flex: 1,
   },
   sheetWrap: {
     flex: 1,
-    marginTop: -14,
+    marginTop: -28, // Deeper overlap
   },
   sheet: {
     backgroundColor: '#FFFFFF',

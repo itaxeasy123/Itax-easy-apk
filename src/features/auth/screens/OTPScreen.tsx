@@ -21,6 +21,7 @@ export default function OTPScreen() {
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(180); // ✅ 3 minutes
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (timer <= 0) {
@@ -38,6 +39,7 @@ export default function OTPScreen() {
 
   const handleVerify = async () => {
     try {
+      setLoading(true);
       setError('');
 
       if (params.mode === 'reset') {
@@ -71,6 +73,8 @@ export default function OTPScreen() {
       });
     } catch (verifyError: any) {
       setError(getApiErrorMessage(verifyError, 'OTP verification failed.'));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -118,7 +122,11 @@ export default function OTPScreen() {
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        <PrimaryButton label="Verify OTP" onPress={handleVerify} />
+        <PrimaryButton
+          label="Verify OTP"
+          loading={loading}
+          onPress={handleVerify}
+        />
 
         <Pressable onPress={handleResend} style={styles.resendRow}>
           <Text style={styles.resendText}>Did not get OTP code? </Text>

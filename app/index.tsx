@@ -86,7 +86,7 @@ export default function IndexScreen() {
         {/* TITLE + LIGHT SWEEP */}
         <View style={{ overflow: 'hidden' }}>
           <Animated.Text style={[styles.title, titleStyle]}>
-            TAXSHAX
+            TaxShax
           </Animated.Text>
 
           <Animated.View style={[styles.sweep, sweepStyle]} />

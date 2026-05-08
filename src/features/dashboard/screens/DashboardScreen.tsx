@@ -48,6 +48,7 @@ type CalculatorRoute =
   | "/image-to-pdf-converter" // ✅ yaha pipe add karo
   | "/merge-pdf" // ✅ add karo
   | "/split-pdf" // ✅ add karo
+  | "/accounting"
   | null;
 
 type CalculatorItem = {
@@ -78,6 +79,12 @@ const PDF_TOOL: ServiceItem = {
 };
 
 const ALL_SERVICES: ServiceItem[] = [
+  {
+    title: "Accounting",
+    icon: "reader",
+    hasBottomSheet: true,
+    calculators: [{ title: "Accounting Dashboard", route: "/accounting" }],
+  },
   {
     title: "Bank",
     icon: "business",
@@ -401,7 +408,7 @@ export default function DashboardScreen() {
                       >
                         <Ionicons
                           name={item.icon}
-                          size={22}
+                          size={18}
                           color={
                             ICON_COLORS[item.originalIndex % ICON_COLORS.length]
                           }
@@ -446,7 +453,7 @@ export default function DashboardScreen() {
                     >
                       <Ionicons
                         name={item.icon}
-                        size={22}
+                        size={18}
                         color={ICON_COLORS[index % ICON_COLORS.length]}
                       />
                     </View>

@@ -41,10 +41,11 @@ header: {
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
-  paddingHorizontal: 14,
-  paddingTop: 2,
+  paddingLeft: 10,
+  paddingRight: 16,
+  paddingTop: 4,
   paddingBottom: 4,
-  // marginTop: -2, // 🔥 THIS FIXES YOUR GAP
+  minHeight: 56,
 },
 
   logo: {
@@ -56,7 +57,7 @@ header: {
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
 
   avatar: {
@@ -165,13 +166,13 @@ header: {
   card: {
     width: '31%',
     backgroundColor: '#fff',
-    borderRadius: 18,
-    paddingVertical: 16,
-    paddingHorizontal: 10,
-    marginBottom: 12,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginBottom: 10,
     alignItems: 'center',
-    elevation: 4,
-    boxShadow: '0px 6px 16px rgba(154, 169, 199, 0.08)',
+    elevation: 3,
+    boxShadow: '0px 4px 12px rgba(154, 169, 199, 0.06)',
   },
 
   searchCard: {
@@ -179,17 +180,17 @@ header: {
   },
 
   iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
 
   cardTitle: {
     fontWeight: '600',
-    fontSize: 13,
+    fontSize: 11,
     color: '#24406D',
     textAlign: 'center',
   },
@@ -200,49 +201,94 @@ header: {
     textAlign: 'center',
   },
 
+  // bottomNav: {
+  //   position:'static',
+  //   left: 0,
+  //   right: 0,
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-around',
+  //   alignItems: 'center',
+  //   backgroundColor: '#FFFFFF',
+  //   borderRadius: 18,
+  //   paddingVertical: 10,
+  //   borderWidth: 1,
+  //   borderColor: '#DDE5EF',
+  //   elevation: 6,
+  //   boxShadow: '0px 6px 16px rgba(154, 169, 199, 0.08)',
+  // },
   bottomNav: {
-    position:'static',
-    left: 16,
-    right: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: '#DDE5EF',
-    elevation: 6,
-    boxShadow: '0px 6px 16px rgba(154, 169, 199, 0.08)',
-  },
+  position: 'absolute',        // 🔥 important
+  left: 0,
+  right: 0,
+  bottom: 0,
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  alignItems: 'center',
+  backgroundColor: '#fff',
+  borderTopWidth: 1,
+  borderTopColor: '#e5e7eb',
+  paddingVertical: 8,
+},
+
+  // bottomItem: {
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  // },
 
   bottomItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  flex: 1,                    // 🔥 equal width (very important)
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingVertical: 8,
+},
+
+  // bottomIconWrap: {
+  //   width: 38,
+  //   height: 28,
+  //   borderRadius: 12,
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  // },
+
+  // bottomIconWrapActive: {
+  //   backgroundColor: '#EAF2FF',
+  // },
+
 
   bottomIconWrap: {
-    width: 38,
-    height: 28,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  width: 38,
+  height: 28,
+  borderRadius: 8,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
 
-  bottomIconWrapActive: {
-    backgroundColor: '#EAF2FF',
-  },
+bottomIconWrapActive: {
+  backgroundColor: '#f0f9ff', // accounting wala
+},
+
+  // bottomText: {
+  //   marginTop: 4,
+  //   fontSize: 10,
+  //   color: '#75849C',
+  //   fontWeight: '500',
+  // },
+
+  // bottomTextActive: {
+  //   color: '#111111',
+  // },
 
   bottomText: {
-    marginTop: 4,
-    fontSize: 10,
-    color: '#75849C',
-    fontWeight: '500',
-  },
+  fontSize: 11,
+  color: '#999',
+  marginTop: 4,
+  fontWeight: '500',
+},
 
-  bottomTextActive: {
-    color: '#111111',
-  },
+bottomTextActive: {
+  color: '#2563eb',
+  fontWeight: '600',
+},
 
   calculatorSheet: {
     position: 'absolute',
@@ -270,6 +316,14 @@ header: {
     backgroundColor: '#D7E1F0',
     marginBottom: 12,
   },
+  profileIconWrap: {
+  width: 36,
+  height: 36,
+  borderRadius: 18,
+  backgroundColor: "#EEF2FF",
+  alignItems: "center",
+  justifyContent: "center",
+},
 
   calculatorSheetHeader: {
     flexDirection: 'row',

@@ -6,12 +6,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const API_URL =
   Constants.expoConfig?.extra?.API_URL || "https://api.itaxeasy.com/api";
 
-console.log("🔥 API URL:", API_URL);
-
 // ===============================
-// 🔥 AXIOS INSTANCE
+// AXIOS INSTANCE
 // ===============================
-export const apiClient = axios.create({
+const apiClientInstance = axios.create({
   baseURL: API_URL,
   timeout: 15000,
   headers: {
@@ -19,6 +17,8 @@ export const apiClient = axios.create({
   },
   withCredentials: false,
 });
+
+export const apiClient = apiClientInstance as any;
 
 // ===============================
 // 🔐 TOKEN HELPERS
@@ -43,8 +43,8 @@ const getRefreshToken = async () => {
 // ===============================
 // 🚀 REQUEST INTERCEPTOR
 // ===============================
-apiClient.interceptors.request.use(
-  async (config) => {
+apiClientInstance.interceptors.request.use(
+  async (config: any) => {
     const token = await getToken();
 
     if (token && config.headers) {
@@ -59,10 +59,10 @@ apiClient.interceptors.request.use(
 // ===============================
 // 🔁 RESPONSE INTERCEPTOR (FIXED)
 // ===============================
-apiClient.interceptors.response.use(
-  (response) => response,
+apiClientInstance.interceptors.response.use(
+  (response: any) => response,
 
-  async (error) => {
+  async (error: any) => {
     const originalRequest = error.config;
 
     if (!originalRequest) {
@@ -100,9 +100,13 @@ apiClient.interceptors.response.use(
           { refreshToken }
         );
 
+        const responseData = res?.data as
+          | { accessToken?: string; data?: { accessToken?: string } }
+          | undefined;
+
         const newToken =
-          res?.data?.accessToken ||
-          res?.data?.data?.accessToken;
+          responseData?.accessToken ||
+          responseData?.data?.accessToken;
 
         if (!newToken) {
           throw new Error("Invalid refresh response");
@@ -112,7 +116,9 @@ apiClient.interceptors.response.use(
 
         console.log("✅ Token refreshed");
 
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        }
 
         return apiClient(originalRequest);
       } catch (refreshError) {

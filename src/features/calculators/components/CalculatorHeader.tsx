@@ -58,14 +58,14 @@ export default function CalculatorHeader({
       <HeaderGradient />
 
       <Pressable onPress={onBackPress} style={calculatorStyles.headerIcon}>
-        <Ionicons color={colors.white} name="chevron-back" size={18} />
+        <Ionicons color={colors.white} name="chevron-back" size={24} />
       </Pressable>
 
       <Text style={calculatorStyles.headerTitle}>{title}</Text>
 
       <View style={calculatorStyles.headerRight}>
-        <Ionicons color={colors.white} name="share-social-outline" size={15} />
-        <Ionicons color={colors.white} name="download-outline" size={15} />
+        <Ionicons color={colors.white} name="share-social-outline" size={19} />
+        <Ionicons color={colors.white} name="download-outline" size={19} />
       </View>
     </View>
   );

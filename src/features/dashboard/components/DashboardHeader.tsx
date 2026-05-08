@@ -9,8 +9,8 @@ const DashboardHeader = ({ user, initials }: any) => {
 
   return (
     <View style={styles.header}>
-      
-      {/* LEFT */}
+
+      {/* LEFT — Logo */}
       <View style={styles.logoContainer}>
         <Image
           source={require("../../../../assets/images/logo.png")}
@@ -20,23 +20,16 @@ const DashboardHeader = ({ user, initials }: any) => {
         <Text style={styles.logoText}>TaxShax</Text>
       </View>
 
-      {/* RIGHT */}
+      {/* RIGHT — Notification + Profile, flush to right edge */}
       <View style={styles.headerRight}>
-        <Ionicons name="notifications-outline" size={22} color="#111" />
+        <Pressable hitSlop={8}>
+          <Ionicons name="notifications-outline" size={22} color="#111" />
+        </Pressable>
 
-        <Pressable onPress={() => router.push("/profile")}>
-          {user ? (
-            <View style={styles.avatarFallback}>
-              <Text style={styles.avatarFallbackText}>
-                {initials || "U"}
-              </Text>
-            </View>
-          ) : (
-            <Image
-              source={{ uri: "https://i.pravatar.cc/100" }}
-              style={styles.avatar}
-            />
-          )}
+        <Pressable onPress={() => router.push("/profile")} hitSlop={8}>
+          <View style={styles.profileIconWrap}>
+            <Ionicons name="person" size={20} color="#111" />
+          </View>
         </Pressable>
       </View>
 
