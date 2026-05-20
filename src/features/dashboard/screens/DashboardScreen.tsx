@@ -49,6 +49,7 @@ type CalculatorRoute =
   | "/merge-pdf" // ✅ add karo
   | "/split-pdf" // ✅ add karo
   | "/accounting"
+  | "/itr"
   | null;
 
 type CalculatorItem = {
@@ -84,6 +85,12 @@ const ALL_SERVICES: ServiceItem[] = [
     icon: "reader",
     hasBottomSheet: true,
     calculators: [{ title: "Accounting Dashboard", route: "/accounting" }],
+  },
+  {
+    title: "ITR",
+    icon: "document-text",
+    hasBottomSheet: true,
+    calculators: [{ title: "ITR Dashboard", route: "/itr" }],
   },
   {
     title: "Bank",

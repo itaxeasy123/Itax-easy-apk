@@ -7,8 +7,8 @@ export const TAX_CONFIG = {
   ],
   new: [
     { upto: 300000, rate: 0 },
-    { upto: 600000, rate: 0.05 },
-    { upto: 900000, rate: 0.1 },
+    { upto: 700000, rate: 0.05 },
+    { upto: 1000000, rate: 0.1 },
     { upto: 1200000, rate: 0.15 },
     { upto: 1500000, rate: 0.2 },
     { upto: Infinity, rate: 0.3 },

@@ -5,3 +5,4 @@ export * from './metrics';
 export * from './radius';
 export * from './shadows';
 export * from './typography';
+export * from './itr';

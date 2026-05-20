@@ -123,7 +123,8 @@ header: {
     marginTop: 12,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    gap: 10,
     paddingBottom: 20,
   },
 

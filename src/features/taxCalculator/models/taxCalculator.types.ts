@@ -4,7 +4,10 @@ export interface TaxInput {
   salary: number;
   otherIncome: number;
   deductions: number;
-  tds: number;
+  exemptions?: number;
+  tdsSalary?: number;
+  tdsNonSalary?: number;
+  tdsOther?: number;
   advanceTax: number;
   regime: TaxRegime;
 }

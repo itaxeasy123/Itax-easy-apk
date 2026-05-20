@@ -20,7 +20,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.rajat_ydv980.itaxeasyapp"
+      "package": "com.itaxeasy.TaxShax"
     },
     "web": {
       "output": "static",
@@ -39,7 +39,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

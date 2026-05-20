@@ -28,7 +28,10 @@ export const calculateIncomeTax = (input: TaxInput): TaxBreakdown => {
     salary,
     otherIncome,
     deductions,
-    tds,
+    exemptions,
+    tdsSalary,
+    tdsNonSalary,
+    tdsOther,
     advanceTax,
     regime,
   } = input;
@@ -38,7 +41,7 @@ export const calculateIncomeTax = (input: TaxInput): TaxBreakdown => {
   // ✅ taxable income
   const taxableIncome =
     regime === "old"
-      ? Math.max(grossIncome - deductions, 0)
+      ? Math.max(grossIncome - (deductions + (exemptions || 0)), 0)
       : Math.max(grossIncome, 0);
 
   const slabs = TAX_CONFIG[regime];
@@ -73,7 +76,7 @@ export const calculateIncomeTax = (input: TaxInput): TaxBreakdown => {
   // =========================
   // ✅ PAID
   // =========================
-  const totalPaid = (tds || 0) + (advanceTax || 0);
+  const totalPaid = (tdsSalary || 0) + (tdsNonSalary || 0) + (tdsOther || 0) + (advanceTax || 0);
 
   const net = totalTax - totalPaid;
 
