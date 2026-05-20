@@ -180,6 +180,14 @@ export default function ITRManualFillScreen() {
             </View>
         </View>
 
+        <Pressable
+          style={styles.returnFormButton}
+          onPress={() => router.push("/itr/return-form")}
+        >
+          <Ionicons name="document-text-outline" size={18} color="#fff" />
+          <Text style={styles.returnFormButtonText}>Open ITR Return Form</Text>
+        </Pressable>
+
         <ITRSaveButton title="Download JSON" onPress={handleDownload} />
       </ScrollView>
 
@@ -257,6 +265,21 @@ const styles = StyleSheet.create({
   finalValue: { fontSize: 14, fontWeight: '700' },
   payableColor: { color: '#EF4444' },
   refundColor: { color: '#059669' },
+  returnFormButton: {
+    alignItems: "center",
+    backgroundColor: itrColors.primary,
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    marginBottom: 12,
+    paddingVertical: 14,
+  },
+  returnFormButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "800",
+  },
   modalBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(15, 23, 42, 0.4)" },
   modalSheet: { backgroundColor: "#fff", borderTopLeftRadius: 24, borderTopRightRadius: 24, bottom: 0, left: 0, paddingHorizontal: 20, paddingVertical: 24, position: "absolute", right: 0 },
   modalTitle: { color: "#1E293B", fontSize: 18, fontWeight: "700", marginBottom: 20, textAlign: "center" },

@@ -5,6 +5,8 @@ import { useITRStore } from "../../../store/itrStore";
 import { ITRBottomNav, ITRHeader, ITRSaveButton, MonthlyYearlyAmountField, type Frequency } from "../components";
 import { itrColors, itrRadius, itrSpacing, itrShadows } from "../../../theme/itr";
 
+const roundMoney = (value: number) => Math.round(value);
+
 export default function ITRBusinessProfessionScreen() {
   const { businessProfession, setBusinessProfession } = useITRStore();
 
@@ -17,13 +19,13 @@ export default function ITRBusinessProfessionScreen() {
     const t = parseFloat(turnover || "0") || 0;
     const r = parseFloat(receipts || "0") || 0;
 
-    const bProfit = (t * profitRate) / 100;
-    const pProfit = r * 0.5; // 50% for 44ADA
+    const bProfit = Math.round((t * profitRate) / 100);
+    const pProfit = Math.round(r * 0.5); // 50% for 44ADA
 
     return {
       bProfit,
       pProfit,
-      totalIncome: bProfit + pProfit,
+      totalIncome: Math.round(bProfit + pProfit),
     };
   }, [turnover, profitRate, receipts]);
 

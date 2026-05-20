@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -16,11 +16,20 @@ import { useITRStore } from "../../../store/itrStore";
 import { itrColors, itrRadius, itrShadows, itrSpacing, itrTypography } from "../../../theme/itr";
 import { ITRBottomNav, ITRHeader } from "../components";
 import { extractForm16FromAsset } from "../services/form16Extraction.service";
+import { exportITRData } from "../services/itrExport.service";
 
 type ResultRowProps = {
   label: string;
   value?: string | number | null;
 };
+
+function formatCurrency(value?: number | null) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "—";
+  }
+
+  return `₹${value.toLocaleString("en-IN")}`;
+}
 
 function ResultRow({ label, value }: ResultRowProps) {
   return (
@@ -38,19 +47,99 @@ export default function ITRForm16Screen() {
   const [parseResult, setParseResult] =
     useState<Awaited<ReturnType<typeof extractForm16FromAsset>> | null>(null);
 
-  const { setForm16, setSalary, setHouseProperty, setOtherSources, setDeductions, setTaxesPaid } =
-    useITRStore();
+  const {
+    salary,
+    houseProperty,
+    otherSources,
+    deductions,
+    taxesPaid,
+    interests,
+    regime,
+    form16,
+    setForm16,
+    setSalary,
+    setHouseProperty,
+    setOtherSources,
+    setDeductions,
+    setTaxesPaid,
+    resetITR,
+  } = useITRStore();
+
+  useEffect(() => {
+    if (!form16) return;
+
+    setParseResult({
+      fileName: form16.fileName,
+      source: form16.source,
+      importedAt: form16.importedAt,
+      rawText: form16.rawText,
+      employeeName: form16.employeeName,
+      employeePan: form16.employeePan,
+      employerPan: form16.employerPan,
+      tan: form16.tan,
+      assessmentYear: form16.assessmentYear,
+      employerName: form16.employerName,
+      grossSalary: form16.grossSalary,
+      grossTotalIncome: form16.grossTotalIncome,
+      salaryChargeable: form16.salaryChargeable,
+      housePropertyIncome: form16.housePropertyIncome,
+      standardDeduction: form16.standardDeduction,
+      otherIncome: form16.otherIncome,
+      taxableIncome: form16.taxableIncome,
+      taxOnTotalIncome: form16.taxOnTotalIncome,
+      rebateUnderSection87A: form16.rebateUnderSection87A,
+      surcharge: form16.surcharge,
+      healthAndEducationCess: form16.healthAndEducationCess,
+      taxPayable: form16.taxPayable,
+      netTaxPayable: form16.netTaxPayable,
+      totalAmountPaid: form16.totalAmountPaid,
+      totalAmountCredited: form16.totalAmountCredited,
+      totalTaxDeducted: form16.totalTaxDeducted,
+      totalTaxDeposited: form16.totalTaxDeposited,
+      section80C: form16.section80C,
+      section80D: form16.section80D,
+      section80CCD1B: form16.section80CCD1B,
+      chapterVIDeductionTotal: form16.chapterVIDeductionTotal,
+      tdsSalary: form16.tdsSalary,
+      taxRegime: form16.taxRegime,
+      confidence: form16.employeePan || form16.assessmentYear ? "medium" : "low",
+      warnings: [],
+    });
+
+    setSelectedFileName(form16.fileName);
+  }, [form16]);
 
   const parsedSummary = useMemo(() => {
     if (!parseResult) return null;
 
     return {
+      employeeName: parseResult.employeeName || "—",
       pan: parseResult.employeePan || "—",
+      employerPan: parseResult.employerPan || "—",
+      tan: parseResult.tan || "—",
       ay: parseResult.assessmentYear || "—",
       employer: parseResult.employerName || "—",
       grossSalary: parseResult.grossSalary || 0,
+      grossTotalIncome: parseResult.grossTotalIncome || 0,
       chargeableSalary: parseResult.salaryChargeable || 0,
-      tdsSalary: parseResult.tdsSalary || 0,
+      standardDeduction: parseResult.standardDeduction || 0,
+      otherIncome: parseResult.otherIncome || 0,
+      taxableIncome: parseResult.taxableIncome || 0,
+      taxOnTotalIncome: parseResult.taxOnTotalIncome || 0,
+      rebateUnderSection87A: parseResult.rebateUnderSection87A || 0,
+      surcharge: parseResult.surcharge || 0,
+      healthAndEducationCess: parseResult.healthAndEducationCess || 0,
+      taxPayable: parseResult.taxPayable || 0,
+      netTaxPayable: parseResult.netTaxPayable || 0,
+      totalAmountPaid: parseResult.totalAmountPaid || 0,
+      totalAmountCredited: parseResult.totalAmountCredited || 0,
+      totalTaxDeducted: parseResult.totalTaxDeducted || 0,
+      totalTaxDeposited: parseResult.totalTaxDeposited || 0,
+      section80C: parseResult.section80C || 0,
+      section80D: parseResult.section80D || 0,
+      section80CCD1B: parseResult.section80CCD1B || 0,
+      chapterVIDeductionTotal: parseResult.chapterVIDeductionTotal || 0,
+      taxRegime: parseResult.taxRegime || "—",
       confidence: parseResult.confidence,
     };
   }, [parseResult]);
@@ -65,17 +154,34 @@ export default function ITRForm16Screen() {
       fileName: fileName ?? parsed.fileName,
       source: parsed.source,
       rawText: parsed.rawText,
+      employeeName: parsed.employeeName,
       employeePan: parsed.employeePan,
+      employerPan: parsed.employerPan,
+      tan: parsed.tan,
       assessmentYear: parsed.assessmentYear,
       grossSalary: parsed.grossSalary,
+      grossTotalIncome: parsed.grossTotalIncome,
       salaryChargeable: parsed.salaryChargeable,
       standardDeduction: parsed.standardDeduction,
       otherIncome: parsed.otherIncome,
+      taxableIncome: parsed.taxableIncome,
+      taxOnTotalIncome: parsed.taxOnTotalIncome,
+      rebateUnderSection87A: parsed.rebateUnderSection87A,
+      surcharge: parsed.surcharge,
+      healthAndEducationCess: parsed.healthAndEducationCess,
+      taxPayable: parsed.taxPayable,
+      netTaxPayable: parsed.netTaxPayable,
+      totalAmountPaid: parsed.totalAmountPaid,
+      totalAmountCredited: parsed.totalAmountCredited,
+      totalTaxDeducted: parsed.totalTaxDeducted,
+      totalTaxDeposited: parsed.totalTaxDeposited,
       section80C: parsed.section80C,
       section80D: parsed.section80D,
       section80CCD1B: parsed.section80CCD1B,
-      tdsSalary: parsed.tdsSalary,
+      chapterVIDeductionTotal: parsed.chapterVIDeductionTotal,
+      tdsSalary: parsed.totalTaxDeducted || 0,
       employerName: parsed.employerName,
+      taxRegime: parsed.taxRegime,
       importedAt: new Date().toISOString(),
     });
 
@@ -98,10 +204,11 @@ export default function ITRForm16Screen() {
       section80C: parsed.section80C ? String(parsed.section80C) : "",
       section80D: parsed.section80D ? String(parsed.section80D) : "",
       section80CCD1B: parsed.section80CCD1B ? String(parsed.section80CCD1B) : "",
+      totalDeductions: parsed.chapterVIDeductionTotal || 0,
     });
 
     setTaxesPaid({
-      tdsSalary: parsed.tdsSalary || 0,
+      tdsSalary: parsed.totalTaxDeducted || 0,
     });
   };
 
@@ -160,6 +267,40 @@ export default function ITRForm16Screen() {
     router.push("/itr/manual");
   };
 
+  const handleDownloadJson = async () => {
+    const payload = {
+      form16,
+      salary,
+      houseProperty,
+      otherSources,
+      deductions,
+      taxesPaid,
+      interests,
+      regime,
+    };
+
+    await exportITRData(payload);
+  };
+
+  const handleReset = () => {
+    Alert.alert(
+      "Reset Form 16 data",
+      "This will clear the imported Form 16 data from the app. Continue?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: () => {
+            resetITR();
+            setParseResult(null);
+            setSelectedFileName(null);
+          },
+        },
+      ],
+    );
+  };
+
   return (
     <View style={styles.screen}>
       <ITRHeader title="Form 16 Import" titleVariant="plain" />
@@ -192,14 +333,137 @@ export default function ITRForm16Screen() {
 
         {parseResult ? (
           <View style={styles.resultCard}>
-            <Text style={styles.sectionTitle}>Extracted Summary</Text>
-            <ResultRow label="PAN" value={parsedSummary?.pan} />
-            <ResultRow label="Assessment Year" value={parsedSummary?.ay} />
-            <ResultRow label="Employer" value={parsedSummary?.employer} />
-            <ResultRow label="Gross Salary" value={parsedSummary?.grossSalary} />
-            <ResultRow label="Chargeable Salary" value={parsedSummary?.chargeableSalary} />
-            <ResultRow label="TDS Salary" value={parsedSummary?.tdsSalary} />
-            <ResultRow label="Confidence" value={parsedSummary?.confidence} />
+            <Text style={styles.sectionTitle}>Form 16 Summary - Auto-Populated Data</Text>
+
+            <View style={styles.summaryMetaRow}>
+              <View style={styles.summaryMetaChip}>
+                <Text style={styles.summaryMetaLabel}>PAN of Employee</Text>
+                <Text style={styles.summaryMetaValue}>{parsedSummary?.pan}</Text>
+              </View>
+              <View style={styles.summaryMetaChip}>
+                <Text style={styles.summaryMetaLabel}>Assessment Year</Text>
+                <Text style={styles.summaryMetaValue}>{parsedSummary?.ay}</Text>
+              </View>
+            </View>
+
+            <View style={styles.sectionBlock}>
+              <Text style={styles.subSectionTitle}>Employee & Employer Information</Text>
+              <ResultRow label="Employee Name" value={parsedSummary?.employeeName} />
+              <ResultRow label="Employee PAN" value={parsedSummary?.pan} />
+              <ResultRow label="Employer" value={parsedSummary?.employer} />
+              <ResultRow label="Employer PAN" value={parsedSummary?.employerPan} />
+              <ResultRow label="TAN" value={parsedSummary?.tan} />
+              <ResultRow label="Assessment Year" value={parsedSummary?.ay} />
+            </View>
+
+            <View style={styles.sectionBlock}>
+              <Text style={styles.subSectionTitle}>Income Details</Text>
+              <ResultRow label="Salary as per Section 17(1)" value={formatCurrency(parsedSummary?.grossSalary)} />
+              <ResultRow
+                label="Other Income (House Property + Other Sources)"
+                value={formatCurrency(parsedSummary?.otherIncome)}
+              />
+              <ResultRow label="Gross Total Income" value={formatCurrency(parsedSummary?.grossTotalIncome)} />
+              <ResultRow
+                label="Income Chargeable Under Salary"
+                value={formatCurrency(parsedSummary?.chargeableSalary)}
+              />
+            </View>
+
+            <View style={styles.sectionBlock}>
+              <Text style={styles.subSectionTitle}>Deductions</Text>
+              <ResultRow
+                label="Standard Deduction (Section 16)"
+                value={formatCurrency(parsedSummary?.standardDeduction)}
+              />
+              <ResultRow label="Section 80C" value={formatCurrency(parsedSummary?.section80C)} />
+              <ResultRow label="Section 80D" value={formatCurrency(parsedSummary?.section80D)} />
+              <ResultRow
+                label="Section 80CCD(1B)"
+                value={formatCurrency(parsedSummary?.section80CCD1B)}
+              />
+              <ResultRow
+                label="Total Deductions (Chapter VI-A)"
+                value={formatCurrency(parsedSummary?.chapterVIDeductionTotal)}
+              />
+            </View>
+
+            <View style={styles.sectionBlock}>
+              <Text style={styles.subSectionTitle}>Tax Computation</Text>
+              <ResultRow label="Taxable Income" value={formatCurrency(parsedSummary?.taxableIncome)} />
+              <ResultRow
+                label="Tax on Total Income"
+                value={formatCurrency(parsedSummary?.taxOnTotalIncome)}
+              />
+              <ResultRow
+                label="Rebate under Section 87A"
+                value={formatCurrency(parsedSummary?.rebateUnderSection87A)}
+              />
+              <ResultRow label="Surcharge" value={formatCurrency(parsedSummary?.surcharge)} />
+              <ResultRow
+                label="Health & Education Cess"
+                value={formatCurrency(parsedSummary?.healthAndEducationCess)}
+              />
+              <ResultRow label="Tax Payable" value={formatCurrency(parsedSummary?.taxPayable)} />
+              <ResultRow label="Net Tax Payable" value={formatCurrency(parsedSummary?.netTaxPayable)} />
+              <ResultRow label="Tax Regime" value={parsedSummary?.taxRegime} />
+            </View>
+
+            <View style={styles.sectionBlock}>
+              <Text style={styles.subSectionTitle}>TDS Summary</Text>
+              <ResultRow
+                label="Total Amount Paid/Credited"
+                value={formatCurrency(parsedSummary?.totalAmountPaid)}
+              />
+              <ResultRow
+                label="Total Amount Credited"
+                value={formatCurrency(parsedSummary?.totalAmountCredited)}
+              />
+              <ResultRow
+                label="Total Tax Deducted (TDS)"
+                value={formatCurrency(parsedSummary?.totalTaxDeducted)}
+              />
+              <ResultRow
+                label="Total Tax Deposited"
+                value={formatCurrency(parsedSummary?.totalTaxDeposited)}
+              />
+              <ResultRow label="Confidence" value={parsedSummary?.confidence} />
+            </View>
+
+            <View style={styles.finalCard}>
+              <Text style={styles.subSectionTitle}>Final Tax Position</Text>
+              <Text
+                style={[
+                  styles.finalValue,
+                  (parsedSummary?.totalTaxDeducted || 0) - (parsedSummary?.netTaxPayable || 0) >= 0
+                    ? styles.finalValuePositive
+                    : styles.finalValueNegative,
+                ]}
+              >
+                {(() => {
+                  const difference = (parsedSummary?.totalTaxDeducted || 0) - (parsedSummary?.netTaxPayable || 0);
+
+                  if (difference > 0) {
+                    return `Refund Due: ₹${difference.toLocaleString("en-IN")}`;
+                  }
+
+                  if (difference < 0) {
+                    return `Tax Payable: ₹${Math.abs(difference).toLocaleString("en-IN")}`;
+                  }
+
+                  return "No Tax Payable / Refund";
+                })()}
+              </Text>
+
+              <View style={styles.actionRow}>
+                <Pressable style={styles.secondaryActionButton} onPress={handleDownloadJson}>
+                  <Text style={styles.secondaryActionText}>Download JSON</Text>
+                </Pressable>
+                <Pressable style={styles.resetActionButton} onPress={handleReset}>
+                  <Text style={styles.resetActionText}>Reset</Text>
+                </Pressable>
+              </View>
+            </View>
 
             {parseResult.warnings.length ? (
               <View style={styles.warningBox}>
@@ -314,9 +578,102 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: itrColors.text,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "800",
     marginBottom: itrSpacing.sm,
+  },
+  summaryMetaRow: {
+    flexDirection: "row",
+    gap: itrSpacing.sm,
+    marginBottom: itrSpacing.md,
+  },
+  summaryMetaChip: {
+    backgroundColor: "#F8FBFF",
+    borderColor: "#D8E4F8",
+    borderRadius: 16,
+    borderWidth: 1,
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  summaryMetaLabel: {
+    color: itrColors.textSecondary,
+    fontSize: 11,
+    fontWeight: "700",
+    marginBottom: 4,
+    textTransform: "uppercase",
+  },
+  summaryMetaValue: {
+    color: itrColors.text,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  sectionBlock: {
+    backgroundColor: "#FCFDFF",
+    borderColor: "#E6EEF9",
+    borderRadius: 18,
+    borderWidth: 1,
+    marginTop: itrSpacing.md,
+    padding: itrSpacing.md,
+  },
+  subSectionTitle: {
+    color: itrColors.text,
+    fontSize: 14,
+    fontWeight: "800",
+    marginBottom: 8,
+  },
+  finalCard: {
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    borderColor: "#E2E8F0",
+    borderRadius: 18,
+    borderWidth: 1,
+    marginTop: itrSpacing.md,
+    padding: itrSpacing.md,
+  },
+  finalValue: {
+    fontSize: 18,
+    fontWeight: "800",
+    marginTop: 2,
+  },
+  finalValuePositive: {
+    color: "#16A34A",
+  },
+  finalValueNegative: {
+    color: "#DC2626",
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: itrSpacing.sm,
+    marginTop: itrSpacing.md,
+  },
+  secondaryActionButton: {
+    alignItems: "center",
+    backgroundColor: "#2563EB",
+    borderRadius: itrRadius.md,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: itrSpacing.md,
+  },
+  secondaryActionText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  resetActionButton: {
+    alignItems: "center",
+    backgroundColor: "#EF4444",
+    borderRadius: itrRadius.md,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: itrSpacing.md,
+  },
+  resetActionText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "800",
   },
   resultRow: {
     borderBottomColor: "#EEF2F7",

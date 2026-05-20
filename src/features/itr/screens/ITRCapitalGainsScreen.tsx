@@ -11,6 +11,8 @@ type FieldConfig = {
   value: string;
 };
 
+const roundMoney = (value: number) => Math.round(value);
+
 export default function ITRCapitalGainsScreen() {
   const { capitalGains, setCapitalGains } = useITRStore();
 
@@ -49,7 +51,7 @@ export default function ITRCapitalGainsScreen() {
     const total = fields.reduce((acc, field) => {
       return acc + (parseFloat(field.value) || 0);
     }, 0);
-    return { total };
+    return { total: roundMoney(total) };
   }, [fields]);
 
   const handleSave = () => {

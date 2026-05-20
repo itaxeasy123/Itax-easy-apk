@@ -13,6 +13,7 @@ type FieldConfig = {
 };
 
 const STANDARD_DEDUCTION = 75000; // Updated for AY 2026-27 New Regime
+const roundMoney = (value: number) => Math.round(value);
 
 export default function ITRSalaryLessSDPTaxScreen() {
   const { salary, setSalary } = useITRStore();
@@ -45,7 +46,7 @@ export default function ITRSalaryLessSDPTaxScreen() {
 
     fields.forEach((field) => {
       const amount = parseFloat(field.value) || 0;
-      const yearlyAmount = field.frequency === "Monthly" ? amount * 12 : amount;
+      const yearlyAmount = Math.round(field.frequency === "Monthly" ? amount * 12 : amount);
 
       if (field.id === "p-tax") {
         pTax = yearlyAmount;
@@ -54,12 +55,12 @@ export default function ITRSalaryLessSDPTaxScreen() {
       }
     });
 
-    const netSalary = Math.max(0, grossTotal - STANDARD_DEDUCTION - pTax);
+    const netSalary = Math.round(Math.max(0, grossTotal - STANDARD_DEDUCTION - pTax));
 
     return {
-      grossTotal,
-      standardDeduction: STANDARD_DEDUCTION,
-      pTax,
+      grossTotal: roundMoney(grossTotal),
+      standardDeduction: roundMoney(STANDARD_DEDUCTION),
+      pTax: roundMoney(pTax),
       netSalary,
     };
   }, [fields]);

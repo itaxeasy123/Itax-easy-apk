@@ -12,6 +12,8 @@ type FieldConfig = {
   frequency: Frequency;
 };
 
+const roundMoney = (value: number) => Math.round(value);
+
 export default function ITROtherSourcesScreen() {
   const { otherSources, setOtherSources } = useITRStore();
 
@@ -61,12 +63,12 @@ export default function ITROtherSourcesScreen() {
 
     fields.forEach((field) => {
       const amount = parseFloat(field.value) || 0;
-      const yearlyAmount = field.frequency === "Monthly" ? amount * 12 : amount;
+      const yearlyAmount = Math.round(field.frequency === "Monthly" ? amount * 12 : amount);
       totalOtherIncome += yearlyAmount;
     });
 
     return {
-      totalOtherIncome,
+      totalOtherIncome: roundMoney(totalOtherIncome),
     };
   }, [fields]);
 

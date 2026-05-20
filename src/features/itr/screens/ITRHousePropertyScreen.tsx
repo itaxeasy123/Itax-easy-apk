@@ -13,6 +13,8 @@ type RowConfig = {
   value: string;
 };
 
+const roundMoney = (value: number) => Math.round(value);
+
 export default function ITRHousePropertyScreen() {
   const { houseProperty, setHouseProperty } = useITRStore();
 
@@ -55,23 +57,23 @@ export default function ITRHousePropertyScreen() {
     const getVal = (id: string) => {
       const row = rows.find((r) => r.id === id);
       const val = parseFloat(row?.value || "0") || 0;
-      return row?.frequency === "Monthly" ? val * 12 : val;
+      return Math.round(row?.frequency === "Monthly" ? val * 12 : val);
     };
 
     const grossRent = getVal("gross-rent");
     const taxes = getVal("municipal-taxes");
     const interest = getVal("housing-loan-interest");
 
-    const nav = Math.max(0, grossRent - taxes);
-    const standardDeduction = nav * 0.3; // 30% flat deduction
-    const incomeFromHP = nav - standardDeduction - interest;
+    const nav = Math.round(Math.max(0, grossRent - taxes));
+    const standardDeduction = Math.round(nav * 0.3); // 30% flat deduction
+    const incomeFromHP = Math.round(nav - standardDeduction - interest);
 
     return {
-      grossRent,
-      taxes,
+      grossRent: roundMoney(grossRent),
+      taxes: roundMoney(taxes),
       nav,
       standardDeduction,
-      interest,
+      interest: roundMoney(interest),
       incomeFromHP,
     };
   }, [rows]);

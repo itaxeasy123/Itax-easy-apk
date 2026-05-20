@@ -89,6 +89,8 @@ function TabButton({
   );
 }
 
+const roundMoney = (value: number) => Math.round(value);
+
 export default function ITRExemptionsDeductionsScreen({
   initialTab = "Exemptions",
 }: ITRExemptionsDeductionsScreenProps) {
@@ -119,8 +121,8 @@ export default function ITRExemptionsDeductionsScreen({
   };
 
   const handleSave = () => {
-    const totalDeductions = deductionCards.reduce((acc, card) => acc + (parseFloat(card.value) || 0), 0);
-    const totalExemptions = exemptionFields.reduce((acc, field) => acc + (parseFloat(field.value) || 0), 0);
+    const totalDeductions = roundMoney(deductionCards.reduce((acc, card) => acc + (parseFloat(card.value) || 0), 0));
+    const totalExemptions = roundMoney(exemptionFields.reduce((acc, field) => acc + (parseFloat(field.value) || 0), 0));
     
     setDeductions({
       section80C: deductionCards.find(c => c.id === "80c")?.value || "",
