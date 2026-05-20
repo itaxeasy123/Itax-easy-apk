@@ -3,7 +3,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, type Href } from "expo-router";
-
 import { itrColors, itrRadius, itrSpacing } from "../../../theme/itr";
 
 type NavItem = {
@@ -25,7 +24,7 @@ const navItems: NavItem[] = [
 
 export default function ITRBottomNav({ activeRoute = "/itr" }: ITRBottomNavProps) {
   const router = useRouter();
-
+  
   return (
     <SafeAreaView edges={["bottom"]} style={styles.container}>
       <View style={styles.navBar}>

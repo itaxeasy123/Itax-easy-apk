@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-
 import { itrShadows } from "../../../theme/itr";
+
 
 export type Frequency = "Monthly" | "Yearly";
 

@@ -27,6 +27,31 @@ export default function MoreScreen() {
     { id: 'vouchers', title: 'Vouchers', subtitle: 'Record journal entries', icon: 'albums' },
     { id: 'payments', title: 'Payments', subtitle: 'View payment transactions', icon: 'card' },
     { id: 'bank-tools', title: 'Bank Tools', subtitle: 'IFSC lookup and account verify', icon: 'business' },
+    {
+  id: 'bank-statement',
+  title: 'Bank Statement OCR',
+  subtitle: 'Upload and extract bank statement data',
+  icon: 'document-text',
+},
+    {
+  id: 'driving-licence',
+  title: 'Driving Licence OCR',
+  subtitle: 'Upload and extract driving licence data',
+  icon: 'document-text',
+},
+    {
+  id: 'invoice-ocr',
+  title: 'Invoice OCR',
+  subtitle: 'Upload and extract invoice data',
+  icon: 'document-text',
+},
+
+   {
+  id: 'gst-ocr',
+  title: 'GST OCR',
+  subtitle: 'Upload and extract GST data',
+  icon: 'document-text',
+},
     { id: 'company-create', title: 'Add Company', subtitle: 'Create a new company profile', icon: 'briefcase' },
     { id: 'settings', title: 'Settings', subtitle: 'Configure accounting settings', icon: 'settings' },
     { id: 'help', title: 'Help & Support', subtitle: 'Get help and support', icon: 'help-circle' },
@@ -62,7 +87,23 @@ export default function MoreScreen() {
       router.push('/accounting/bank');
       return;
     }
+    if (itemId === 'bank-statement') {
+  router.push('/accounting/bank-statement');
+  return;
+}
+    if (itemId === 'driving-licence') {
+      router.push('/accounting/driving-licence');
+      return;
+    }
 
+    if (itemId === 'invoice-ocr') {
+      router.push('/accounting/invoice');
+      return;
+    }
+    if (itemId === 'gst-ocr') {
+      router.push('/accounting/gst-ocr');
+      return;
+    }
     if (itemId === 'company-create') {
       router.push('/accounting/company-create');
       return;
