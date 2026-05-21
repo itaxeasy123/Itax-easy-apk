@@ -45,6 +45,7 @@ type FormState = {
   contactDetails: {
     addressLine1: string;
     addressLine2: string;
+    flatDoorBlockNo: string;
     buildingVillage: string;
     roadStreetPostOffice: string;
     areaLocality: string;
@@ -74,6 +75,9 @@ type FormState = {
     lastName: string;
     employerName: string;
     employerPan: string;
+    fatherName: string;
+    gender: string;
+    natureOfEmployment: string;
     name: string;
     residentialStatus: string;
     pan: string;
@@ -367,6 +371,7 @@ export default function ITRReturnFormScreen() {
     contactDetails: {
       addressLine1: seedDraft.contactDetails.addressLine1,
       addressLine2: seedDraft.contactDetails.addressLine2,
+      flatDoorBlockNo: seedDraft.contactDetails.flatDoorBlockNo ?? "",
       buildingVillage: seedDraft.contactDetails.buildingVillage,
       roadStreetPostOffice: seedDraft.contactDetails.roadStreetPostOffice,
       areaLocality: seedDraft.contactDetails.areaLocality,
@@ -396,6 +401,9 @@ export default function ITRReturnFormScreen() {
       lastName: seedDraft.personalInfo.lastName,
       employerName: seedDraft.personalInfo.employerName,
       employerPan: seedDraft.personalInfo.employerPan,
+      fatherName: "",
+      gender: "",
+      natureOfEmployment: "",
       name: seedDraft.personalInfo.name,
       residentialStatus: seedDraft.personalInfo.regime === "old" ? "Resident" : "Resident",
       pan: seedDraft.personalInfo.pan,
@@ -575,6 +583,7 @@ export default function ITRReturnFormScreen() {
       contactDetails: {
         addressLine1: seedDraft.contactDetails.addressLine1,
         addressLine2: seedDraft.contactDetails.addressLine2,
+        flatDoorBlockNo: seedDraft.contactDetails.flatDoorBlockNo ?? "",
         buildingVillage: seedDraft.contactDetails.buildingVillage,
         roadStreetPostOffice: seedDraft.contactDetails.roadStreetPostOffice,
         areaLocality: seedDraft.contactDetails.areaLocality,
@@ -604,6 +613,9 @@ export default function ITRReturnFormScreen() {
         lastName: seedDraft.personalInfo.lastName,
         employerName: seedDraft.personalInfo.employerName,
         employerPan: seedDraft.personalInfo.employerPan,
+        fatherName: "",
+        gender: "",
+        natureOfEmployment: "",
         name: seedDraft.personalInfo.name,
         residentialStatus: seedDraft.personalInfo.regime === "old" ? "Resident" : "Resident",
         pan: seedDraft.personalInfo.pan,
@@ -634,6 +646,7 @@ export default function ITRReturnFormScreen() {
         profit17_3: "",
         retirementBenefit89A: "",
         retirementBenefit89ACountry: "",
+        retirementBenefitOtherCountry89A: "",
         professionalTax16iii: "",
         standardDeduction16ia: toAmountText(seedDraft.income.standardDeduction),
       },
@@ -664,16 +677,21 @@ export default function ITRReturnFormScreen() {
         section80CCC: toAmountText(seedDraft.deductions.section80CCC),
         section80CCD1: toAmountText(seedDraft.deductions.section80CCD1),
         section80CCD1B: toAmountText(seedDraft.deductions.section80CCD1B),
+        pranNumber: "",
+        section80CCD2: "",
         section80D: toAmountText(seedDraft.deductions.section80D),
         section80E: toAmountText(seedDraft.deductions.section80E),
         section80DD: toAmountText(seedDraft.deductions.section80DD),
         section80DDB: toAmountText(seedDraft.deductions.section80DDB),
+        section80DDB_disease1: "",
+        section80DDB_disease2: "",
         section80EE: toAmountText(seedDraft.deductions.section80EE),
         section80EEA: toAmountText(seedDraft.deductions.section80EEA),
         section80EEB: toAmountText(seedDraft.deductions.section80EEB),
         section80GGA: toAmountText(seedDraft.deductions.section80GGA),
         section80GGC: toAmountText(seedDraft.deductions.section80GGC),
         section80GG: toAmountText(seedDraft.deductions.section80GG),
+        form10BA_ackNumber: "",
         section80TTA: toAmountText(seedDraft.deductions.section80TTA),
         section80TTB: toAmountText(seedDraft.deductions.section80TTB),
         section80CCH: toAmountText(seedDraft.deductions.section80CCH),
@@ -710,6 +728,22 @@ export default function ITRReturnFormScreen() {
         row4Amount: "",
         row4Description: "",
         row4Nature: "",
+        retirementBenefitOtherCountry89AOtherSources: "",
+        retirementBenefitNotifiedCountryUSA: "",
+        retirementBenefitNotifiedCountryUK: "",
+        retirementBenefitNotifiedCountryCanada: "",
+        quarterly89A_1: "",
+        quarterly89A_2: "",
+        quarterly89A_3: "",
+        quarterly89A_4: "",
+        quarterly89A_5: "",
+        dividend_1: "",
+        dividend_2: "",
+        dividend_3: "",
+        dividend_4: "",
+        dividend_5: "",
+        relief89AOtherSources: "",
+        deduction57iia: "",
         exemptIncome1Nature: "",
         exemptIncome1Description: "",
         exemptIncome1Amount: "",
@@ -997,6 +1031,7 @@ export default function ITRReturnFormScreen() {
               contactDetails: {
                 addressLine1: "",
                 addressLine2: "",
+                flatDoorBlockNo: "",
                 buildingVillage: "",
                 roadStreetPostOffice: "",
                 areaLocality: "",
@@ -1884,5 +1919,37 @@ const styles = StyleSheet.create({
     color: "#334155",
     fontSize: 14,
     fontWeight: "800",
+  },
+  gridContainer: {
+    borderColor: "#E2E8F0",
+    borderRadius: 8,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  gridRowHeader: {
+    backgroundColor: "#F8FAFC",
+    borderBottomColor: "#E2E8F0",
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    padding: 10,
+  },
+  gridRow: {
+    borderBottomColor: "#E2E8F0",
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    padding: 10,
+  },
+  gridCell: {
+    flex: 1,
+    paddingHorizontal: 6,
+  },
+  gridInput: {
+    backgroundColor: "#fff",
+    borderColor: "#E2E8F0",
+    borderRadius: 6,
+    borderWidth: 1,
+    color: "#0F172A",
+    fontSize: 13,
+    padding: 8,
   },
 });

@@ -3,7 +3,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-
 import { itrColors, itrSpacing, itrTypography } from "../../../theme/itr";
 
 type ITRHeaderProps = {
@@ -13,6 +12,7 @@ type ITRHeaderProps = {
   onBackPress?: () => void;
   rightContent?: React.ReactNode;
 };
+
 
 function hexToRgb(hex: string) {
   const value = hex.replace("#", "");
@@ -28,7 +28,6 @@ function interpolateColor(start: string, end: string, progress: number) {
   const second = hexToRgb(end);
   const channel = (from: number, to: number) =>
     Math.round(from + (to - from) * progress);
-
   return `rgb(${channel(first.r, second.r)}, ${channel(first.g, second.g)}, ${channel(first.b, second.b)})`;
 }
 
