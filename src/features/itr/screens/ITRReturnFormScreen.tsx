@@ -34,6 +34,8 @@ type FormState = {
     originalOrRevised: string;
     optOutOfNewRegime: "yes" | "no";
     otherConditionsClause: "yes" | "no";
+    otherConditionsTdsTcs: "yes" | "no";
+    otherConditionsSavingsDeposit: "yes" | "no";
     originalReturnReceiptNumber: string;
     returnType: string;
     submissionMode: string;
@@ -83,6 +85,14 @@ type FormState = {
     basicDA: string;
     entertainmentAllowance: string;
     exemptAllowance10: string;
+    exemptAllowanceHra: string;
+    exemptAllowanceHraDescription: string;
+    exemptAllowanceOther1Nature: string;
+    exemptAllowanceOther1Description: string;
+    exemptAllowanceOther1Amount: string;
+    exemptAllowanceOther2Nature: string;
+    exemptAllowanceOther2Description: string;
+    exemptAllowanceOther2Amount: string;
     grossSalary17_1: string;
     grossTotal: string;
     incomeChargeableSalaries: string;
@@ -94,6 +104,7 @@ type FormState = {
     profit17_3: string;
     retirementBenefit89A: string;
     retirementBenefit89ACountry: string;
+    retirementBenefitOtherCountry89A: string;
     professionalTax16iii: string;
     standardDeduction16ia: string;
   };
@@ -124,21 +135,26 @@ type FormState = {
     section80CCC: string;
     section80CCD1: string;
     section80CCD1B: string;
+    pranNumber: string;
+    section80CCD2: string;
     section80D: string;
-    section80E: string;
     section80DD: string;
     section80DDB: string;
+    section80DDB_disease1: string;
+    section80DDB_disease2: string;
+    section80E: string;
     section80EE: string;
     section80EEA: string;
     section80EEB: string;
+    section80G: string;
+    section80GG: string;
+    form10BA_ackNumber: string;
     section80GGA: string;
     section80GGC: string;
-    section80GG: string;
     section80TTA: string;
     section80TTB: string;
-    section80CCH: string;
-    section80G: string;
     section80U: string;
+    section80CCH: string;
     otherDeductions: string;
     totalDeductions: string;
     totalExemptions: string;
@@ -170,6 +186,22 @@ type FormState = {
     row4Amount: string;
     row4Description: string;
     row4Nature: string;
+    retirementBenefitOtherCountry89AOtherSources: string;
+    retirementBenefitNotifiedCountryUSA: string;
+    retirementBenefitNotifiedCountryUK: string;
+    retirementBenefitNotifiedCountryCanada: string;
+    quarterly89A_1: string;
+    quarterly89A_2: string;
+    quarterly89A_3: string;
+    quarterly89A_4: string;
+    quarterly89A_5: string;
+    dividend_1: string;
+    dividend_2: string;
+    dividend_3: string;
+    dividend_4: string;
+    dividend_5: string;
+    relief89AOtherSources: string;
+    deduction57iia: string;
     exemptIncome1Nature: string;
     exemptIncome1Description: string;
     exemptIncome1Amount: string;
@@ -325,6 +357,8 @@ export default function ITRReturnFormScreen() {
       originalOrRevised: "Original",
       optOutOfNewRegime: seedDraft.personalInfo.regime === "old" ? "yes" : "no",
       otherConditionsClause: "no",
+      otherConditionsTdsTcs: "no",
+      otherConditionsSavingsDeposit: "no",
       returnType: "ITR-1",
       submissionMode: "Online",
       dateOfNoticeOrOrder: "",
@@ -373,6 +407,14 @@ export default function ITRReturnFormScreen() {
       bonus: toAmountText(seedDraft.salaryBreakup.bonus),
       entertainmentAllowance: toAmountText(seedDraft.salaryBreakup.entertainmentAllowance),
       exemptAllowance10: toAmountText(seedDraft.salaryBreakup.exemptAllowance10),
+      exemptAllowanceHra: "",
+      exemptAllowanceHraDescription: "",
+      exemptAllowanceOther1Nature: "",
+      exemptAllowanceOther1Description: "",
+      exemptAllowanceOther1Amount: "",
+      exemptAllowanceOther2Nature: "",
+      exemptAllowanceOther2Description: "",
+      exemptAllowanceOther2Amount: "",
       grossSalary17_1: toAmountText(seedDraft.income.salary),
       grossTotal: toAmountText(seedDraft.income.salary),
       incomeChargeableSalaries: toAmountText(seedDraft.income.salary),
@@ -384,6 +426,7 @@ export default function ITRReturnFormScreen() {
       profit17_3: toAmountText(seedDraft.salaryBreakup.profit17_3),
       retirementBenefit89A: toAmountText(seedDraft.salaryBreakup.retirementBenefit89A),
       retirementBenefit89ACountry: "",
+      retirementBenefitOtherCountry89A: "",
       professionalTax16iii: toAmountText(seedDraft.salaryBreakup.professionalTax16iii),
       standardDeduction16ia: toAmountText(seedDraft.income.standardDeduction),
     },
@@ -414,21 +457,26 @@ export default function ITRReturnFormScreen() {
       section80CCC: toAmountText(seedDraft.deductions.section80CCC),
       section80CCD1: toAmountText(seedDraft.deductions.section80CCD1),
       section80CCD1B: toAmountText(seedDraft.deductions.section80CCD1B),
+      pranNumber: "",
+      section80CCD2: "",
       section80D: toAmountText(seedDraft.deductions.section80D),
-      section80E: toAmountText(seedDraft.deductions.section80E),
       section80DD: toAmountText(seedDraft.deductions.section80DD),
       section80DDB: toAmountText(seedDraft.deductions.section80DDB),
+      section80DDB_disease1: "",
+      section80DDB_disease2: "",
+      section80E: toAmountText(seedDraft.deductions.section80E),
       section80EE: toAmountText(seedDraft.deductions.section80EE),
       section80EEA: toAmountText(seedDraft.deductions.section80EEA),
       section80EEB: toAmountText(seedDraft.deductions.section80EEB),
+      section80G: toAmountText(seedDraft.deductions.section80G),
+      section80GG: toAmountText(seedDraft.deductions.section80GG),
+      form10BA_ackNumber: "",
       section80GGA: toAmountText(seedDraft.deductions.section80GGA),
       section80GGC: toAmountText(seedDraft.deductions.section80GGC),
-      section80GG: toAmountText(seedDraft.deductions.section80GG),
       section80TTA: toAmountText(seedDraft.deductions.section80TTA),
       section80TTB: toAmountText(seedDraft.deductions.section80TTB),
-      section80CCH: toAmountText(seedDraft.deductions.section80CCH),
-      section80G: toAmountText(seedDraft.deductions.section80G),
       section80U: toAmountText(seedDraft.deductions.section80U),
+      section80CCH: toAmountText(seedDraft.deductions.section80CCH),
       otherDeductions: toAmountText(seedDraft.deductions.otherDeductions),
       totalDeductions: toAmountText(seedDraft.deductions.totalDeductions),
       totalExemptions: toAmountText(seedDraft.deductions.totalExemptions),
@@ -460,6 +508,22 @@ export default function ITRReturnFormScreen() {
       row4Amount: "",
       row4Description: "",
       row4Nature: "",
+      retirementBenefitOtherCountry89AOtherSources: "",
+      retirementBenefitNotifiedCountryUSA: "",
+      retirementBenefitNotifiedCountryUK: "",
+      retirementBenefitNotifiedCountryCanada: "",
+      quarterly89A_1: "",
+      quarterly89A_2: "",
+      quarterly89A_3: "",
+      quarterly89A_4: "",
+      quarterly89A_5: "",
+      dividend_1: "",
+      dividend_2: "",
+      dividend_3: "",
+      dividend_4: "",
+      dividend_5: "",
+      relief89AOtherSources: "",
+      deduction57iia: "",
       exemptIncome1Nature: "",
       exemptIncome1Description: "",
       exemptIncome1Amount: "",
@@ -501,6 +565,8 @@ export default function ITRReturnFormScreen() {
       originalOrRevised: "Original",
       optOutOfNewRegime: seedDraft.personalInfo.regime === "old" ? "yes" : "no",
       otherConditionsClause: "no",
+      otherConditionsTdsTcs: "no",
+      otherConditionsSavingsDeposit: "no",
       returnType: "ITR-1",
       submissionMode: "Online",
       dateOfNoticeOrOrder: "",
@@ -549,6 +615,14 @@ export default function ITRReturnFormScreen() {
         bonus: "",
         entertainmentAllowance: "",
         exemptAllowance10: "",
+        exemptAllowanceHra: "",
+        exemptAllowanceHraDescription: "",
+        exemptAllowanceOther1Nature: "",
+        exemptAllowanceOther1Description: "",
+        exemptAllowanceOther1Amount: "",
+        exemptAllowanceOther2Nature: "",
+        exemptAllowanceOther2Description: "",
+        exemptAllowanceOther2Amount: "",
         grossSalary17_1: toAmountText(seedDraft.income.salary),
         grossTotal: toAmountText(seedDraft.income.salary),
         incomeChargeableSalaries: toAmountText(seedDraft.income.salary),
@@ -913,6 +987,8 @@ export default function ITRReturnFormScreen() {
               originalOrRevised: "Original",
               optOutOfNewRegime: seedDraft.personalInfo.regime === "old" ? "yes" : "no",
               otherConditionsClause: "no",
+              otherConditionsTdsTcs: "no",
+              otherConditionsSavingsDeposit: "no",
               returnType: "ITR-1",
               submissionMode: "Online",
               dateOfNoticeOrOrder: "",
@@ -961,6 +1037,14 @@ export default function ITRReturnFormScreen() {
               bonus: "",
               entertainmentAllowance: "",
               exemptAllowance10: "",
+              exemptAllowanceHra: "",
+              exemptAllowanceHraDescription: "",
+              exemptAllowanceOther1Nature: "",
+              exemptAllowanceOther1Description: "",
+              exemptAllowanceOther1Amount: "",
+              exemptAllowanceOther2Nature: "",
+              exemptAllowanceOther2Description: "",
+              exemptAllowanceOther2Amount: "",
               grossSalary17_1: toAmountText(seedDraft.income.salary),
               grossTotal: toAmountText(seedDraft.income.salary),
               incomeChargeableSalaries: toAmountText(seedDraft.income.salary),
@@ -972,6 +1056,7 @@ export default function ITRReturnFormScreen() {
               profit17_3: "",
               retirementBenefit89A: "",
               retirementBenefit89ACountry: "",
+              retirementBenefitOtherCountry89A: "",
               professionalTax16iii: "",
               standardDeduction16ia: toAmountText(seedDraft.income.standardDeduction),
             },
@@ -1002,21 +1087,26 @@ export default function ITRReturnFormScreen() {
               section80CCC: toAmountText(seedDraft.deductions.section80CCC),
               section80CCD1: toAmountText(seedDraft.deductions.section80CCD1),
               section80CCD1B: toAmountText(seedDraft.deductions.section80CCD1B),
+              pranNumber: "",
+              section80CCD2: "",
               section80D: toAmountText(seedDraft.deductions.section80D),
-              section80E: toAmountText(seedDraft.deductions.section80E),
               section80DD: toAmountText(seedDraft.deductions.section80DD),
               section80DDB: toAmountText(seedDraft.deductions.section80DDB),
+              section80DDB_disease1: "",
+              section80DDB_disease2: "",
+              section80E: toAmountText(seedDraft.deductions.section80E),
               section80EE: toAmountText(seedDraft.deductions.section80EE),
               section80EEA: toAmountText(seedDraft.deductions.section80EEA),
               section80EEB: toAmountText(seedDraft.deductions.section80EEB),
+              section80G: toAmountText(seedDraft.deductions.section80G),
+              section80GG: toAmountText(seedDraft.deductions.section80GG),
+              form10BA_ackNumber: "",
               section80GGA: toAmountText(seedDraft.deductions.section80GGA),
               section80GGC: toAmountText(seedDraft.deductions.section80GGC),
-              section80GG: toAmountText(seedDraft.deductions.section80GG),
               section80TTA: toAmountText(seedDraft.deductions.section80TTA),
               section80TTB: toAmountText(seedDraft.deductions.section80TTB),
-              section80CCH: toAmountText(seedDraft.deductions.section80CCH),
-              section80G: toAmountText(seedDraft.deductions.section80G),
               section80U: toAmountText(seedDraft.deductions.section80U),
+              section80CCH: toAmountText(seedDraft.deductions.section80CCH),
               otherDeductions: toAmountText(seedDraft.deductions.otherDeductions),
               totalDeductions: toAmountText(seedDraft.deductions.totalDeductions),
               totalExemptions: toAmountText(seedDraft.deductions.totalExemptions),
@@ -1048,6 +1138,22 @@ export default function ITRReturnFormScreen() {
               row4Amount: "",
               row4Description: "",
               row4Nature: "",
+              retirementBenefitOtherCountry89AOtherSources: "",
+              retirementBenefitNotifiedCountryUSA: "",
+              retirementBenefitNotifiedCountryUK: "",
+              retirementBenefitNotifiedCountryCanada: "",
+              quarterly89A_1: "",
+              quarterly89A_2: "",
+              quarterly89A_3: "",
+              quarterly89A_4: "",
+              quarterly89A_5: "",
+              dividend_1: "",
+              dividend_2: "",
+              dividend_3: "",
+              dividend_4: "",
+              dividend_5: "",
+              relief89AOtherSources: "",
+              deduction57iia: "",
               exemptIncome1Nature: "",
               exemptIncome1Description: "",
               exemptIncome1Amount: "",
@@ -1187,7 +1293,33 @@ export default function ITRReturnFormScreen() {
             ))}
           </View>
           <Text style={styles.helperText}>the aggregate of tax deducted at source and tax collected at source during the previous year, in the case of the person, is twenty-five thousand rupees or more (fifty thousand for resident senior citizen); or</Text>
+          <View style={styles.pillsRow}>
+            {(["no", "yes"] as const).map((item) => (
+              <Pressable
+                key={item}
+                onPress={() => updateFilingInfo("otherConditionsTdsTcs", item)}
+                style={[styles.pill, form.filingInfo.otherConditionsTdsTcs === item && styles.pillActive]}
+              >
+                <Text style={[styles.pillText, form.filingInfo.otherConditionsTdsTcs === item && styles.pillTextActive]}>
+                  {item === "no" ? "No" : "Yes"}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
           <Text style={styles.helperText}>The deposit in one or more savings bank account of the person, in aggregate, is fifty lakh rupees or more, in the previous year</Text>
+          <View style={styles.pillsRow}>
+            {(["no", "yes"] as const).map((item) => (
+              <Pressable
+                key={item}
+                onPress={() => updateFilingInfo("otherConditionsSavingsDeposit", item)}
+                style={[styles.pill, form.filingInfo.otherConditionsSavingsDeposit === item && styles.pillActive]}
+              >
+                <Text style={[styles.pillText, form.filingInfo.otherConditionsSavingsDeposit === item && styles.pillTextActive]}>
+                  {item === "no" ? "No" : "Yes"}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
           <View style={styles.pillsRow}>
             {(["139(1)", "139(4)", "139(5)", "119(2)(b)", "139(8A)"] as const).map((item) => (
               <Pressable
@@ -1233,143 +1365,234 @@ export default function ITRReturnFormScreen() {
         </SectionCard>
 
         <SectionCard title="SALARY / PENSION" subtitle="Exact salary section wording from the ITR-1 workbook.">
-          <FieldRow label="Gross Salary (ia + ib + ic + id + ie)" value={form.salaryBreakup.grossTotal} onChangeText={(value) => updateSalaryBreakup("grossTotal", value)} keyboardType="numeric" helper="a + b + c + d + e" />
-          <FieldRow label="Salary as per section 17(1)" value={form.salaryBreakup.grossSalary17_1} onChangeText={(value) => updateSalaryBreakup("grossSalary17_1", value)} keyboardType="numeric" helper="Salary received during the year" />
-          <FieldRow label="Value of perquisites as per section 17(2)" value={form.salaryBreakup.perquisites17_2} onChangeText={(value) => updateSalaryBreakup("perquisites17_2", value)} keyboardType="numeric" helper="Employer-provided benefits / perquisites" />
-          <FieldRow label="Profit in lieu of salary as per section 17(3)" value={form.salaryBreakup.profit17_3} onChangeText={(value) => updateSalaryBreakup("profit17_3", value)} keyboardType="numeric" helper="Any compensation taxable under section 17(3)" />
-          <FieldRow label="Income from retirement benefit account maintained in a notified country u/s 89A" value={form.salaryBreakup.retirementBenefit89A} onChangeText={(value) => updateSalaryBreakup("retirementBenefit89A", value)} keyboardType="numeric" />
+          <FieldRow label="i Gross Salary (ia + ib + ic + id + ie)" value={form.salaryBreakup.grossTotal} onChangeText={(value) => updateSalaryBreakup("grossTotal", value)} keyboardType="numeric" helper="a + b + c + d + e" />
+          <FieldRow label="a Salary as per section 17(1)" value={form.salaryBreakup.grossSalary17_1} onChangeText={(value) => updateSalaryBreakup("grossSalary17_1", value)} keyboardType="numeric" helper="Salary received during the year" />
+          <FieldRow label="b Value of perquisites as per section 17(2)" value={form.salaryBreakup.perquisites17_2} onChangeText={(value) => updateSalaryBreakup("perquisites17_2", value)} keyboardType="numeric" helper="Employer-provided benefits / perquisites" />
+          <FieldRow label="c Profit in lieu of salary as per section 17(3)" value={form.salaryBreakup.profit17_3} onChangeText={(value) => updateSalaryBreakup("profit17_3", value)} keyboardType="numeric" helper="Any compensation taxable under section 17(3)" />
+          <FieldRow label="d Income from retirement benefit account maintained in a notified country u/s 89A" value={form.salaryBreakup.retirementBenefit89A} onChangeText={(value) => updateSalaryBreakup("retirementBenefit89A", value)} keyboardType="numeric" />
           <FieldRow label="Country" value={form.salaryBreakup.retirementBenefit89ACountry} onChangeText={(value) => updateSalaryBreakup("retirementBenefit89ACountry", value)} placeholder="United States of America / United Kingdom / Canada" />
-          <View style={styles.pillsRow}>
+          <View style={styles.countryGrid}>
             {(["United States of America", "United Kingdom of Great Britain and Northern Ireland", "Canada"] as const).map((item) => (
               <Pressable
                 key={item}
                 onPress={() => updateSalaryBreakup("retirementBenefit89ACountry", item)}
-                style={[styles.pill, form.salaryBreakup.retirementBenefit89ACountry === item && styles.pillActive]}
+                style={[styles.countryChip, form.salaryBreakup.retirementBenefit89ACountry === item && styles.countryChipActive]}
               >
-                <Text style={[styles.pillText, form.salaryBreakup.retirementBenefit89ACountry === item && styles.pillTextActive]}>{item}</Text>
+                <Text style={[styles.countryChipText, form.salaryBreakup.retirementBenefit89ACountry === item && styles.countryChipTextActive]}>{item}</Text>
               </Pressable>
             ))}
           </View>
-          <FieldRow label="Less : Allowances to the extent exempt u/s 10" value={form.salaryBreakup.exemptAllowance10} onChangeText={(value) => updateSalaryBreakup("exemptAllowance10", value)} keyboardType="numeric" helper="Ensure that it is included in salary income u/s 17(1)/17(2)/17(3)" />
-          {false && (
-          <>
-          <FieldRow label="Basic + DA" value={form.salaryBreakup.basicDA} onChangeText={(value) => updateSalaryBreakup("basicDA", value)} keyboardType="numeric" />
-          <FieldRow label="HRA" value={form.salaryBreakup.hra} onChangeText={(value) => updateSalaryBreakup("hra", value)} keyboardType="numeric" />
-          <FieldRow label="Bonus / Commission" value={form.salaryBreakup.bonus} onChangeText={(value) => updateSalaryBreakup("bonus", value)} keyboardType="numeric" />
-          <FieldRow label="Other Allowance" value={form.salaryBreakup.otherAllowance} onChangeText={(value) => updateSalaryBreakup("otherAllowance", value)} keyboardType="numeric" />
-          <FieldRow label="Professional Tax u/s 16(iii)" value={form.salaryBreakup.pTax} onChangeText={(value) => updateSalaryBreakup("pTax", value)} keyboardType="numeric" />
-          <FieldRow label="Standard Deduction u/s 16(ia)" value={form.salaryBreakup.standardDeduction16ia} onChangeText={(value) => updateSalaryBreakup("standardDeduction16ia", value)} keyboardType="numeric" />
-          <FieldRow label="Entertainment Allowance u/s 16(ii)" value={form.salaryBreakup.entertainmentAllowance} onChangeText={(value) => updateSalaryBreakup("entertainmentAllowance", value)} keyboardType="numeric" />
-          <FieldRow label="Net Salary" value={form.salaryBreakup.netSalary} onChangeText={(value) => updateSalaryBreakup("netSalary", value)} keyboardType="numeric" />
-          <FieldRow label="Income Chargeable under Salaries" value={form.salaryBreakup.incomeChargeableSalaries} onChangeText={(value) => updateSalaryBreakup("incomeChargeableSalaries", value)} keyboardType="numeric" />
-          </>
-          )}
+          <FieldRow label="e Income from retirement benefit account maintained in a country other than notified country u/s 89A" value={form.salaryBreakup.retirementBenefitOtherCountry89A} onChangeText={(value) => updateSalaryBreakup("retirementBenefitOtherCountry89A", value)} keyboardType="numeric" />
+          <FieldRow label="ii Less : Allowances to the extent exempt u/s 10" value={form.salaryBreakup.exemptAllowance10} onChangeText={(value) => updateSalaryBreakup("exemptAllowance10", value)} keyboardType="numeric" helper="Ensure that it is included in salary income u/s 17(1)/17(2)/17(3)" />
+          <View style={styles.matrixCard}>
+            <Text style={styles.matrixTitle}>Exempt Allowances</Text>
+            <View style={styles.matrixHeaderRow}>
+              <Text style={[styles.matrixHeaderCell, styles.matrixSlNo]}>Sl.No.</Text>
+              <Text style={[styles.matrixHeaderCell, styles.matrixNature]}>Nature of Exempt Allowance</Text>
+              <Text style={[styles.matrixHeaderCell, styles.matrixDesc]}>Description (If "Any Other" selected)</Text>
+              <Text style={[styles.matrixHeaderCell, styles.matrixAmount]}>Amount</Text>
+            </View>
+            <View style={styles.matrixDataRow}>
+              <Text style={[styles.matrixCell, styles.matrixSlNo]}>1</Text>
+              <TextInput
+                value={form.salaryBreakup.exemptAllowanceHra}
+                onChangeText={(value) => updateSalaryBreakup("exemptAllowanceHra", value)}
+                placeholder="(Select)"
+                placeholderTextColor="#94A3B8"
+                style={[styles.matrixInput, styles.matrixNature]}
+              />
+              <TextInput
+                value={form.salaryBreakup.exemptAllowanceHraDescription}
+                onChangeText={(value) => updateSalaryBreakup("exemptAllowanceHraDescription", value)}
+                placeholder="Not Applicable"
+                placeholderTextColor="#94A3B8"
+                style={[styles.matrixInput, styles.matrixDesc]}
+              />
+              <TextInput
+                value={form.salaryBreakup.exemptAllowance10}
+                onChangeText={(value) => updateSalaryBreakup("exemptAllowance10", value)}
+                keyboardType="numeric"
+                placeholder="0"
+                placeholderTextColor="#94A3B8"
+                style={[styles.matrixInput, styles.matrixAmount]}
+              />
+            </View>
+            <View style={styles.matrixDataRow}>
+              <Text style={[styles.matrixCell, styles.matrixSlNo]}>2</Text>
+              <TextInput
+                value={form.salaryBreakup.exemptAllowanceOther1Nature}
+                onChangeText={(value) => updateSalaryBreakup("exemptAllowanceOther1Nature", value)}
+                placeholder="(Select)"
+                placeholderTextColor="#94A3B8"
+                style={[styles.matrixInput, styles.matrixNature]}
+              />
+              <TextInput
+                value={form.salaryBreakup.exemptAllowanceOther1Description}
+                onChangeText={(value) => updateSalaryBreakup("exemptAllowanceOther1Description", value)}
+                placeholder="Not Applicable"
+                placeholderTextColor="#94A3B8"
+                style={[styles.matrixInput, styles.matrixDesc]}
+              />
+              <TextInput
+                value={form.salaryBreakup.exemptAllowanceOther1Amount}
+                onChangeText={(value) => updateSalaryBreakup("exemptAllowanceOther1Amount", value)}
+                keyboardType="numeric"
+                placeholder="0"
+                placeholderTextColor="#94A3B8"
+                style={[styles.matrixInput, styles.matrixAmount]}
+              />
+            </View>
+          </View>
+          <FieldRow label="Sec 10(13A)-Allowance to meet expenditure incurred on house rent" value={form.salaryBreakup.hra} onChangeText={(value) => updateSalaryBreakup("hra", value)} keyboardType="numeric" />
+          <FieldRow label="iia Less: Income claimed for relief from taxation u/s 89A" value={form.salaryBreakup.otherAllowance} onChangeText={(value) => updateSalaryBreakup("otherAllowance", value)} keyboardType="numeric" />
+          <FieldRow label="iii Net Salary (i - ii - iia)" value={form.salaryBreakup.netSalary} onChangeText={(value) => updateSalaryBreakup("netSalary", value)} keyboardType="numeric" />
+          
+          <FieldRow label="iv Deductions u/s 16 (iva + ivb + ivc)" value={String((Number(form.salaryBreakup.standardDeduction16ia || 0) + Number(form.salaryBreakup.entertainmentAllowance || 0) + Number(form.salaryBreakup.professionalTax16iii || 0)))} readOnly />
+          <FieldRow label="a Standard Deduction u/s 16(ia)" value={form.salaryBreakup.standardDeduction16ia} onChangeText={(value) => updateSalaryBreakup("standardDeduction16ia", value)} keyboardType="numeric" />
+          <FieldRow label="b Entertainment Allowance u/s 16(ii)" value={form.salaryBreakup.entertainmentAllowance} onChangeText={(value) => updateSalaryBreakup("entertainmentAllowance", value)} keyboardType="numeric" />
+          <FieldRow label="c Professional Tax u/s 16(iii)" value={form.salaryBreakup.professionalTax16iii} onChangeText={(value) => updateSalaryBreakup("professionalTax16iii", value)} keyboardType="numeric" />
+          
+          <FieldRow label="v Income chargeable under the Head 'Salaries' (iii-iv)" value={form.salaryBreakup.incomeChargeableSalaries} onChangeText={(value) => updateSalaryBreakup("incomeChargeableSalaries", value)} keyboardType="numeric" />
         </SectionCard>
 
         <SectionCard title="HOUSE PROPERTY" subtitle="One house property is supported for ITR-1.">
-          <FieldRow label="Type of House Property" value={form.housePropertyDetails.propertyType} onChangeText={(value) => updateHousePropertyDetails("propertyType", value)} />
-          <FieldRow label="Gross rent received / receivable / lettable value during the year" value={form.housePropertyDetails.grossRent} onChangeText={(value) => updateHousePropertyDetails("grossRent", value)} keyboardType="numeric" />
-          <FieldRow label="Tax paid to local authorities" value={form.housePropertyDetails.municipalTaxes} onChangeText={(value) => updateHousePropertyDetails("municipalTaxes", value)} keyboardType="numeric" />
-          <FieldRow label="Arrears / Unrealised Rent received during the year Less 30%" value={form.housePropertyDetails.arrearsUnrealisedRent} onChangeText={(value) => updateHousePropertyDetails("arrearsUnrealisedRent", value)} keyboardType="numeric" />
-          <FieldRow label="30% of Annual Value (30% * iii)" value={form.housePropertyDetails.thirtyPercentDeduction} onChangeText={(value) => updateHousePropertyDetails("thirtyPercentDeduction", value)} keyboardType="numeric" />
-          <FieldRow label="Interest payable on borrowed capital" value={form.housePropertyDetails.interestOnLoan} onChangeText={(value) => updateHousePropertyDetails("interestOnLoan", value)} keyboardType="numeric" />
-          <FieldRow label="Income Chargeable under House Property" value={form.housePropertyDetails.incomeChargeableHouseProperty} onChangeText={(value) => updateHousePropertyDetails("incomeChargeableHouseProperty", value)} keyboardType="numeric" />
+          <FieldRow label="Type of House Property" value={form.housePropertyDetails.propertyType} onChangeText={(value) => updateHousePropertyDetails("propertyType", value)} placeholder="(Select)" />
+          <FieldRow label="i Gross rent received/ receivable/ lettable value during the year" value={form.housePropertyDetails.grossRent} onChangeText={(value) => updateHousePropertyDetails("grossRent", value)} keyboardType="numeric" />
+          <FieldRow label="ii Tax paid to local authorities" value={form.housePropertyDetails.municipalTaxes} onChangeText={(value) => updateHousePropertyDetails("municipalTaxes", value)} keyboardType="numeric" />
+          <FieldRow label="iii Annual Value (i - ii)" value={String(Number(form.housePropertyDetails.grossRent || 0) - Number(form.housePropertyDetails.municipalTaxes || 0))} readOnly />
+          <FieldRow label="iv 30% of Annual Value (30% * iii)" value={form.housePropertyDetails.thirtyPercentDeduction} onChangeText={(value) => updateHousePropertyDetails("thirtyPercentDeduction", value)} keyboardType="numeric" />
+          <FieldRow label="v Interest payable on borrowed capital" value={form.housePropertyDetails.interestOnLoan} onChangeText={(value) => updateHousePropertyDetails("interestOnLoan", value)} keyboardType="numeric" />
+          <FieldRow label="vi Arrears/Unrealised Rent received during the year Less 30%" value={form.housePropertyDetails.arrearsUnrealisedRent} onChangeText={(value) => updateHousePropertyDetails("arrearsUnrealisedRent", value)} keyboardType="numeric" />
+          <FieldRow label={"vii Income chargeable under the head 'House Property' (iii \u2013 iv \u2013 v )+ vi\nNote : (If loss, put the figure in negative) Maximum Loss from House property that can be set-off in computing income of this year is INR 2,00,000. To avail the benefit of carry forward and set off of loss, please use ITR-2"} value={form.housePropertyDetails.incomeChargeableHouseProperty} onChangeText={(value) => updateHousePropertyDetails("incomeChargeableHouseProperty", value)} keyboardType="numeric" />
         </SectionCard>
 
-        <SectionCard title="Exempt Income: For reporting purpose and Income on which no tax is payable" subtitle="Workbook rows 1 and 2, plus total exempt income and 7a details.">
-          <FieldRow label="1. Nature of Income" value={form.otherSourcesDetails.exemptIncome1Nature} onChangeText={(value) => updateOtherSourcesDetails("exemptIncome1Nature", value)} />
-          <FieldRow label="Description (If 'Any Other' selected)" value={form.otherSourcesDetails.exemptIncome1Description} onChangeText={(value) => updateOtherSourcesDetails("exemptIncome1Description", value)} />
-          <FieldRow label="Amount" value={form.otherSourcesDetails.exemptIncome1Amount} onChangeText={(value) => updateOtherSourcesDetails("exemptIncome1Amount", value)} keyboardType="numeric" />
-          <FieldRow label="2. Nature of Income" value={form.otherSourcesDetails.exemptIncome2Nature} onChangeText={(value) => updateOtherSourcesDetails("exemptIncome2Nature", value)} />
-          <FieldRow label="Description (If 'Any Other' selected)" value={form.otherSourcesDetails.exemptIncome2Description} onChangeText={(value) => updateOtherSourcesDetails("exemptIncome2Description", value)} />
-          <FieldRow label="Amount" value={form.otherSourcesDetails.exemptIncome2Amount} onChangeText={(value) => updateOtherSourcesDetails("exemptIncome2Amount", value)} keyboardType="numeric" />
-          <FieldRow label="Total Exempt Income" value={form.deductions.totalExemptions} onChangeText={(value) => updateDeductions("totalExemptions", value)} keyboardType="numeric" />
-          <FieldRow label="7a(i) Total sale consideration" value={form.otherSourcesDetails.ltcg112A_saleConsideration} onChangeText={(value) => updateOtherSourcesDetails("ltcg112A_saleConsideration", value)} keyboardType="numeric" />
-          <FieldRow label="7a(ii) Total cost of acquisition" value={form.otherSourcesDetails.ltcg112A_costOfAcquisition} onChangeText={(value) => updateOtherSourcesDetails("ltcg112A_costOfAcquisition", value)} keyboardType="numeric" />
-          <FieldRow label="7a(iii) Long term capital gains as per sec 112A" value={form.otherSourcesDetails.ltcg112A_amount} onChangeText={(value) => updateOtherSourcesDetails("ltcg112A_amount", value)} keyboardType="numeric" />
-        </SectionCard>
-
-        <SectionCard title="DEDUCTIONS" subtitle="Chapter VI-A amounts from the workbook.">
-          <FieldRow label="80C - Life insurance premium, deferred annuity, contributions to provident fund, subscription to certain equity shares or debentures, etc." value={form.deductions.section80C} onChangeText={(value) => updateDeductions("section80C", value)} keyboardType="numeric" />
-          <FieldRow label="80CCC - Payment in respect Pension Fund, etc." value={form.deductions.section80CCC} onChangeText={(value) => updateDeductions("section80CCC", value)} keyboardType="numeric" />
-          <FieldRow label="80CCD(1) - Contribution to pension scheme of Central Government" value={form.deductions.section80CCD1} onChangeText={(value) => updateDeductions("section80CCD1", value)} keyboardType="numeric" />
-          <FieldRow label="80CCD(1B) - Contribution to pension scheme of Central Government" value={form.deductions.section80CCD1B} onChangeText={(value) => updateDeductions("section80CCD1B", value)} keyboardType="numeric" />
-          <FieldRow label="80D - Deduction in respect of Health Insurance premia..." value={form.deductions.section80D} onChangeText={(value) => updateDeductions("section80D", value)} keyboardType="numeric" />
-          <FieldRow label="80DDB - Maintenance including medical treatment of a dependent who is a person with disability..." value={form.deductions.section80DDB} onChangeText={(value) => updateDeductions("section80DDB", value)} keyboardType="numeric" />
-          <FieldRow label="80E - Interest on loan taken for higher education" value={form.deductions.section80E} onChangeText={(value) => updateDeductions("section80E", value)} keyboardType="numeric" />
-          <FieldRow label="80EE - Interest on loan taken for residential house property" value={form.deductions.section80EE} onChangeText={(value) => updateDeductions("section80EE", value)} keyboardType="numeric" />
-          <FieldRow label="80EEA - Deduction in respect of interest on loan taken for certain house property" value={form.deductions.section80EEA} onChangeText={(value) => updateDeductions("section80EEA", value)} keyboardType="numeric" />
-          <FieldRow label="80EEB - Deduction in respect of purchase of electric vehicle" value={form.deductions.section80EEB} onChangeText={(value) => updateDeductions("section80EEB", value)} keyboardType="numeric" />
-          <FieldRow label="80GGA - Donations for scientific research or rural development" value={form.deductions.section80GGA} onChangeText={(value) => updateDeductions("section80GGA", value)} keyboardType="numeric" />
-          <FieldRow label="80GGC - Contribution to Political party." value={form.deductions.section80GGC} onChangeText={(value) => updateDeductions("section80GGC", value)} keyboardType="numeric" />
-          <FieldRow label="80GG - Rent paid (Please submit form 10BA to claim deduction)" value={form.deductions.section80GG} onChangeText={(value) => updateDeductions("section80GG", value)} keyboardType="numeric" />
-          <FieldRow label="80TTA - Interest from savings bank account" value={form.deductions.section80TTA} onChangeText={(value) => updateDeductions("section80TTA", value)} keyboardType="numeric" />
-          <FieldRow label="80TTB - Interest from deposits by senior citizen" value={form.deductions.section80TTB} onChangeText={(value) => updateDeductions("section80TTB", value)} keyboardType="numeric" />
-          <FieldRow label="80CCH - Contribution to Agniveer Corpus Fund" value={form.deductions.section80CCH} onChangeText={(value) => updateDeductions("section80CCH", value)} keyboardType="numeric" />
-          <FieldRow label="80U - In case of a person with disability" value={form.deductions.section80U} onChangeText={(value) => updateDeductions("section80U", value)} keyboardType="numeric" />
-          <FieldRow label="Any other deduction" value={form.deductions.otherDeductions} onChangeText={(value) => updateDeductions("otherDeductions", value)} keyboardType="numeric" />
-          <FieldRow label="Total Deductions (Total of 5a to 5t)" value={form.deductions.totalDeductions} onChangeText={(value) => updateDeductions("totalDeductions", value)} keyboardType="numeric" />
-          <FieldRow label="Total Exempt Income" value={form.deductions.totalExemptions} onChangeText={(value) => updateDeductions("totalExemptions", value)} keyboardType="numeric" />
-        </SectionCard>
-
-        {false && (
-          <>
-        <SectionCard title="TAXES PAID / TDS" subtitle="TDS and advance tax values.">
-          <FieldRow label="TDS Salary" value={form.taxesPaid.tdsSalary} onChangeText={(value) => updateTaxesPaid("tdsSalary", value)} keyboardType="numeric" />
-          <FieldRow label="TDS Non Salary" value={form.taxesPaid.tdsNonSalary} onChangeText={(value) => updateTaxesPaid("tdsNonSalary", value)} keyboardType="numeric" />
-          <FieldRow label="TDS Other" value={form.taxesPaid.tdsOther} onChangeText={(value) => updateTaxesPaid("tdsOther", value)} keyboardType="numeric" />
-          <FieldRow label="Advance Tax" value={form.taxesPaid.advanceTax} onChangeText={(value) => updateTaxesPaid("advanceTax", value)} keyboardType="numeric" />
-          <FieldRow label="TCS" value={form.taxesPaid.tcs} onChangeText={(value) => updateTaxesPaid("tcs", value)} keyboardType="numeric" />
-          <FieldRow label="Self Assessment Tax" value={form.taxesPaid.selfAssessmentTax} onChangeText={(value) => updateTaxesPaid("selfAssessmentTax", value)} keyboardType="numeric" />
-          <FieldRow label="Total Paid" value={String(summary.totalPaid)} readOnly />
-        </SectionCard>
-
-        <SectionCard title="TAX PAYABLE / VERIFICATION" subtitle="Portal-style declaration and sign-off details.">
-          <FieldRow label="Verification Place" value={form.verification.place} onChangeText={(value) => updateVerification("place", value)} />
-          <FieldRow label="Verification Date" value={form.verification.date} onChangeText={(value) => updateVerification("date", value)} placeholder="DD/MM/YYYY" />
-          <FieldRow label="Verified By Name" value={form.verification.name} onChangeText={(value) => updateVerification("name", value)} />
-          <FieldRow label="Capacity" value={form.verification.capacity} onChangeText={(value) => updateVerification("capacity", value)} placeholder="Self / Representative" />
-        </SectionCard>
-
-        <SectionCard title="FINAL SUMMARY" subtitle="A preview of the filled JSON data.">
-          <View style={styles.summaryBox}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Tax on Total Income</Text>
-              <Text style={styles.summaryValue}>₹ {summary.taxOnTotalIncome.toLocaleString("en-IN")}</Text>
+        <SectionCard title="Income from Other Sources" subtitle="Workbook rows for other sources.">
+          <View style={styles.matrixCard}>
+            <Text style={styles.matrixTitle}>Income from Other Sources</Text>
+            <View style={styles.matrixHeaderRow}>
+              <Text style={[styles.matrixHeaderCell, styles.matrixSlNo]}>Sl.No.</Text>
+              <Text style={[styles.matrixHeaderCell, styles.matrixNature]}>Nature of Income</Text>
+              <Text style={[styles.matrixHeaderCell, styles.matrixDesc]}>Description (If 'Any Other' selected)</Text>
+              <Text style={[styles.matrixHeaderCell, styles.matrixAmount]}>Amount</Text>
             </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Net Payable</Text>
-              <Text style={[styles.summaryValue, styles.payableColor]}>
-                ₹ {summary.net.toLocaleString("en-IN")}
-              </Text>
+            {[1, 2, 3, 4].map((i) => {
+              const natureKey = `row${i}Nature` as keyof typeof form.otherSourcesDetails;
+              const descKey = `row${i}Description` as keyof typeof form.otherSourcesDetails;
+              const amtKey = `row${i}Amount` as keyof typeof form.otherSourcesDetails;
+              return (
+                <View style={styles.matrixDataRow} key={i}>
+                  <Text style={[styles.matrixCell, styles.matrixSlNo]}>{i}</Text>
+                  <TextInput value={String(form.otherSourcesDetails[natureKey] || "")} onChangeText={(value) => updateOtherSourcesDetails(natureKey, value)} placeholder="(Select)" placeholderTextColor="#94A3B8" style={[styles.matrixInput, styles.matrixNature]} />
+                  <TextInput value={String(form.otherSourcesDetails[descKey] || "")} onChangeText={(value) => updateOtherSourcesDetails(descKey, value)} style={[styles.matrixInput, styles.matrixDesc]} />
+                  <TextInput value={String(form.otherSourcesDetails[amtKey] || "")} onChangeText={(value) => updateOtherSourcesDetails(amtKey, value)} keyboardType="numeric" placeholder="0" placeholderTextColor="#94A3B8" style={[styles.matrixInput, styles.matrixAmount]} />
+                </View>
+              );
+            })}
+          </View>
+
+          <FieldRow label="Income from retirement benefit account maintained in a country other than a country notified u/s 89A" value={form.otherSourcesDetails.retirementBenefitOtherCountry89AOtherSources} onChangeText={(value) => updateOtherSourcesDetails("retirementBenefitOtherCountry89AOtherSources", value)} keyboardType="numeric" />
+          <FieldRow label="Income from retirement benefit account maintained in a notified country u/s 89A (1 + 2 + 3)" value={String(Number(form.otherSourcesDetails.retirementBenefitNotifiedCountryUSA || 0) + Number(form.otherSourcesDetails.retirementBenefitNotifiedCountryUK || 0) + Number(form.otherSourcesDetails.retirementBenefitNotifiedCountryCanada || 0))} readOnly />
+          
+          <FieldRow label="1 United States of America" value={form.otherSourcesDetails.retirementBenefitNotifiedCountryUSA} onChangeText={(value) => updateOtherSourcesDetails("retirementBenefitNotifiedCountryUSA", value)} keyboardType="numeric" />
+          <FieldRow label="2 United Kingdom of Great Britain and Northern Ireland" value={form.otherSourcesDetails.retirementBenefitNotifiedCountryUK} onChangeText={(value) => updateOtherSourcesDetails("retirementBenefitNotifiedCountryUK", value)} keyboardType="numeric" />
+          <FieldRow label="3 Canada" value={form.otherSourcesDetails.retirementBenefitNotifiedCountryCanada} onChangeText={(value) => updateOtherSourcesDetails("retirementBenefitNotifiedCountryCanada", value)} keyboardType="numeric" />
+
+          <Text style={{ fontSize: 13, fontWeight: "600", color: "#334155", marginTop: 12, marginBottom: 8 }}>Income from retirement benefit account maintained in a notified country u/s 89A (Quarterly breakup of Taxable Portion)</Text>
+          <FieldRow label="i Upto 15-Jun-2024" value={form.otherSourcesDetails.quarterly89A_1} onChangeText={(value) => updateOtherSourcesDetails("quarterly89A_1", value)} keyboardType="numeric" />
+          <FieldRow label="ii From 16-Jun-2024 to 15-Sep-2024" value={form.otherSourcesDetails.quarterly89A_2} onChangeText={(value) => updateOtherSourcesDetails("quarterly89A_2", value)} keyboardType="numeric" />
+          <FieldRow label="iii From 16-Sep-2024 to 15-Dec-2024" value={form.otherSourcesDetails.quarterly89A_3} onChangeText={(value) => updateOtherSourcesDetails("quarterly89A_3", value)} keyboardType="numeric" />
+          <FieldRow label="iv From 16-Dec-2024 to 15-Mar-2025" value={form.otherSourcesDetails.quarterly89A_4} onChangeText={(value) => updateOtherSourcesDetails("quarterly89A_4", value)} keyboardType="numeric" />
+          <FieldRow label="v From 16-Mar-2025 to 31-Mar-2025" value={form.otherSourcesDetails.quarterly89A_5} onChangeText={(value) => updateOtherSourcesDetails("quarterly89A_5", value)} keyboardType="numeric" />
+
+          <FieldRow label="Dividend (i+ii+iii+iv+v)" value={String(Number(form.otherSourcesDetails.dividend_1 || 0) + Number(form.otherSourcesDetails.dividend_2 || 0) + Number(form.otherSourcesDetails.dividend_3 || 0) + Number(form.otherSourcesDetails.dividend_4 || 0) + Number(form.otherSourcesDetails.dividend_5 || 0))} readOnly />
+          <FieldRow label="i Upto 15-Jun-2024" value={form.otherSourcesDetails.dividend_1} onChangeText={(value) => updateOtherSourcesDetails("dividend_1", value)} keyboardType="numeric" />
+          <FieldRow label="ii From 16-Jun-2024 to 15-Sep-2024" value={form.otherSourcesDetails.dividend_2} onChangeText={(value) => updateOtherSourcesDetails("dividend_2", value)} keyboardType="numeric" />
+          <FieldRow label="iii From 16-Sep-2024 to 15-Dec-2024" value={form.otherSourcesDetails.dividend_3} onChangeText={(value) => updateOtherSourcesDetails("dividend_3", value)} keyboardType="numeric" />
+          <FieldRow label="iv From 16-Dec-2024 to 15-Mar-2025" value={form.otherSourcesDetails.dividend_4} onChangeText={(value) => updateOtherSourcesDetails("dividend_4", value)} keyboardType="numeric" />
+          <FieldRow label="v From 16-Mar-2025 to 31-Mar-2025" value={form.otherSourcesDetails.dividend_5} onChangeText={(value) => updateOtherSourcesDetails("dividend_5", value)} keyboardType="numeric" />
+
+          <FieldRow label="Less : Income claimed for relief from taxation u/s 89A" value={form.otherSourcesDetails.relief89AOtherSources} onChangeText={(value) => updateOtherSourcesDetails("relief89AOtherSources", value)} keyboardType="numeric" />
+          <FieldRow label="Less: Deduction u/s 57(iia) (In case of family pension only)" value={form.otherSourcesDetails.deduction57iia} onChangeText={(value) => updateOtherSourcesDetails("deduction57iia", value)} keyboardType="numeric" />
+          <FieldRow label={"Gross Total Income (1+2+3+7a(iii)) (If loss, put the figure in negative)\nNote: To avail the benefit of carry forward and set off of loss, please use ITR-2"} value={String(Number(form.otherSourcesDetails.row1Amount || 0) + Number(form.otherSourcesDetails.row2Amount || 0) + Number(form.otherSourcesDetails.row3Amount || 0) + Number(form.otherSourcesDetails.ltcg112A_amount || 0))} readOnly />
+        </SectionCard>
+
+
+        <SectionCard title="Part C - Deductions and Taxable Total Income" subtitle="Chapter VI-A amounts from the workbook.">
+          <FieldRow label="a 80C - Life insurance premium, deferred annuity, contributions to provident fund, subscription to certain equity shares or debentures, etc." value={form.deductions.section80C} onChangeText={(value) => updateDeductions("section80C", value)} keyboardType="numeric" />
+          <FieldRow label="b 80CCC - Payment in respect Pension Fund, etc." value={form.deductions.section80CCC} onChangeText={(value) => updateDeductions("section80CCC", value)} keyboardType="numeric" />
+          <FieldRow label="c 80CCD(1) - Contribution to pension scheme of Central Government" value={form.deductions.section80CCD1} onChangeText={(value) => updateDeductions("section80CCD1", value)} keyboardType="numeric" />
+          <FieldRow label="d 80CCD(1B) - Contribution to pension scheme of Central Government" value={form.deductions.section80CCD1B} onChangeText={(value) => updateDeductions("section80CCD1B", value)} keyboardType="numeric" />
+          <FieldRow label="PRAN of the taxpayer" value={form.deductions.pranNumber} onChangeText={(value) => updateDeductions("pranNumber", value)} />
+          <FieldRow label="e 80CCD(2) - Contribution to pension scheme of Central Government by employer" value={form.deductions.section80CCD2} onChangeText={(value) => updateDeductions("section80CCD2", value)} keyboardType="numeric" />
+          <FieldRow label="f 80D - Deduction in respect of Health Insurance premia. (Please fill 80D Schedule. This field is auto-populated from schedule 80D.)" value={form.deductions.section80D} onChangeText={(value) => updateDeductions("section80D", value)} keyboardType="numeric" />
+          <FieldRow label="g 80DD - Maintenance including medical treatment of a dependent who is a person with disability. (Please fill 80DD Schedule. This field is auto-populated from schedule 80DD.)" value={form.deductions.section80DD} onChangeText={(value) => updateDeductions("section80DD", value)} keyboardType="numeric" />
+          <FieldRow label="h 80DDB - Medical treatment of specified disease" value={form.deductions.section80DDB} onChangeText={(value) => updateDeductions("section80DDB", value)} keyboardType="numeric" />
+          <FieldRow label="Name of the specified Disease 1" value={form.deductions.section80DDB_disease1} onChangeText={(value) => updateDeductions("section80DDB_disease1", value)} placeholder="(Select)" />
+          <FieldRow label="Name of the specified Disease 2" value={form.deductions.section80DDB_disease2} onChangeText={(value) => updateDeductions("section80DDB_disease2", value)} placeholder="(Select)" />
+          <FieldRow label="i 80E - Interest on loan taken for higher education" value={form.deductions.section80E} onChangeText={(value) => updateDeductions("section80E", value)} keyboardType="numeric" />
+          <FieldRow label="j 80EE - Interest on loan taken for residential house property" value={form.deductions.section80EE} onChangeText={(value) => updateDeductions("section80EE", value)} keyboardType="numeric" />
+          <FieldRow label="k 80EEA - Deduction in respect of interest on loan taken for certain house property" value={form.deductions.section80EEA} onChangeText={(value) => updateDeductions("section80EEA", value)} keyboardType="numeric" />
+          <FieldRow label="l 80EEB - Deduction in respect of purchase of electric vehicle" value={form.deductions.section80EEB} onChangeText={(value) => updateDeductions("section80EEB", value)} keyboardType="numeric" />
+          <FieldRow label="m 80G - Donations to certain funds, charitable institutions, etc. (Please fill 80G Schedule. This field is auto-populated from schedule 80G.)" value={form.deductions.section80G} onChangeText={(value) => updateDeductions("section80G", value)} keyboardType="numeric" />
+          <FieldRow label="n 80GG - Rent paid (Please submit form 10BA to claim deduction)" value={form.deductions.section80GG} onChangeText={(value) => updateDeductions("section80GG", value)} keyboardType="numeric" />
+          <FieldRow label="Acknowledgement number of Form 10BA" value={form.deductions.form10BA_ackNumber} onChangeText={(value) => updateDeductions("form10BA_ackNumber", value)} />
+          <FieldRow label="o 80GGA - Certain donations for scientific research or rural development (Please fill 80GGA Schedule. This field is auto-populated from schedule 80GGA.)" value={form.deductions.section80GGA} onChangeText={(value) => updateDeductions("section80GGA", value)} keyboardType="numeric" />
+          <FieldRow label="p 80GGC - Contribution to Political party. (Please fill 80GGC Schedule. This field is auto-populated from schedule 80GGC.)" value={form.deductions.section80GGC} onChangeText={(value) => updateDeductions("section80GGC", value)} keyboardType="numeric" />
+          <FieldRow label="q 80TTA - Interest on saving bank Accounts in case of other than Resident senior citizens" value={form.deductions.section80TTA} onChangeText={(value) => updateDeductions("section80TTA", value)} keyboardType="numeric" />
+          <FieldRow label="r 80TTB - Interest on deposits in case of Resident senior citizens" value={form.deductions.section80TTB} onChangeText={(value) => updateDeductions("section80TTB", value)} keyboardType="numeric" />
+          <FieldRow label="s 80U - In case of a person with disability.(Please fill 80U Schedule. This field is auto-populated from schedule 80U.)" value={form.deductions.section80U} onChangeText={(value) => updateDeductions("section80U", value)} keyboardType="numeric" />
+          <FieldRow label="t 80CCH - Contribution to Agnipath Scheme" value={form.deductions.section80CCH} onChangeText={(value) => updateDeductions("section80CCH", value)} keyboardType="numeric" />
+          <FieldRow label="u Any Other deductions" value={form.deductions.otherDeductions} onChangeText={(value) => updateDeductions("otherDeductions", value)} keyboardType="numeric" />
+          <FieldRow label="6 Total Deductions (Total of 5a to 5t)" value={form.deductions.totalDeductions} onChangeText={(value) => updateDeductions("totalDeductions", value)} keyboardType="numeric" />
+        </SectionCard>
+
+        <SectionCard title="COMPUTATION OF TAX PAYABLE" subtitle="Exempt income and tax calculations.">
+          <Text style={styles.sectionTitle}>Exempt Income: For reporting purpose and Income on which no tax is payable</Text>
+          <View style={styles.gridContainer}>
+            <View style={styles.gridRowHeader}>
+              <Text style={[styles.gridCell, { flex: 0.5 }]}>Sl.No.</Text>
+              <Text style={[styles.gridCell, { flex: 2 }]}>Nature of Income</Text>
+              <Text style={[styles.gridCell, { flex: 2 }]}>Description (If 'Any Other' selected)</Text>
+              <Text style={[styles.gridCell, { flex: 1.5 }]}>Amount</Text>
             </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Refund</Text>
-              <Text style={[styles.summaryValue, styles.refundColor]}>
-                ₹ {summary.refund.toLocaleString("en-IN")}
-              </Text>
+            <View style={styles.gridRow}>
+              <Text style={[styles.gridCell, { flex: 0.5 }]}>1</Text>
+              <TextInput style={[styles.gridCell, styles.gridInput, { flex: 2 }]} value={form.otherSourcesDetails.exemptIncome1Nature} onChangeText={(v) => updateOtherSourcesDetails("exemptIncome1Nature", v)} placeholder="(Select)" />
+              <TextInput style={[styles.gridCell, styles.gridInput, { flex: 2 }]} value={form.otherSourcesDetails.exemptIncome1Description} onChangeText={(v) => updateOtherSourcesDetails("exemptIncome1Description", v)} placeholder="Not Applicable" />
+              <TextInput style={[styles.gridCell, styles.gridInput, { flex: 1.5 }]} value={form.otherSourcesDetails.exemptIncome1Amount} onChangeText={(v) => updateOtherSourcesDetails("exemptIncome1Amount", v)} keyboardType="numeric" />
+            </View>
+            <View style={styles.gridRow}>
+              <Text style={[styles.gridCell, { flex: 0.5 }]}>2</Text>
+              <TextInput style={[styles.gridCell, styles.gridInput, { flex: 2 }]} value={form.otherSourcesDetails.exemptIncome2Nature} onChangeText={(v) => updateOtherSourcesDetails("exemptIncome2Nature", v)} placeholder="(Select)" />
+              <TextInput style={[styles.gridCell, styles.gridInput, { flex: 2 }]} value={form.otherSourcesDetails.exemptIncome2Description} onChangeText={(v) => updateOtherSourcesDetails("exemptIncome2Description", v)} placeholder="Not Applicable" />
+              <TextInput style={[styles.gridCell, styles.gridInput, { flex: 1.5 }]} value={form.otherSourcesDetails.exemptIncome2Amount} onChangeText={(v) => updateOtherSourcesDetails("exemptIncome2Amount", v)} keyboardType="numeric" />
             </View>
           </View>
-        </SectionCard>
-          </>
-        )}
+          <FieldRow label="Total Exempt Income" value={form.deductions.totalExemptions} onChangeText={(value) => updateDeductions("totalExemptions", value)} keyboardType="numeric" />
+          
+          <Text style={[styles.sectionTitle, { marginTop: 16 }]}>7a Income on which no tax is payable: Long Term capital gains u/s 112A not chargeable to Income-tax</Text>
+          <FieldRow label="i Total sale consideration" value={form.otherSourcesDetails.ltcg112A_saleConsideration} onChangeText={(value) => updateOtherSourcesDetails("ltcg112A_saleConsideration", value)} keyboardType="numeric" />
+          <FieldRow label="ii Total cost of acquisition" value={form.otherSourcesDetails.ltcg112A_costOfAcquisition} onChangeText={(value) => updateOtherSourcesDetails("ltcg112A_costOfAcquisition", value)} keyboardType="numeric" />
+          <FieldRow label="iii Long term capital gains as per sec 112A" value={form.otherSourcesDetails.ltcg112A_amount} onChangeText={(value) => updateOtherSourcesDetails("ltcg112A_amount", value)} keyboardType="numeric" />
 
-        <SectionCard title="TOTAL INCOME / TAX PAYABLE" subtitle="Auto-calculated return totals, matching the workbook summary section.">
-          <FieldRow label="Total Income (4-6)" value={String(summary.totalIncome)} readOnly />
-          <FieldRow label="Tax Payable on Total Income" value={String(summary.taxPayableOnTotalIncome)} readOnly />
-          <FieldRow label="Rebate u/s 87A" value={String(summary.rebate)} readOnly />
-          <FieldRow label="Tax payable after Rebate" value={String(summary.taxAfterRebate)} readOnly />
-          <FieldRow label="Health and Education Cess @4% on (10)" value={String(summary.cess)} readOnly />
-          <FieldRow label="Total Tax and Cess" value={String(summary.taxOnTotalIncome)} readOnly />
-          <FieldRow label="Relief u/s 89 (Please ensure to submit Form 10E to claim this relief)" value={String(summary.relief89)} readOnly />
-          <FieldRow label="Balance Tax after Relief (12-13)" value={String(summary.net)} readOnly />
-          <FieldRow label="Interest u/s 234 A" value={String(summary.interest234A)} readOnly />
-          <FieldRow label="Interest u/s 234 B" value={String(summary.interest234B)} readOnly />
-          <FieldRow label="Interest u/s 234 C" value={String(summary.interest234C)} readOnly />
-          <FieldRow label="Fee u/s 234F" value={String(summary.totalInterestAndFee)} readOnly />
-          <FieldRow label="Total Interest, Fee Payable (15a + 15b + 15c + 15d)" value={String(summary.totalInterestAndFee)} readOnly />
-          <FieldRow label="Total Tax, Fee and Interest (14 + 16)" value={String(summary.totalTaxFeeInterest)} readOnly />
+          <FieldRow label="8 Tax Payable on Total Income" value={String(summary.taxPayableOnTotalIncome)} readOnly />
+          <FieldRow label="9 Rebate u/s 87A" value={String(summary.rebate)} readOnly />
+          <FieldRow label="10 Tax payable after Rebate" value={String(summary.taxAfterRebate)} readOnly />
+          <FieldRow label="11 Health and Education Cess @4% on (10)" value={String(summary.cess)} readOnly />
+          <FieldRow label="12 Total Tax and Cess" value={String(summary.taxOnTotalIncome)} readOnly />
+          <FieldRow label="13 Relief u/s 89 (Please ensure to submit Form 10E to claim this relief)" value={String(summary.relief89)} readOnly />
+          <FieldRow label="14 Balance Tax after Relief (12-13)" value={String(summary.taxOnTotalIncome - summary.relief89)} readOnly />
+          <FieldRow label="15a Interest u/s 234 A" value={String(summary.interest234A)} readOnly />
+          <FieldRow label="15b Interest u/s 234 B" value={String(summary.interest234B)} readOnly />
+          <FieldRow label="15c Interest u/s 234 C" value={String(summary.interest234C)} readOnly />
+          <FieldRow label="15d Fee u/s 234F" value="0" readOnly />
+          <FieldRow label="16 Total Interest, Fee Payable (15a + 15b + 15c+15d)" value={String(summary.totalInterestAndFee)} readOnly />
+          <FieldRow label="17 Total Tax, Fee and Interest (14 + 16)" value={String(summary.totalTaxFeeInterest)} readOnly />
         </SectionCard>
+
+
+
+
 
         <View style={styles.actionsRow}>
           <Pressable style={styles.secondaryButton} onPress={handleReset}>
@@ -1486,6 +1709,92 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
     marginTop: 4,
+  },
+  countryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 4,
+  },
+  countryChip: {
+    backgroundColor: "#F8FAFC",
+    borderColor: "#D7E0ED",
+    borderRadius: 18,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  countryChipActive: {
+    backgroundColor: "#EEF4FF",
+    borderColor: itrColors.primary,
+  },
+  countryChipText: {
+    color: "#475569",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  countryChipTextActive: {
+    color: itrColors.primary,
+  },
+  matrixCard: {
+    backgroundColor: "#F8FAFC",
+    borderColor: "#CBD5E1",
+    borderRadius: 12,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  matrixTitle: {
+    color: "#0F172A",
+    fontSize: 13,
+    fontWeight: "800",
+    paddingHorizontal: 12,
+    paddingTop: 10,
+  },
+  matrixHeaderRow: {
+    flexDirection: "row",
+    borderTopColor: "#CBD5E1",
+    borderTopWidth: 1,
+  },
+  matrixDataRow: {
+    flexDirection: "row",
+    borderTopColor: "#CBD5E1",
+    borderTopWidth: 1,
+  },
+  matrixHeaderCell: {
+    color: "#334155",
+    fontSize: 10.5,
+    fontWeight: "800",
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+  },
+  matrixCell: {
+    color: "#334155",
+    fontSize: 11,
+    fontWeight: "700",
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+  },
+  matrixInput: {
+    backgroundColor: "#fff",
+    borderColor: "#CBD5E1",
+    borderLeftWidth: 1,
+    color: "#0F172A",
+    fontSize: 11,
+    minHeight: 42,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  matrixSlNo: {
+    width: 36,
+  },
+  matrixNature: {
+    flex: 2.1,
+  },
+  matrixDesc: {
+    flex: 2.2,
+  },
+  matrixAmount: {
+    flex: 0.9,
   },
   input: {
     backgroundColor: "#fff",

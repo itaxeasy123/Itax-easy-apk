@@ -6,8 +6,6 @@ import { calculateIncomeTax } from "../../taxCalculator/services/taxCalculator.s
 import { ITRBottomNav, ITRHeader, ITRSaveButton } from "../components";
 import { itrColors, itrRadius, itrSpacing, itrShadows } from "../../../theme/itr";
 
-const roundMoney = (value: number) => Math.round(value);
-
 export default function ITRTaxPayableScreen() {
   const { 
     salary, houseProperty, otherSources, 
@@ -20,19 +18,18 @@ export default function ITRTaxPayableScreen() {
     const updatedData = { [key]: cleanValue };
     
     const current = { ...interests, ...updatedData };
-    const total = roundMoney(
+    const total =
       (parseFloat(current.section234A) || 0) + 
       (parseFloat(current.section234B) || 0) + 
       (parseFloat(current.section234C) || 0) + 
-      (parseFloat(current.section234F) || 0),
-    );
+      (parseFloat(current.section234F) || 0);
     
     setInterests({ ...updatedData, totalInterests: total });
   };
 
   const taxResult = useMemo(() => {
     return calculateIncomeTax({
-      salary: roundMoney(salary.netSalary + houseProperty.incomeFromHP + businessProfession.totalIncome + capitalGains.totalGains),
+      salary: salary.netSalary + houseProperty.incomeFromHP + businessProfession.totalIncome + capitalGains.totalGains,
       otherIncome: otherSources.totalOtherIncome,
       deductions: deductions.totalDeductions,
       exemptions: deductions.totalExemptions,
@@ -45,10 +42,10 @@ export default function ITRTaxPayableScreen() {
   }, [salary, houseProperty, otherSources, businessProfession, capitalGains, deductions, taxesPaid, regime]);
 
   const finalAmount = useMemo(() => {
-    const net = roundMoney(taxResult.netPayable + interests.totalInterests);
+    const net = taxResult.netPayable + interests.totalInterests;
     return {
         payable: net > 0 ? net : 0,
-        refund: taxResult.refund > 0 && net <= 0 ? roundMoney(taxResult.refund) : 0
+        refund: taxResult.refund > 0 && net <= 0 ? taxResult.refund : 0
     };
   }, [taxResult, interests]);
 

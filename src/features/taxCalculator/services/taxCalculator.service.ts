@@ -1,7 +1,7 @@
 import { TAX_CONFIG } from "../constants/taxSlabs";
 import { TaxInput, TaxBreakdown } from "../models/taxCalculator.types";
 
-// ✅ slab calculation
+// âœ… slab calculation
 const calculateSlabTax = (income: number, slabs: any[]) => {
   let tax = 0;
   let prev = 0;
@@ -17,7 +17,7 @@ const calculateSlabTax = (income: number, slabs: any[]) => {
   return tax;
 };
 
-// ✅ surcharge
+// âœ… surcharge
 const calculateSurcharge = (tax: number, income: number) => {
   const slab = TAX_CONFIG.surcharge.find((s) => income <= s.upto);
   return tax * (slab?.rate || 0);
@@ -38,7 +38,7 @@ export const calculateIncomeTax = (input: TaxInput): TaxBreakdown => {
 
   const grossIncome = salary + otherIncome;
 
-  // ✅ taxable income
+  // âœ… taxable income
   const taxableIncome =
     regime === "old"
       ? Math.max(grossIncome - (deductions + (exemptions || 0)), 0)
@@ -46,11 +46,11 @@ export const calculateIncomeTax = (input: TaxInput): TaxBreakdown => {
 
   const slabs = TAX_CONFIG[regime];
 
-  // ✅ slab tax
+  // âœ… slab tax
   let tax = calculateSlabTax(taxableIncome, slabs);
 
   // =========================
-  // ✅ REBATE 87A (CORRECT)
+  // âœ… REBATE 87A (CORRECT)
   // =========================
   let rebate = 0;
 
@@ -62,19 +62,19 @@ export const calculateIncomeTax = (input: TaxInput): TaxBreakdown => {
   }
 
   // =========================
-  // ✅ SURCHARGE
+  // âœ… SURCHARGE
   // =========================
   const surcharge = calculateSurcharge(tax, taxableIncome);
 
   // =========================
-  // ✅ CESS (4%)
+  // âœ… CESS (4%)
   // =========================
   const cess = (tax + surcharge) * 0.04;
 
   const totalTax = tax + surcharge + cess;
 
   // =========================
-  // ✅ PAID
+  // âœ… PAID
   // =========================
   const totalPaid = (tdsSalary || 0) + (tdsNonSalary || 0) + (tdsOther || 0) + (advanceTax || 0);
 
