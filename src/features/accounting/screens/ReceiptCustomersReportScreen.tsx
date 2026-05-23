@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "expo-router";
+import { useRouter , useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
   Pressable,
@@ -20,7 +20,7 @@ import {
   formatCurrency,
   getCurrentFinancialYearLabel,
 } from "../utils/salesReport";
-import { useFocusEffect } from "expo-router";
+
 
 export default function ReceiptCustomersReportScreen() {
   const router = useRouter();

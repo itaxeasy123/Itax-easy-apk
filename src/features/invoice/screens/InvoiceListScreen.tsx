@@ -38,7 +38,7 @@ type ListInvoice = Invoice & {
 const PARTY_PAGE_LIMIT = 100;
 const PAGE_SIZE = 10;
 
-const TYPE_OPTIONS: Array<{ label: string; value: InvoiceListTypeFilter }> = [
+const TYPE_OPTIONS: { label: string; value: InvoiceListTypeFilter }[] = [
   { label: 'All', value: 'all' },
   { label: 'Sales', value: 'sales' },
   { label: 'Purchase', value: 'purchase' },
@@ -46,7 +46,7 @@ const TYPE_OPTIONS: Array<{ label: string; value: InvoiceListTypeFilter }> = [
   { label: 'Purchase Return', value: 'purchase_return' },
 ];
 
-const STATUS_OPTIONS: Array<{ label: string; value: InvoiceListStatusFilter }> = [
+const STATUS_OPTIONS: { label: string; value: InvoiceListStatusFilter }[] = [
   { label: 'All Status', value: 'all' },
   { label: 'Paid', value: 'paid' },
   { label: 'Unpaid', value: 'unpaid' },

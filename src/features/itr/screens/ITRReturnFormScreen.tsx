@@ -16,6 +16,7 @@ import { useITRStore } from "../../../store/itrStore";
 import { itrColors, itrShadows } from "../../../theme/itr";
 import { calculateIncomeTax } from "../../taxCalculator/services/taxCalculator.service";
 import { ITRBottomNav, ITRHeader, ITRSaveButton } from "../components";
+import { downloadITRPdf, previewITRPdf } from "../services/itrPdf.service";
 import {
   buildItrReturnDraft,
   buildItrReturnJson,
@@ -348,6 +349,8 @@ export default function ITRReturnFormScreen() {
     ],
   );
 
+  const defaultAssessmentYear = "2025-26";
+
   const [form, setForm] = useState<FormState>(() => ({
     filingInfo: {
       acknowledgmentNo: "",
@@ -393,7 +396,7 @@ export default function ITRReturnFormScreen() {
       prevalidated: "Yes",
     },
     personalInfo: {
-      assessmentYear: seedDraft.personalInfo.assessmentYear,
+      assessmentYear: defaultAssessmentYear,
       aadhaar: "",
       dob: "",
       firstName: seedDraft.personalInfo.firstName,
@@ -604,8 +607,8 @@ export default function ITRReturnFormScreen() {
         ifsc: "",
         prevalidated: "Yes",
       },
-      personalInfo: {
-        assessmentYear: seedDraft.personalInfo.assessmentYear,
+    personalInfo: {
+        assessmentYear: defaultAssessmentYear,
         aadhaar: "",
         dob: "",
         firstName: seedDraft.personalInfo.firstName,
@@ -613,14 +616,14 @@ export default function ITRReturnFormScreen() {
         lastName: seedDraft.personalInfo.lastName,
         employerName: seedDraft.personalInfo.employerName,
         employerPan: seedDraft.personalInfo.employerPan,
-        fatherName: "",
-        gender: "",
-        natureOfEmployment: "",
         name: seedDraft.personalInfo.name,
         residentialStatus: seedDraft.personalInfo.regime === "old" ? "Resident" : "Resident",
         pan: seedDraft.personalInfo.pan,
         regime: seedDraft.personalInfo.regime,
         tan: seedDraft.personalInfo.tan,
+        fatherName: seedDraft.personalInfo.fatherName || "",
+        gender: seedDraft.personalInfo.gender || "",
+        natureOfEmployment: seedDraft.personalInfo.natureOfEmployment || "",
       },
       salaryBreakup: {
         basicDA: "",
@@ -928,8 +931,8 @@ export default function ITRReturnFormScreen() {
       },
       salaryBreakup: {
         ...form.salaryBreakup,
-        grossTotal: summary.grossTotalIncome,
-        netSalary: summary.grossTotalIncome - toAmount(form.income.standardDeduction),
+        grossTotal: toAmountText(summary.grossTotalIncome),
+        netSalary: toAmountText(summary.grossTotalIncome - toAmount(form.income.standardDeduction)),
       },
       scheduleEA: {
         ...form.scheduleEA,
@@ -958,12 +961,15 @@ export default function ITRReturnFormScreen() {
         section80EEA: toAmount(form.deductions.section80EEA),
         section80EEB: toAmount(form.deductions.section80EEB),
         section80CCD1B: toAmount(form.deductions.section80CCD1B),
+        section80DDB: toAmount(form.deductions.section80DDB),
         section80G: toAmount(form.deductions.section80G),
+        section80GG: toAmount(form.deductions.section80GG),
         section80GGA: toAmount(form.deductions.section80GGA),
         section80GGC: toAmount(form.deductions.section80GGC),
         section80TTA: toAmount(form.deductions.section80TTA),
         section80TTB: toAmount(form.deductions.section80TTB),
         section80U: toAmount(form.deductions.section80U),
+        section80CCH: toAmount(form.deductions.section80CCH),
         otherDeductions: toAmount(form.deductions.otherDeductions),
         totalDeductions: toAmount(form.deductions.totalDeductions),
         totalExemptions: toAmount(form.deductions.totalExemptions),
@@ -988,9 +994,9 @@ export default function ITRReturnFormScreen() {
       },
       summary: {
         taxOnTotalIncome: summary.taxOnTotalIncome,
-        cess: 0,
-        rebate: 0,
-        surcharge: 0,
+        cess: summary.cess,
+        rebate: summary.rebate,
+        surcharge: summary.surcharge,
         netPayable: summary.net,
         refund: summary.refund,
       },
@@ -999,6 +1005,32 @@ export default function ITRReturnFormScreen() {
 
     setReturnFormDraft(normalizedDraft);
     await exportITRData(buildItrReturnJson(normalizedDraft));
+  };
+
+  const handleGeneratePdf = async () => {
+    try {
+      await previewITRPdf({
+        form,
+        summary,
+        storeData: { taxesPaid },
+        assessmentYear: form.personalInfo.assessmentYear || seedDraft.personalInfo.assessmentYear || "2025-26",
+      });
+    } catch (error) {
+      console.log("Error generating PDF:", error);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      await downloadITRPdf({
+        form,
+        summary,
+        storeData: { taxesPaid },
+        assessmentYear: form.personalInfo.assessmentYear || seedDraft.personalInfo.assessmentYear || "2025-26",
+      });
+    } catch (error) {
+      console.log("Error generating PDF:", error);
+    }
   };
 
   const handleReset = () => {
@@ -1053,7 +1085,7 @@ export default function ITRReturnFormScreen() {
               prevalidated: "Yes",
             },
             personalInfo: {
-              assessmentYear: seedDraft.personalInfo.assessmentYear,
+              assessmentYear: defaultAssessmentYear,
               aadhaar: "",
               dob: "",
               firstName: seedDraft.personalInfo.firstName,
@@ -1066,6 +1098,9 @@ export default function ITRReturnFormScreen() {
               pan: seedDraft.personalInfo.pan,
               regime: seedDraft.personalInfo.regime,
               tan: seedDraft.personalInfo.tan,
+              fatherName: "",
+              gender: "",
+              natureOfEmployment: "",
             },
             salaryBreakup: {
               basicDA: "",
@@ -1273,9 +1308,9 @@ export default function ITRReturnFormScreen() {
           <FieldRow label="PIN Code" value={form.contactDetails.pincode} onChangeText={(value) => updateContactDetails("pincode", value)} keyboardType="numeric" />
           <FieldRow label="No ZIP Code" value={form.contactDetails.noZipCode} onChangeText={(value) => updateContactDetails("noZipCode", value)} />
           <FieldRow label="ZIP Code" value={form.contactDetails.zipCode} onChangeText={(value) => updateContactDetails("zipCode", value)} />
-          <Text style={styles.questionHeading}>Do you wish to exercise the option u/s 115BAC(6) of Opting out of new tax regime? (default is "No")</Text>
-          <Text style={styles.helperText}>1. By selecting "No" option your income and tax computation shall be as per "NEW TAX REGIME"</Text>
-          <Text style={styles.helperText}>2. By selecting "Yes" option your income and tax computation shall be as per "OLD TAX REGIME"</Text>
+          <Text style={styles.questionHeading}>Do you wish to exercise the option u/s 115BAC(6) of Opting out of new tax regime? (default is &quot;No&quot;)</Text>
+          <Text style={styles.helperText}>1. By selecting &quot;No&quot; option your income and tax computation shall be as per &quot;NEW TAX REGIME&quot;</Text>
+          <Text style={styles.helperText}>2. By selecting &quot;Yes&quot; option your income and tax computation shall be as per &quot;OLD TAX REGIME&quot;</Text>
           <Text style={styles.helperText}>Note- For Opting out, option should be exercised along with the return of income filed u/s 139(1).</Text>
           <View style={styles.pillsRow}>
             {(["no", "yes"] as const).map((item) => (
@@ -1424,7 +1459,7 @@ export default function ITRReturnFormScreen() {
             <View style={styles.matrixHeaderRow}>
               <Text style={[styles.matrixHeaderCell, styles.matrixSlNo]}>Sl.No.</Text>
               <Text style={[styles.matrixHeaderCell, styles.matrixNature]}>Nature of Exempt Allowance</Text>
-              <Text style={[styles.matrixHeaderCell, styles.matrixDesc]}>Description (If "Any Other" selected)</Text>
+              <Text style={[styles.matrixHeaderCell, styles.matrixDesc]}>Description (If &quot;Any Other&quot; selected)</Text>
               <Text style={[styles.matrixHeaderCell, styles.matrixAmount]}>Amount</Text>
             </View>
             <View style={styles.matrixDataRow}>
@@ -1507,7 +1542,7 @@ export default function ITRReturnFormScreen() {
             <View style={styles.matrixHeaderRow}>
               <Text style={[styles.matrixHeaderCell, styles.matrixSlNo]}>Sl.No.</Text>
               <Text style={[styles.matrixHeaderCell, styles.matrixNature]}>Nature of Income</Text>
-              <Text style={[styles.matrixHeaderCell, styles.matrixDesc]}>Description (If 'Any Other' selected)</Text>
+              <Text style={[styles.matrixHeaderCell, styles.matrixDesc]}>Description (If &apos;Any Other&apos; selected)</Text>
               <Text style={[styles.matrixHeaderCell, styles.matrixAmount]}>Amount</Text>
             </View>
             {[1, 2, 3, 4].map((i) => {
@@ -1587,7 +1622,7 @@ export default function ITRReturnFormScreen() {
             <View style={styles.gridRowHeader}>
               <Text style={[styles.gridCell, { flex: 0.5 }]}>Sl.No.</Text>
               <Text style={[styles.gridCell, { flex: 2 }]}>Nature of Income</Text>
-              <Text style={[styles.gridCell, { flex: 2 }]}>Description (If 'Any Other' selected)</Text>
+              <Text style={[styles.gridCell, { flex: 2 }]}>Description (If &apos;Any Other&apos; selected)</Text>
               <Text style={[styles.gridCell, { flex: 1.5 }]}>Amount</Text>
             </View>
             <View style={styles.gridRow}>
@@ -1610,19 +1645,19 @@ export default function ITRReturnFormScreen() {
           <FieldRow label="ii Total cost of acquisition" value={form.otherSourcesDetails.ltcg112A_costOfAcquisition} onChangeText={(value) => updateOtherSourcesDetails("ltcg112A_costOfAcquisition", value)} keyboardType="numeric" />
           <FieldRow label="iii Long term capital gains as per sec 112A" value={form.otherSourcesDetails.ltcg112A_amount} onChangeText={(value) => updateOtherSourcesDetails("ltcg112A_amount", value)} keyboardType="numeric" />
 
-          <FieldRow label="8 Tax Payable on Total Income" value={String(summary.taxPayableOnTotalIncome)} readOnly />
-          <FieldRow label="9 Rebate u/s 87A" value={String(summary.rebate)} readOnly />
-          <FieldRow label="10 Tax payable after Rebate" value={String(summary.taxAfterRebate)} readOnly />
-          <FieldRow label="11 Health and Education Cess @4% on (10)" value={String(summary.cess)} readOnly />
-          <FieldRow label="12 Total Tax and Cess" value={String(summary.taxOnTotalIncome)} readOnly />
-          <FieldRow label="13 Relief u/s 89 (Please ensure to submit Form 10E to claim this relief)" value={String(summary.relief89)} readOnly />
-          <FieldRow label="14 Balance Tax after Relief (12-13)" value={String(summary.taxOnTotalIncome - summary.relief89)} readOnly />
-          <FieldRow label="15a Interest u/s 234 A" value={String(summary.interest234A)} readOnly />
-          <FieldRow label="15b Interest u/s 234 B" value={String(summary.interest234B)} readOnly />
-          <FieldRow label="15c Interest u/s 234 C" value={String(summary.interest234C)} readOnly />
+          <FieldRow label="8 Tax Payable on Total Income" value={String(Math.round(summary.taxPayableOnTotalIncome || 0))} readOnly />
+          <FieldRow label="9 Rebate u/s 87A" value={String(Math.round(summary.rebate || 0))} readOnly />
+          <FieldRow label="10 Tax payable after Rebate" value={String(Math.round(summary.taxAfterRebate || 0))} readOnly />
+          <FieldRow label="11 Health and Education Cess @4% on (10)" value={String(Math.round(summary.cess || 0))} readOnly />
+          <FieldRow label="12 Total Tax and Cess" value={String(Math.round(summary.taxOnTotalIncome || 0))} readOnly />
+          <FieldRow label="13 Relief u/s 89 (Please ensure to submit Form 10E to claim this relief)" value={String(Math.round(summary.relief89 || 0))} readOnly />
+          <FieldRow label="14 Balance Tax after Relief (12-13)" value={String(Math.round((summary.taxOnTotalIncome || 0) - (summary.relief89 || 0)))} readOnly />
+          <FieldRow label="15a Interest u/s 234 A" value={String(Math.round(summary.interest234A || 0))} readOnly />
+          <FieldRow label="15b Interest u/s 234 B" value={String(Math.round(summary.interest234B || 0))} readOnly />
+          <FieldRow label="15c Interest u/s 234 C" value={String(Math.round(summary.interest234C || 0))} readOnly />
           <FieldRow label="15d Fee u/s 234F" value="0" readOnly />
-          <FieldRow label="16 Total Interest, Fee Payable (15a + 15b + 15c+15d)" value={String(summary.totalInterestAndFee)} readOnly />
-          <FieldRow label="17 Total Tax, Fee and Interest (14 + 16)" value={String(summary.totalTaxFeeInterest)} readOnly />
+          <FieldRow label="16 Total Interest, Fee Payable (15a + 15b + 15c+15d)" value={String(Math.round(summary.totalInterestAndFee || 0))} readOnly />
+          <FieldRow label="17 Total Tax, Fee and Interest (14 + 16)" value={String(Math.round(summary.totalTaxFeeInterest || 0))} readOnly />
         </SectionCard>
 
 
@@ -1635,7 +1670,11 @@ export default function ITRReturnFormScreen() {
           </Pressable>
         </View>
 
-        <ITRSaveButton title="Download JSON" onPress={handleExport} />
+        <View style={{ gap: 10, marginTop: 10, marginBottom: 10 }}>
+          <ITRSaveButton title="Preview PDF" onPress={handleGeneratePdf} />
+          <ITRSaveButton title="Download PDF" onPress={handleDownloadPdf} />
+          <ITRSaveButton title="Download JSON" onPress={handleExport} />
+        </View>
       </ScrollView>
 
       <ITRBottomNav activeRoute="/itr" />

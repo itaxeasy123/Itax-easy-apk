@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "expo-router";
+import { useRouter , useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LineChart } from "react-native-chart-kit";
 import {
@@ -20,7 +20,7 @@ import {
 } from "../utils/salesReport";
 import { invoiceService } from "../../invoice/services/invoiceService";
 import type { Invoice } from "../../invoice/types/invoice.types";
-import { useFocusEffect } from "expo-router";
+
 
 export default function SalesMonthlyReportScreen() {
   const router = useRouter();

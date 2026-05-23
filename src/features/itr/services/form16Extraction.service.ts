@@ -124,11 +124,7 @@ function firstNumber(...values: unknown[]) {
 }
 
 function getServerErrorMessage(error: unknown) {
-  if (!axios.isAxiosError(error)) {
-    return null;
-  }
-
-  const data = error.response?.data as
+  const data = (error as any).response?.data as
     | { detail?: unknown; message?: unknown; error?: unknown }
     | string
     | undefined;
@@ -765,21 +761,21 @@ async function postForm16Pdf(asset: { uri: string; name: string; mimeType?: stri
     } as any);
   }
 
-  const response = await axios.post(OCR_API_URL, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      accept: "application/json",
-    },
-  }).catch((error) => {
+  try {
+    const response = await axios.post(OCR_API_URL, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        accept: "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
     const serverMessage = getServerErrorMessage(error);
     if (serverMessage) {
       throw new Error(serverMessage);
     }
-
     throw error;
-  });
-
-  return response.data;
+  }
 }
 
 export async function extractForm16FromAsset(asset: {

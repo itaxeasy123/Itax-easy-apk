@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
@@ -42,6 +43,7 @@ type InvoiceRow = {
 };
 
 export default function ReceiptUnpaidInvoicesScreen() {
+    const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams<ReceiptInvoiceParams>();
 
@@ -238,7 +240,7 @@ export default function ReceiptUnpaidInvoicesScreen() {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: 150 + Math.max(insets.bottom, 0) }]}
         showsVerticalScrollIndicator={false}
       >
         <Card style={styles.topCard}>
@@ -338,7 +340,7 @@ export default function ReceiptUnpaidInvoicesScreen() {
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
         <View>
           <Text style={styles.footerLabel}>Total Amount</Text>
           <Text style={styles.footerAmount}>{formatMoney(totalSelected)}</Text>

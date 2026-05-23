@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Image } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { AccountingHeader } from "../components";
@@ -10,6 +11,7 @@ const format = (value: number | undefined) => {
 };
 
 export default function CapitalAccountReportScreen() {
+    const insets = useSafeAreaInsets();
   const router = useRouter();
   const [report, setReport] = useState<any>(null); // Start with empty state
   
@@ -91,10 +93,11 @@ export default function CapitalAccountReportScreen() {
         <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalDebit)}</Text>
         <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalCredit)}</Text>
       </View>
+      <View style={{ backgroundColor: "#FFFFFF", height: Math.max(insets.bottom, 0) }} />
 
       {/* FAB Print */}
       <Pressable 
-        style={styles.fabPrint} 
+        style={[styles.fabPrint, { bottom: 80 + Math.max(insets.bottom, 0) }]} 
         onPress={() => router.push("/accounting/reports-capital-account-preview")}
       >
         <Ionicons name="print-outline" size={20} color="#FFFFFF" />

@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -32,6 +33,7 @@ const voucherTypes: VoucherType[] = ["journal", "payment", "receipt", "contra", 
 const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 export default function VoucherCreateScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [voucherNumber, setVoucherNumber] = useState(`VCH-${Date.now().toString().slice(-6)}`);
   const [voucherType, setVoucherType] = useState<VoucherType>("journal");
@@ -340,7 +342,9 @@ export default function VoucherCreateScreen() {
             <Text style={styles.successText}>{successMessage}</Text>
           </View>
         ) : null}
+      </ScrollView>
 
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) + 16 }]}>
         <Button
           title={saving ? "Saving..." : "Save Voucher"}
           onPress={handleSave}
@@ -348,19 +352,30 @@ export default function VoucherCreateScreen() {
           size="large"
           fullWidth
         />
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  footer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
   container: {
     flex: 1,
     backgroundColor: "#f9fafb",
   },
   content: {
     padding: 16,
-    paddingBottom: 32,
+    paddingBottom: 100,
   },
   field: {
     marginBottom: 16,

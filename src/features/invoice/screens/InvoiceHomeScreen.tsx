@@ -34,7 +34,7 @@ const EMPTY_SUMMARY: InvoiceSummary = {
   number_of_items: 0,
 };
 
-const FILTER_OPTIONS: Array<{ label: string; value: HomeFilter }> = [
+const FILTER_OPTIONS: { label: string; value: HomeFilter }[] = [
   { label: 'All', value: 'all' },
   { label: 'Sales', value: 'sales' },
   { label: 'Purchase', value: 'purchase' },

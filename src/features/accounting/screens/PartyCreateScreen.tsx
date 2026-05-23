@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, Button, Card } from "../components";
 import { accountingService } from "../services/accountingService";
 import { PartyType } from "../types/accountingTypes";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const partyTypeOptions: { label: string; value: PartyType }[] = [
   { label: "Customer", value: "customer" },
@@ -13,6 +14,7 @@ const partyTypeOptions: { label: string; value: PartyType }[] = [
 ]; 
 
 export default function PartyCreateScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [partyName, setPartyName] = useState("");
   const [type, setType] = useState<PartyType>("customer");

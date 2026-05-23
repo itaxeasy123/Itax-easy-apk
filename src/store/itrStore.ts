@@ -612,14 +612,14 @@ export const useITRStore = create<ITRState>()(
       storage: createJSONStorage(() => {
         if (Platform.OS === "web") {
           if (typeof window !== "undefined" && window.localStorage) {
-            return window.localStorage;
+            return window.localStorage as any;
           }
           // Fallback for SSR
           return {
             getItem: () => null,
             setItem: () => {},
             removeItem: () => {},
-          };
+          } as any;
         }
         return AsyncStorage;
       }),

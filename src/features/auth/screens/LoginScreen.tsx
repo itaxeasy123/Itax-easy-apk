@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import AuthInput from '../components/AuthInput';
 import AuthScaffold, { AuthIllustration, PrimaryButton } from '../components/AuthScaffold';
@@ -130,6 +131,13 @@ export default function LoginScreen() {
         </Text>
         <View style={styles.line} />
       </View>
+
+      <View style={styles.privacyRow}>
+        <MaterialCommunityIcons name="shield-check-outline" size={14} color="#60708A" />
+        <Text style={styles.privacyText}>
+          Your data is securely encrypted
+        </Text>
+      </View>
     </AuthScaffold>
   );
 }
@@ -170,6 +178,18 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginHorizontal: 5,
   },
+  privacyRow: {
+    marginTop: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    gap: 6,
+  },
+  privacyText: {
+    fontSize: 11,
+    color: '#60708A',
+  },
   errorText: {
     color: '#D64A4A',
     fontSize: 10,
@@ -181,7 +201,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   logo: {
-    height: 100,
-    width: 100,
+    height: 60,
+    width: 60,
   },
 });

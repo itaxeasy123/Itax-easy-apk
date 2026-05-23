@@ -1,15 +1,15 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
-
-import AuthInput from '../components/AuthInput';
-import AuthScaffold, { PrimaryButton, SignupIllustration } from '../components/AuthScaffold';
+import { Image, Pressable, StyleSheet, Text, View, Linking } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { authService } from '../../../services/authService';
+import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
 import {
   validateEmail,
   validatePassword,
 } from '../../../utils/validators/authValidator';
-import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
+import AuthInput from '../components/AuthInput';
+import AuthScaffold, { PrimaryButton, SignupIllustration } from '../components/AuthScaffold';
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -24,6 +24,7 @@ export default function SignupScreen() {
   const [isGenderOpen, setIsGenderOpen] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
 
   const updateField =
     (field: keyof typeof form) =>
@@ -71,6 +72,12 @@ export default function SignupScreen() {
         return;
       }
 
+      if (!isTermsAccepted) {
+        setError('Please agree to the Terms & Conditions.');
+        setLoading(false);
+        return;
+      }
+
       await authService.signup({
         email: form.email,
         fullName: form.fullName,
@@ -107,7 +114,7 @@ export default function SignupScreen() {
       </View>
       <View style={styles.hero}>
         <Text style={styles.title}>Create an account</Text>
-        <Text style={styles.subtitle}>Join iTaxEasy and manage your tax journey easily.</Text>
+        <Text style={styles.subtitle}>Join iTaxEasy and manage your tax journey easy.</Text>
       </View>
 
       <SignupIllustration />
@@ -192,6 +199,26 @@ export default function SignupScreen() {
       </View>
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+      <View style={styles.termsRow}>
+        <Pressable onPress={() => setIsTermsAccepted(!isTermsAccepted)} style={styles.checkbox}>
+          <MaterialCommunityIcons 
+            name={isTermsAccepted ? "checkbox-marked" : "checkbox-blank-outline"} 
+            size={20} 
+            color={isTermsAccepted ? "#347BE5" : "#60708A"} 
+          />
+        </Pressable>
+        <Text style={styles.termsText}>
+          By signing up, you agree to our{' '}
+          <Text 
+            style={styles.termsLink} 
+            onPress={() => Linking.openURL('https://itaxeasy.com/tc')}
+          >
+            Terms & Conditions
+          </Text>
+          .
+        </Text>
+      </View>
 
       <PrimaryButton label="Signup" loading={loading} onPress={handleSignup} />
 
@@ -301,7 +328,26 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   logo: {
-    height: 100,
-    width: 100,
+    height: 60,
+    width: 60,
+  },
+  termsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+    marginTop: 4,
+    paddingHorizontal: 10,
+  },
+  checkbox: {
+    marginRight: 8,
+  },
+  termsText: {
+    color: '#60708A',
+    fontSize: 10,
+    lineHeight: 14,
+  },
+  termsLink: {
+    color: '#347BE5',
   },
 });

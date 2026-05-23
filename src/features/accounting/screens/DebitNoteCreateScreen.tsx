@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
@@ -52,6 +53,7 @@ const gstOptions = ["IGST", "CGST", "GST 18%", "GST 2.5%", "GST 1%"];
 const money = (value: number) => formatMoney(value);
 
 export default function DebitNoteCreateScreen() {
+    const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
@@ -335,7 +337,7 @@ export default function DebitNoteCreateScreen() {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: 132 + Math.max(insets.bottom, 0) }]}
         showsVerticalScrollIndicator={false}
       >
         <Card style={styles.cardBlock}>
@@ -583,7 +585,7 @@ export default function DebitNoteCreateScreen() {
         </View>
       </Modal>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
         <View>
           <Text style={styles.footerLabel}>Total Amount</Text>
           <Text style={styles.footerAmount}>{money(totalAmount)}</Text>

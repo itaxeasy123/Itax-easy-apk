@@ -18,12 +18,12 @@ type MenuIconName = React.ComponentProps<typeof ListItem>['leftIcon'];
 export default function MoreScreen() {
   const router = useRouter();
 
-  const menuItems: Array<{
+  const menuItems: {
     id: string;
     title: string;
     subtitle: string;
     icon: NonNullable<MenuIconName>;
-  }> = [
+  }[] = [
     { id: 'vouchers', title: 'Vouchers', subtitle: 'Record journal entries', icon: 'albums' },
     { id: 'payments', title: 'Payments', subtitle: 'View payment transactions', icon: 'card' },
     { id: 'bank-tools', title: 'Bank Tools', subtitle: 'IFSC lookup and account verify', icon: 'business' },

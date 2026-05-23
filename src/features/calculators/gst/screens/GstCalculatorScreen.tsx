@@ -20,6 +20,8 @@ const GST_MODES: { label: string; value: GstMode }[] = [
   { label: 'Inclusive GST', value: 'inclusive' },
 ];
 
+const GST_RATES: GstRateOption[] = [3, 5, 12, 18, 28];
+
 function cycleValue<T>(items: T[], current: T) {
   const index = items.indexOf(current);
   return items[(index + 1) % items.length];
@@ -58,27 +60,24 @@ export default function GstCalculatorScreen() {
         <CalculatorInputField
           keyboardType="decimal-pad"
           label="Amount: (Rs)"
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              amount: value.replace(/[^0-9.]/g, ''),
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 1000000000) return;
+            setForm((current) => ({ ...current, amount: value }));
+          }}
           placeholder="0"
           value={form.amount}
         />
 
-        <CalculatorInputField
-          keyboardType="decimal-pad"
-          label="GST Rate: (%)"
-          onChangeText={(value) =>
+        <CalculatorSelectField
+          label="GST Rate:"
+          onPress={() =>
             setForm((current) => ({
               ...current,
-              rate: Number(value.replace(/[^0-9.]/g, '') || 0) as GstRateOption,
+              rate: cycleValue(GST_RATES, current.rate),
             }))
           }
-          placeholder="5"
-          value={form.rate ? String(form.rate) : ''}
+          value={`${form.rate}%`}
         />
 
         <CalculatorSummaryCard

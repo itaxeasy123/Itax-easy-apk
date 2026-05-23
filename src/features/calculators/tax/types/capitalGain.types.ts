@@ -1,7 +1,8 @@
 export type CapitalGainCalculatorInput = {
   purchasePrice: string;
   salePrice: string;
-  taxRate: string;
+  assetType: 'equity' | 'property';
+  holdingPeriod: 'short' | 'long';
 };
 
 export type CapitalGainCalculatorResult = {

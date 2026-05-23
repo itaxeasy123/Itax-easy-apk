@@ -7,6 +7,7 @@ import { calculatorStyles } from '../../../../theme';
 import { calculateCapitalGain } from '../../../../utils/calculations/capitalGain';
 import CalculatorHeader from '../../components/CalculatorHeader';
 import CalculatorInputField from '../../components/CalculatorInputField';
+import CalculatorSelectField from '../../components/CalculatorSelectField';
 import CalculatorSummaryCard from '../../components/CalculatorSummaryCard';
 import { capitalGainFieldLabels } from '../data/capitalGainFields';
 import { CapitalGainCalculatorInput } from '../types/capitalGain.types';
@@ -16,7 +17,8 @@ export default function CapitalGainCalculatorScreen() {
   const [form, setForm] = useState<CapitalGainCalculatorInput>({
     purchasePrice: '0',
     salePrice: '0',
-    taxRate: '0',
+    assetType: 'equity',
+    holdingPeriod: 'short',
   });
 
   const result = useMemo(() => calculateCapitalGain(form), [form]);
@@ -32,12 +34,11 @@ export default function CapitalGainCalculatorScreen() {
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={capitalGainFieldLabels.purchasePrice}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              purchasePrice: value.replace(/[^0-9.]/g, ''),
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 1000000000) return;
+            setForm((current) => ({ ...current, purchasePrice: value }));
+          }}
           placeholder="0"
           value={form.purchasePrice}
         />
@@ -45,27 +46,35 @@ export default function CapitalGainCalculatorScreen() {
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={capitalGainFieldLabels.salePrice}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              salePrice: value.replace(/[^0-9.]/g, ''),
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 1000000000) return;
+            setForm((current) => ({ ...current, salePrice: value }));
+          }}
           placeholder="0"
           value={form.salePrice}
         />
 
-        <CalculatorInputField
-          keyboardType="decimal-pad"
-          label={capitalGainFieldLabels.taxRate}
-          onChangeText={(value) =>
+        <CalculatorSelectField
+          label="Asset Type"
+          value={form.assetType === 'equity' ? 'Equity (Shares/MF)' : 'Property/Gold'}
+          onPress={() =>
             setForm((current) => ({
               ...current,
-              taxRate: value.replace(/[^0-9.]/g, ''),
+              assetType: current.assetType === 'equity' ? 'property' : 'equity',
             }))
           }
-          placeholder="0"
-          value={form.taxRate}
+        />
+
+        <CalculatorSelectField
+          label="Holding Period"
+          value={form.holdingPeriod === 'short' ? 'Short Term' : 'Long Term'}
+          onPress={() =>
+            setForm((current) => ({
+              ...current,
+              holdingPeriod: current.holdingPeriod === 'short' ? 'long' : 'short',
+            }))
+          }
         />
 
         <CalculatorSummaryCard

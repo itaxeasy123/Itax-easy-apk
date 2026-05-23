@@ -9,11 +9,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { AccountingHeader } from "../components";
 
 export default function BankCreateScreen() {
+    const insets = useSafeAreaInsets();
   const router = useRouter();
   const [ifsc, setIfsc] = useState("");
   const [bankName, setBankName] = useState("");
@@ -32,7 +34,7 @@ export default function BankCreateScreen() {
         showBackButton
       />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 100 + Math.max(insets.bottom, 0) }} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Bank Details</Text>
 
@@ -107,7 +109,7 @@ export default function BankCreateScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
         <Pressable style={styles.saveButton}>
           <Text style={styles.saveButtonText}>Save</Text>
         </Pressable>

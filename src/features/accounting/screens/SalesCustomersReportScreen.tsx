@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "expo-router";
+import { useRouter , useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LineChart } from "react-native-chart-kit";
 import {
@@ -26,7 +26,7 @@ import {
   getCurrentFinancialYearLabel,
   MONTH_LABELS,
 } from "../utils/salesReport";
-import { useFocusEffect } from "expo-router";
+
 
 export default function SalesCustomersReportScreen() {
   const router = useRouter();

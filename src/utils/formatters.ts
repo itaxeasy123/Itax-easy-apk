@@ -22,3 +22,21 @@ export function formatCurrency(value: number) {
     maximumFractionDigits: 2,
   }).format(value);
 }
+
+export function sanitizeNumberInput(value: string) {
+  // Remove any character that is not a digit or decimal point
+  let sanitized = value.replace(/[^0-9.]/g, '');
+  
+  // Ensure only one decimal point exists
+  const parts = sanitized.split('.');
+  if (parts.length > 2) {
+    sanitized = parts[0] + '.' + parts.slice(1).join('');
+  }
+  
+  // Handle leading zeros (e.g., '012' -> '12', but keep '0.12')
+  if (sanitized.length > 1 && sanitized.startsWith('0') && sanitized[1] !== '.') {
+    sanitized = sanitized.replace(/^0+/, '');
+  }
+  
+  return sanitized;
+}

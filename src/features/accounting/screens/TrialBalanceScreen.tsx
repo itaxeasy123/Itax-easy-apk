@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AccountingHeader } from "../components";
 import { Ionicons } from "@expo/vector-icons";
 import { accountingService } from "../services/accountingService";
@@ -10,6 +11,7 @@ const format = (value: number | undefined) => {
 };
 
 export default function TrialBalanceScreen() {
+    const insets = useSafeAreaInsets();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -139,6 +141,7 @@ export default function TrialBalanceScreen() {
         <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalDebit)}</Text>
         <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalCredit)}</Text>
       </View>
+      <View style={{ backgroundColor: "#FFFFFF", height: Math.max(insets.bottom, 0) }} />
     </View>
   );
 }

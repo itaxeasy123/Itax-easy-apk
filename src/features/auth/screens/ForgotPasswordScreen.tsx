@@ -299,7 +299,7 @@ export default function ForgotPasswordScreen() {
 
             {timer <= 0 && (
               <Pressable onPress={handleResendOtp} style={styles.resendRow}>
-                <Text style={styles.resendText}>Didn't receive OTP? </Text>
+                <Text style={styles.resendText}>Didn&apos;t receive OTP? </Text>
                 <Text style={styles.resendLink}>Resend</Text>
               </Pressable>
             )}

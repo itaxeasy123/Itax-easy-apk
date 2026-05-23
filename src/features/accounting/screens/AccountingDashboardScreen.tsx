@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LineChart } from "react-native-chart-kit";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomNav, Card, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Ledger } from "../types/accountingTypes";
@@ -36,6 +37,7 @@ const getLedgerTotal = (ledgers: Ledger[], types: Ledger["ledgerType"][]) =>
 export default function AccountingDashboardScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalSales: 0,
@@ -290,7 +292,7 @@ export default function AccountingDashboardScreen() {
         ) : null}
       </ScrollView>
 
-      <Pressable style={styles.fab} onPress={() => router.push("/invoice")}>
+      <Pressable style={[styles.fab, { bottom: 84 + Math.max(insets.bottom, 0) }]} onPress={() => router.push("/invoice")}>
         <Text style={styles.fabText}>Create Invoice</Text>
       </Pressable>
 

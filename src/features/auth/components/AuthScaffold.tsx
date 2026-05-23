@@ -10,7 +10,7 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type AuthScaffoldProps = {
   children: ReactNode;
@@ -183,6 +183,7 @@ export default function AuthScaffold({
   onBackPress,
   footer,
 }: AuthScaffoldProps) {
+  const insets = useSafeAreaInsets();
   return (
     <View style={styles.screen}>
       {/* header: no fixed height — SafeAreaView sizes from content, gradient fills behind */}
@@ -214,7 +215,7 @@ export default function AuthScaffold({
           <View style={styles.sheet}>
             <ScrollView
               bounces={false}
-              contentContainerStyle={styles.scrollContent}
+              contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 24) + 16 }]}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >

@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
-// import { StatusBar } from "expo-status-bar";
-import React, { useCallback, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import {
   Animated,
+  Easing,
   Image,
   Platform,
   Pressable,
@@ -78,6 +79,66 @@ const PDF_TOOL: ServiceItem = {
     { title: "Image to PDF", route: "/image-to-pdf-converter" },
   ],
 };
+
+const OCR_TOOL: ServiceItem = {
+  title: "OCR Scanner",
+  icon: "scan",
+  hasBottomSheet: true,
+  calculators: [
+    { title: "PAN OCR Scan", route: "/pan-scan" },
+    { title: "Aadhaar OCR Scan", route: "/adhaar-scan" },
+  ],
+};
+
+const REPORTS_MARQUEE = [
+  { title: "Monthly Reports", icon: "calendar", route: "/accounting/reports", colors: ['#ec4899', '#be185d'] as const },
+  { title: "Daybook", icon: "book", route: "/accounting/daybook", colors: ['#f59e0b', '#b45309'] as const },
+  { title: "Profit & Loss", icon: "trending-up", route: "/accounting/reports-profit-loss", colors: ['#10b981', '#047857'] as const },
+  { title: "Balance Sheet", icon: "reader", route: "/accounting/reports-balance-sheet", colors: ['#3b82f6', '#1d4ed8'] as const },
+];
+
+function MarqueeBanner({ onNavigate }: { onNavigate: (route: string) => void }) {
+  const scrollX = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    let animation: Animated.CompositeAnimation;
+    const startAnimation = () => {
+      scrollX.setValue(0);
+      animation = Animated.timing(scrollX, {
+        toValue: -480, // roughly 4 items * 120 width
+        duration: 12000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      });
+      animation.start(({ finished }) => {
+        if (finished) {
+          startAnimation();
+        }
+      });
+    };
+    startAnimation();
+    return () => animation?.stop();
+  }, [scrollX]);
+
+  const marqueeItems = [...REPORTS_MARQUEE, ...REPORTS_MARQUEE, ...REPORTS_MARQUEE];
+
+  return (
+    <View style={styles.marqueeContainer}>
+      <Animated.View style={[styles.marqueeScroll, { transform: [{ translateX: scrollX }] }]}>
+        {marqueeItems.map((item, index) => (
+          <Pressable key={index} onPress={() => onNavigate(item.route)}>
+            <LinearGradient colors={item.colors} style={styles.marqueeCard}>
+              <View style={styles.marqueeCardIcon}>
+                <Ionicons name={item.icon as any} size={16} color="#fff" />
+              </View>
+              <Text style={styles.marqueeCardText}>{item.title}</Text>
+            </LinearGradient>
+          </Pressable>
+        ))}
+      </Animated.View>
+    </View>
+  );
+}
 
 const ALL_SERVICES: ServiceItem[] = [
   {
@@ -332,11 +393,32 @@ export default function DashboardScreen() {
       }
     : null;
 
-  const blogItems = [
-    { title: "Tax Saving Tips", subtitle: "Latest article" },
-    { title: "GST Filing Guide", subtitle: "Beginner friendly" },
-    { title: "ITR Documents", subtitle: "Checklist" },
+  const quickActionsItems = [
+    { title: 'ITR Filing', colors: ['#3b82f6', '#1d4ed8'], icon: 'document-text', route: '/itr' },
+    { title: 'GST Return', colors: ['#2dd4bf', '#0f766e'], icon: 'file-tray', route: '' },
+    { title: 'Create Invoice', colors: ['#a855f7', '#6b21a8'], icon: 'receipt', route: '/accounting' }
   ];
+
+  const allServicesItems = [
+    { title: 'ITR Filing', icon: 'document-text', color: '#3b82f6', route: '/itr' },
+    { title: 'GST Return', icon: 'file-tray', color: '#2dd4bf', route: '' },
+    { title: 'E-Invoice', icon: 'flash', color: '#f59e0b', route: '/accounting' },
+    { title: 'Invoice', icon: 'receipt', color: '#a855f7', route: '/accounting' },
+    { title: 'Converter', icon: 'sync', color: '#2dd4bf', isTool: PDF_TOOL },
+    { title: 'OCR', icon: 'scan', color: '#3b82f6', isTool: OCR_TOOL },
+  ];
+
+  const calculatorToolsItems = [
+    { title: 'Bank Calculator', searchTitle: 'Bank', icon: 'business', sub: 'Quick financial calculations' },
+    { title: 'Income Tax', searchTitle: 'Income Tax', icon: 'pie-chart', sub: 'Quick financial calculations' },
+    { title: 'GST Calculator', searchTitle: 'GST', icon: 'calculator', sub: 'Quick financial calculations' },
+  ];
+
+  const isMatch = (title: string, searchTitle?: string) => !normalizedQuery || title.toLowerCase().includes(normalizedQuery) || (searchTitle && searchTitle.toLowerCase().includes(normalizedQuery));
+
+  const filteredQA = quickActionsItems.filter(q => isMatch(q.title));
+  const filteredAS = allServicesItems.filter(s => isMatch(s.title));
+  const filteredCT = calculatorToolsItems.filter(c => isMatch(c.title, c.searchTitle));
 
   return (
     // <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
@@ -372,18 +454,91 @@ export default function DashboardScreen() {
             />
           </View>
 
-          <View style={styles.banner}>
-            <Image
-              accessibilityLabel="Policy banner"
-              resizeMode="cover"
-              source={require("../../../../assets/images/dashboard.jpeg")}
-              style={styles.bannerImage}
-            />
-          </View>
+          <MarqueeBanner onNavigate={(route) => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.push(route as any)); }} />
 
           {activeTab === "home" ? (
             <>
-              <Text style={styles.sectionTitle}>All Calculators</Text>
+              {filteredQA.length > 0 && (
+                <>
+                  <Text style={styles.sectionTitle}>Quick Actions</Text>
+                  <View style={styles.quickActionsContainer}>
+                    {filteredQA.map((item, idx) => (
+                      <Pressable key={idx} style={{ flex: 1 }} onPress={() => { if (item.route) { blurActiveElement(); globalThis.requestAnimationFrame(() => router.push(item.route as any)); } }}>
+                        <View style={styles.quickActionCard}>
+                          <LinearGradient colors={item.colors as any} style={styles.quickActionIconContainer}>
+                            <Ionicons name={item.icon as any} size={22} color="#fff" />
+                          </LinearGradient>
+                          <Text style={styles.quickActionText}>{item.title}</Text>
+                        </View>
+                      </Pressable>
+                    ))}
+                  </View>
+                </>
+              )}
+
+              {filteredAS.length > 0 && (
+                <>
+                  <Text style={styles.sectionTitle}>All Services</Text>
+                  <View style={styles.allServicesGrid}>
+                    {filteredAS.map((item, idx) => (
+                      <Pressable key={idx} style={styles.serviceCard} onPress={() => {
+                        if (item.isTool) openCalculatorSheet(item.isTool);
+                        else if (item.route) { blurActiveElement(); globalThis.requestAnimationFrame(() => router.push(item.route as any)); }
+                      }}>
+                        <View style={styles.serviceCardIconContainer}><Ionicons name={item.icon as any} size={20} color={item.color} /></View>
+                        <Text style={styles.serviceCardText}>{item.title}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </>
+              )}
+
+              {filteredCT.length > 0 && (
+                <>
+                  <Pressable onPress={() => setActiveTab("tools")}>
+                    <Text style={styles.sectionTitle}>Calculators & Tools</Text>
+                  </Pressable>
+                  <View style={styles.calculatorsRow}>
+                    {filteredCT.map((item, idx) => (
+                      <Pressable key={idx} style={styles.calculatorSmallCard} onPress={() => {
+                        const tool = ALL_SERVICES.find(s => s.title === item.searchTitle);
+                        if (tool) openCalculatorSheet(tool);
+                      }}>
+                        <View style={styles.calcIconContainer}>
+                          <Ionicons name={item.icon as any} size={22} color="#3b82f6" />
+                        </View>
+                        <Text style={styles.calculatorSmallText}>{item.title}</Text>
+                        <Text style={styles.calculatorSmallSub}>{item.sub}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </>
+              )}
+
+              {!normalizedQuery && (
+                <LinearGradient colors={['#3b82f6', '#6366f1', '#a855f7']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.itrBannerCard}>
+                  <Ionicons name="rocket" size={40} color="#fff" />
+                  <View style={styles.itrBannerTextContainer}>
+                    <Text style={styles.itrBannerTitle}>File your ITR in just 3 minutes!</Text>
+                    <Pressable style={styles.itrBannerButton} onPress={() => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.push('/itr')); }}>
+                      <Text style={styles.itrBannerButtonText}>Get Started</Text>
+                    </Pressable>
+                  </View>
+                </LinearGradient>
+              )}
+
+              {normalizedQuery && filteredQA.length === 0 && filteredAS.length === 0 && filteredCT.length === 0 && (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateTitle}>No results found</Text>
+                  <Text style={styles.emptyStateSub}>Try a different calculator or service name.</Text>
+                </View>
+              )}
+            </>
+          ) : null}
+
+          {activeTab === "tools" ? (
+            <>
+              <Text style={styles.sectionTitle}>All Calculators & Tools</Text>
               <View
                 style={[
                   styles.grid,
@@ -423,7 +578,9 @@ export default function DashboardScreen() {
                       </View>
 
                       <Text style={styles.cardTitle}>{item.title}</Text>
-                      <Text style={styles.cardSub}>Calculator</Text>
+                      {item.title !== "Accounting" && item.title !== "ITR" && item.title !== "PDF Toolkit" && (
+                        <Text style={styles.cardSub}>Calculator</Text>
+                      )}
                     </Pressable>
                   ))
                 ) : (
@@ -434,64 +591,6 @@ export default function DashboardScreen() {
                     </Text>
                   </View>
                 )}
-              </View>
-            </>
-          ) : null}
-
-          {activeTab === "tools" ? (
-            <>
-              <Text style={styles.sectionTitle}>Popular Tools</Text>
-              <View style={styles.grid}>
-                {toolsItems.map((item, index) => (
-                  <Pressable
-                    key={item.title}
-                    onPress={() => {
-                      if (item.hasBottomSheet) {
-                        openCalculatorSheet(item);
-                      }
-                    }}
-                    style={styles.card}
-                  >
-                    <View
-                      style={[
-                        styles.iconBox,
-                        { backgroundColor: COLORS[index % COLORS.length] },
-                      ]}
-                    >
-                      <Ionicons
-                        name={item.icon}
-                        size={18}
-                        color={ICON_COLORS[index % ICON_COLORS.length]}
-                      />
-                    </View>
-
-                    <Text style={styles.cardTitle}>{item.title}</Text>
-                    <Text style={styles.cardSub}>Quick Tool</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </>
-          ) : null}
-
-          {activeTab === "blogs" ? (
-            <>
-              <Text style={styles.sectionTitle}>Latest Blogs</Text>
-              <View style={styles.listSection}>
-                {blogItems.map((item) => (
-                  <View key={item.title} style={styles.listCard}>
-                    <View style={styles.listIcon}>
-                      <Ionicons
-                        color="#347BE5"
-                        name="newspaper-outline"
-                        size={18}
-                      />
-                    </View>
-                    <View style={styles.listContent}>
-                      <Text style={styles.listTitle}>{item.title}</Text>
-                      <Text style={styles.listSubtitle}>{item.subtitle}</Text>
-                    </View>
-                  </View>
-                ))}
               </View>
             </>
           ) : null}
@@ -691,7 +790,7 @@ export default function DashboardScreen() {
         ) : null}
 
         <View
-          style={[styles.bottomNav, { bottom: Math.max(insets.bottom, 1) }]}
+          style={[styles.bottomNav, { paddingBottom: Math.max(insets.bottom, 6) }]}
         >
           <Pressable
             onPress={() => setActiveTab("home")}
@@ -745,31 +844,6 @@ export default function DashboardScreen() {
             </Text>
           </Pressable>
 
-          <Pressable
-            onPress={() => setActiveTab("blogs")}
-            style={styles.bottomItem}
-          >
-            <View
-              style={[
-                styles.bottomIconWrap,
-                activeTab === "blogs" && styles.bottomIconWrapActive,
-              ]}
-            >
-              <Ionicons
-                color={activeTab === "blogs" ? "#347BE5" : "#94A3B8"}
-                name="newspaper-outline"
-                size={20}
-              />
-            </View>
-            <Text
-              style={[
-                styles.bottomText,
-                activeTab === "blogs" && styles.bottomTextActive,
-              ]}
-            >
-              Blogs
-            </Text>
-          </Pressable>
 
           <Pressable
             onPress={() => setActiveTab("more")}

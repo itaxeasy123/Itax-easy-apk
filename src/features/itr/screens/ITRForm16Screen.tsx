@@ -70,7 +70,7 @@ export default function ITRForm16Screen() {
 
     setParseResult({
       fileName: form16.fileName,
-      source: form16.source,
+      source: form16.source as "pdf",
       importedAt: form16.importedAt,
       rawText: form16.rawText,
       employeeName: form16.employeeName,
@@ -416,22 +416,12 @@ export default function ITRForm16Screen() {
                 value={formatCurrency(parsedSummary?.totalAmountPaid)}
               />
               <ResultRow
-                label="Total Amount Credited"
-                value={formatCurrency(parsedSummary?.totalAmountCredited)}
-              />
-              <ResultRow
                 label="Total Tax Deducted (TDS)"
                 value={formatCurrency(parsedSummary?.totalTaxDeducted)}
               />
-              <ResultRow
-                label="Total Tax Deposited"
-                value={formatCurrency(parsedSummary?.totalTaxDeposited)}
-              />
-              <ResultRow label="Confidence" value={parsedSummary?.confidence} />
             </View>
 
             <View style={styles.finalCard}>
-              <Text style={styles.subSectionTitle}>Final Tax Position</Text>
               <Text
                 style={[
                   styles.finalValue,

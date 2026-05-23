@@ -30,12 +30,11 @@ export default function SipCalculatorScreen() {
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={sipFieldLabels.monthlyInvestment}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              monthlyInvestment: value.replace(/[^0-9.]/g, ''),
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 100000000) return; // Max 10 Crores monthly
+            setForm((current) => ({ ...current, monthlyInvestment: value }));
+          }}
           placeholder="0"
           value={form.monthlyInvestment}
         />
@@ -43,27 +42,27 @@ export default function SipCalculatorScreen() {
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={sipFieldLabels.annualRate}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              annualRate: value.replace(/[^0-9.]/g, ''),
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 50) return; // Max 50%
+            setForm((current) => ({ ...current, annualRate: value }));
+          }}
           placeholder="0"
           value={form.annualRate}
+          infoText="Expected annual return rate (Max 50%)"
         />
 
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={sipFieldLabels.timeYears}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              timeYears: value.replace(/[^0-9.]/g, ''),
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 50) return; // Max 50 years
+            setForm((current) => ({ ...current, timeYears: value }));
+          }}
           placeholder="0"
           value={form.timeYears}
+          infoText="Time period in years (Max 50 years)"
         />
 
         <CalculatorSummaryCard

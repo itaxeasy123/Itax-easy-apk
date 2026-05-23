@@ -14,7 +14,7 @@ import { DayBook, VoucherType } from "../types/accountingTypes";
 
 type DayBookFilter = "all" | VoucherType;
 
-const FILTERS: Array<{ key: DayBookFilter; label: string }> = [
+const FILTERS: { key: DayBookFilter; label: string }[] = [
   { key: "all", label: "Show All" },
   { key: "sales", label: "Sales" },
   { key: "purchase", label: "Purchase" },

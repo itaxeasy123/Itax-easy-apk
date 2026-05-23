@@ -53,13 +53,13 @@ export default function VoucherListScreen() {
     { id: "receipt", title: "Receipt", subtitle: "Record payment received", route: "/accounting/receipt", icon: "download-outline" },
     { id: "credit", title: "Credit Note", subtitle: "Return and adjustment", route: "/accounting/credit-note", icon: "return-down-back-outline" },
     { id: "debit", title: "Debit Note", subtitle: "Return and adjustment", route: "/accounting/debit-note", icon: "return-up-forward-outline" },
-  ] as Array<{
+  ] as {
     id: string;
     title: string;
     subtitle: string;
     route: Href;
     icon: QuickVoucherIcon;
-  }>;
+  }[];
 
   return (
     <View style={styles.container}>

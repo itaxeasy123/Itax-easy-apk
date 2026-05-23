@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
-import { useRouter } from "expo-router";
-import { useFocusEffect } from "expo-router";
+import { useRouter , useFocusEffect } from "expo-router";
+
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   View,
   ScrollView,
@@ -39,6 +40,7 @@ const formatCurrency = (value: number) =>
 
 export default function ItemsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -222,7 +224,7 @@ export default function ItemsScreen() {
         )}
       </ScrollView>
 
-      <Pressable style={styles.fab} onPress={handleAddItem}>
+      <Pressable style={[styles.fab, { bottom: 84 + Math.max(insets.bottom, 0) }]} onPress={handleAddItem}>
         <Ionicons name="add" size={20} color="#fff" />
         <Text style={styles.fabText}>Add Item</Text>
       </Pressable>

@@ -8,6 +8,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
@@ -83,6 +84,7 @@ export default function DealVoucherCreateScreen({
   invoicePrefix,
 }: DealVoucherCreateScreenProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -369,7 +371,7 @@ export default function DealVoucherCreateScreen({
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: 132 + Math.max(insets.bottom, 0) }]}
         showsVerticalScrollIndicator={false}
       >
         <Card style={styles.cardBlock}>
@@ -618,7 +620,7 @@ export default function DealVoucherCreateScreen({
         </View>
       </Modal>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
         <View>
           <Text style={styles.footerLabel}>Total Amount</Text>
           <Text style={styles.footerAmount}>{money(summary.total)}</Text>

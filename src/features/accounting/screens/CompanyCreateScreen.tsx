@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { AccountingHeader } from "../components";
 
 export default function CompanyCreateScreen() {
+    const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const [businessName, setBusinessName] = useState("");
@@ -28,7 +30,7 @@ export default function CompanyCreateScreen() {
         }
       />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 100 + Math.max(insets.bottom, 0) }]} showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Basic Details</Text>
 
@@ -115,7 +117,7 @@ export default function CompanyCreateScreen() {
       </ScrollView>
 
       {/* Sticky Bottom Save Button */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
         <Pressable style={styles.saveBtn} onPress={() => router.back()}>
           <Text style={styles.saveBtnText}>Save</Text>
         </Pressable>

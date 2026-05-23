@@ -21,7 +21,7 @@ export default function TaxCalculatorScreen() {
     regime: 'new',
     salary: 0,
     otherIncome: 0,
-    tds: 0,
+    tdsSalary: 0,
   });
 
   const result = useMemo(() => calculateIncomeTax(form), [form]);
@@ -41,12 +41,12 @@ export default function TaxCalculatorScreen() {
           label="Salary"
           placeholder="0"
           value={String(form.salary)}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              salary: Number(value.replace(/[^0-9.]/g, '')) || 0,
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 1000000000) return; // Max 100 Cr limit
+            setForm((current) => ({ ...current, salary: num }));
+          }}
+          infoText="Gross Salary including all allowances"
         />
 
         <CalculatorInputField
@@ -54,12 +54,12 @@ export default function TaxCalculatorScreen() {
           label="Other Income"
           placeholder="0"
           value={String(form.otherIncome)}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              otherIncome: Number(value.replace(/[^0-9.]/g, '')) || 0,
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 1000000000) return;
+            setForm((current) => ({ ...current, otherIncome: num }));
+          }}
+          infoText="Interest, rental income, capital gains, etc."
         />
 
         {/* <Text style={[calculatorStyles.fieldLabel, { marginTop: 14 }]}>Deductions</Text> */}
@@ -68,13 +68,14 @@ export default function TaxCalculatorScreen() {
           keyboardType="decimal-pad"
           label="Total Deductions"
           placeholder="0"
-          value={String(form.deductions)}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              deductions: Number(value.replace(/[^0-9.]/g, '')) || 0,
-            }))
-          }
+          value={form.regime === 'new' ? '0' : String(form.deductions)}
+          editable={form.regime === 'old'}
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 1000000000) return;
+            setForm((current) => ({ ...current, deductions: num }));
+          }}
+          infoText={form.regime === 'new' ? "Deductions (except standard deduction) are mostly not allowed in New Regime" : "E.g. 80C, 80D, HRA"}
         />
 
         {/* <Text style={[calculatorStyles.fieldLabel, { marginTop: 14 }]}>Tax Paid</Text> */}
@@ -83,13 +84,13 @@ export default function TaxCalculatorScreen() {
           keyboardType="decimal-pad"
           label="TDS"
           placeholder="0"
-          value={String(form.tds)}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              tds: Number(value.replace(/[^0-9.]/g, '')) || 0,
-            }))
-          }
+          value={String(form.tdsSalary)}
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 1000000000) return;
+            setForm((current) => ({ ...current, tdsSalary: num }));
+          }}
+          infoText="Tax already deducted at source by employer/bank"
         />
 
         <CalculatorInputField
@@ -97,12 +98,12 @@ export default function TaxCalculatorScreen() {
           label="Advance Tax"
           placeholder="0"
           value={String(form.advanceTax)}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              advanceTax: Number(value.replace(/[^0-9.]/g, '')) || 0,
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 1000000000) return;
+            setForm((current) => ({ ...current, advanceTax: num }));
+          }}
+          infoText="Tax paid directly by you in advance"
         />
 
         <CalculatorSelectField

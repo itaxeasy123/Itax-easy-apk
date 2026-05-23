@@ -150,7 +150,7 @@ export default function ITRAdvanceAssessmentTaxScreen() {
             <View key={field.id} style={styles.fieldWrap}>
               {field.isDate ? (
                 <Pressable onPress={() => setShowCalendar(true)} style={styles.dateInputContainer}>
-                  <View pointerEvents="none" style={{flex: 1}}>
+                  <View style={{flex: 1, pointerEvents: 'none'}}>
                     <TextInput 
                         value={field.value} 
                         placeholder={field.placeholder} 

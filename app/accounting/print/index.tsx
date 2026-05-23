@@ -3,11 +3,11 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AccountingHeader, Card } from "../../../src/features/accounting/components";
 
-const items: Array<{
+const items: {
   title: string;
   route: Href;
   note: string;
-}> = [
+}[] = [
   { title: "Party Print", route: "/accounting/print/party", note: "Pass `id` in query params." },
   { title: "Invoice Print", route: "/accounting/print/invoice", note: "Pass `id` in query params." },
   { title: "Voucher Print", route: "/accounting/print/voucher", note: "Pass `id` in query params." },

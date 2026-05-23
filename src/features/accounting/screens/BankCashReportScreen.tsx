@@ -10,6 +10,7 @@ import {
   Modal,
   TextInput,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccountingHeader, BottomNav, Card, EmptyState, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
@@ -21,13 +22,14 @@ import {
   formatCurrency,
 } from "../utils/bankCashReport";
 
-const TAB_LABELS: Array<{ key: BankCashTab; label: string }> = [
+const TAB_LABELS: { key: BankCashTab; label: string }[] = [
   { key: "bank", label: "Bank" },
   { key: "cash", label: "Cash" },
 ];
 
 export default function BankCashReportScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [ledgers, setLedgers] = useState<Ledger[]>([]);
   const [activeTab, setActiveTab] = useState<BankCashTab>("bank");
   const [loading, setLoading] = useState(true);
@@ -171,7 +173,7 @@ export default function BankCashReportScreen() {
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
-      <Pressable style={styles.fab} onPress={handleAddLedger}>
+      <Pressable style={[styles.fab, { bottom: 130 + Math.max(insets.bottom, 0) }]} onPress={handleAddLedger}>
         <Ionicons name="add" size={18} color="#fff" />
         <Text style={styles.fabText}>
           {activeTab === "bank" ? "Add New Bank" : "Add Category"}
@@ -347,7 +349,7 @@ const styles = StyleSheet.create({
   fab: {
     position: "absolute",
     right: 16,
-    bottom: 84,
+    bottom: 130,
     backgroundColor: "#2563EB",
     borderRadius: 999,
     paddingHorizontal: 16,

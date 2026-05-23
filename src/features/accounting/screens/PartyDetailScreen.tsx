@@ -343,7 +343,7 @@ export default function PartyDetailScreen() {
       .join("\n");
     const csv = header + rows;
     try {
-      const { FileSystem } = await import("expo-file-system");
+      const FileSystem = await import("expo-file-system/legacy");
       const path = `${FileSystem.documentDirectory}${party.partyName.replace(/\s+/g, "_")}_export.csv`;
       await FileSystem.writeAsStringAsync(path, csv, { encoding: FileSystem.EncodingType.UTF8 });
       if (await Sharing.isAvailableAsync()) {

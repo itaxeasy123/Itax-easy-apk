@@ -30,40 +30,40 @@ export default function EmiCalculatorScreen() {
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={emiFieldLabels.principal}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              principal: value.replace(/[^0-9.]/g, ''),
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 1000000000) return; // 100 Crores
+            setForm((current) => ({ ...current, principal: value }));
+          }}
           placeholder="0"
           value={form.principal}
+          infoText="Total loan amount you want to borrow"
         />
 
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={emiFieldLabels.annualRate}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              annualRate: value.replace(/[^0-9.]/g, ''),
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 50) return; // Max 50% interest
+            setForm((current) => ({ ...current, annualRate: value }));
+          }}
           placeholder="0"
           value={form.annualRate}
+          infoText="Yearly interest rate (Max 50%)"
         />
 
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={emiFieldLabels.tenureYears}
-          onChangeText={(value) =>
-            setForm((current) => ({
-              ...current,
-              tenureYears: value.replace(/[^0-9.]/g, ''),
-            }))
-          }
+          onChangeText={(value) => {
+            const num = Number(value) || 0;
+            if (num > 40) return; // Max 40 years
+            setForm((current) => ({ ...current, tenureYears: value }));
+          }}
           placeholder="0"
           value={form.tenureYears}
+          infoText="Duration of the loan in years (Max 40 years)"
         />
 
         <CalculatorSummaryCard

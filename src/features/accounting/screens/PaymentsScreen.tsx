@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useFocusEffect } from "expo-router";
-import { AccountingHeader, BottomNav, SalesReportSwitcher, EmptyState } from "../components";
+import { AccountingHeader, SalesReportSwitcher, EmptyState } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Payment } from "../types/accountingTypes";
 
@@ -179,7 +179,6 @@ export default function PaymentsScreen() {
         </Pressable>
       </View>
 
-      <BottomNav activeRoute="/accounting" />
     </View>
   );
 }

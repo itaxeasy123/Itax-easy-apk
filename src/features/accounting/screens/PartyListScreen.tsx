@@ -10,6 +10,7 @@ import {
   View,
   Modal,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, BottomNav, Card, EmptyState, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
@@ -25,6 +26,7 @@ const getPartyBalance = (party: Party) =>
 
 export default function PartyListScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [parties, setParties] = useState<Party[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -197,7 +199,7 @@ export default function PartyListScreen() {
         )}
       </ScrollView>
 
-      <Pressable style={styles.fab} onPress={() => router.push("/accounting/parties/create")}>
+      <Pressable style={[styles.fab, { bottom: 86 + Math.max(insets.bottom, 0) }]} onPress={() => router.push("/accounting/parties/create")}>
         <Ionicons name="person-add" size={18} color="#fff" />
         <Text style={styles.fabText}>Add Party</Text>
       </Pressable>

@@ -9,12 +9,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 import { AccountingHeader } from "../components";
 
 export default function PaymentCreateScreen() {
+    const insets = useSafeAreaInsets();
   const router = useRouter();
   const [amount, setAmount] = useState("11,200");
   const [paymentMode, setPaymentMode] = useState("Bank Transfer");
@@ -38,7 +40,7 @@ export default function PaymentCreateScreen() {
         }
       />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 100 + Math.max(insets.bottom, 0) }} showsVerticalScrollIndicator={false}>
         <View style={styles.formGroup}>
           <Text style={styles.label}>Amount</Text>
           <View style={styles.inputWrap}>
@@ -83,7 +85,7 @@ export default function PaymentCreateScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
         <View>
           <Text style={styles.footerLabel}>Total Amount</Text>
           <Text style={styles.footerAmount}>₹ {amount || "0"}</Text>

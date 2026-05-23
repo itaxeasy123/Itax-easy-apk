@@ -339,7 +339,6 @@ const styles = StyleSheet.create({
   deductionInput: {
     color: "#111827",
     fontSize: 14,
-    fontSize: 14,
     height: 40,
     paddingHorizontal: 0,
     paddingVertical: 0,

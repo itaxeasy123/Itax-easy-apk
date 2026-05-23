@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, Button, Card } from "../components";
 import { accountingService } from "../services/accountingService";
@@ -31,6 +32,7 @@ const ITEM_UNITS = [
 ];
 
 export default function ItemCreateScreen() {
+    const insets = useSafeAreaInsets();
   const router = useRouter();
   const [itemName, setItemName] = useState("");
   const [hsnSac, setHsnSac] = useState("");
@@ -90,7 +92,7 @@ export default function ItemCreateScreen() {
         }
       />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 40 + Math.max(insets.bottom, 0) }]} showsVerticalScrollIndicator={false}>
         <View style={styles.formArea}>
           
           {/* Item Details Section */}
@@ -182,7 +184,7 @@ export default function ItemCreateScreen() {
       </ScrollView>
 
       {/* Fixed Save Button */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
         <Pressable 
           style={({ pressed }) => [styles.saveButton, pressed && styles.saveButtonPressed]} 
           onPress={handleSave}

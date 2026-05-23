@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Modal, TextInput } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AccountingHeader } from "../components";
 import { Ionicons } from "@expo/vector-icons";
 import { accountingService } from "../services/accountingService";
@@ -10,6 +11,7 @@ const format = (value: number | undefined) => {
 };
 
 export default function BalanceSheetReportScreen() {
+    const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<"assets" | "liabilities">("assets");
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
@@ -173,7 +175,7 @@ export default function BalanceSheetReportScreen() {
       </ScrollView>
 
       {/* FAB */}
-      <Pressable style={styles.fab} onPress={() => setShowEntryModal(true)}>
+      <Pressable style={[styles.fab, { bottom: 72 + Math.max(insets.bottom, 0) }]} onPress={() => setShowEntryModal(true)}>
         <Ionicons name="add" size={20} color="#FFFFFF" />
         <Text style={styles.fabText}>Add New Entry</Text>
       </Pressable>
@@ -187,6 +189,7 @@ export default function BalanceSheetReportScreen() {
           {format(tab === "assets" ? report?.totalAssets : report?.totalLiabilities)}
         </Text>
       </View>
+      <View style={{ backgroundColor: "#FFFFFF", height: Math.max(insets.bottom, 0) }} />
 
       {/* Add Entry Bottom Sheet Modal */}
       <Modal

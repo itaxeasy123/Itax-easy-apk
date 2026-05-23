@@ -55,7 +55,8 @@ export default function ITRManualFillScreen() {
   }, []);
 
   const [showRegimeModal, setShowRegimeModal] = useState(false);
-  const selectedYearLabel = currentAY;
+  const [showYearModal, setShowYearModal] = useState(false);
+  const [selectedYearLabel, setSelectedYearLabel] = useState(currentAY);
 
   const taxResults = useMemo(() => {
     const commonInputs = {
@@ -107,10 +108,11 @@ export default function ITRManualFillScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.controlsGrid}>
           <View style={styles.controlsRow}>
-            <View style={styles.pickerBtn}>
+            <Pressable style={styles.pickerBtn} onPress={() => setShowYearModal(true)}>
               <Ionicons name="calendar-outline" size={14} color={itrColors.primary} />
               <Text style={styles.pickerBtnText}>{selectedYearLabel}</Text>
-            </View>
+              <Ionicons name="chevron-down" size={12} color="#64748B" />
+            </Pressable>
 
             <Pressable style={[styles.pickerBtn, styles.regimeBtn]} onPress={() => setShowRegimeModal(true)}>
               <Text style={styles.pickerBtnText}>{regime.toUpperCase()} Regime</Text>
@@ -192,6 +194,20 @@ export default function ITRManualFillScreen() {
       </ScrollView>
 
       <ITRBottomNav activeRoute="/itr" />
+
+      {/* Year Picker Modal */}
+      <Modal visible={showYearModal} transparent animationType="fade" onRequestClose={() => setShowYearModal(false)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setShowYearModal(false)} />
+        <View style={styles.modalSheet}>
+          <Text style={styles.modalTitle}>Select Assessment Year</Text>
+          {["2025-26", "2024-25"].map((opt) => (
+            <Pressable key={opt} onPress={() => { setSelectedYearLabel(opt); setShowYearModal(false); }} style={[styles.modalOption, selectedYearLabel === opt && styles.modalOptionActive]}>
+              <Text style={[styles.modalOptionText, selectedYearLabel === opt && styles.modalOptionTextActive]}>{opt}</Text>
+              {selectedYearLabel === opt && <Ionicons name="checkmark-circle" size={20} color={itrColors.primary} />}
+            </Pressable>
+          ))}
+        </View>
+      </Modal>
 
       {/* Regime Picker Modal */}
       <Modal visible={showRegimeModal} transparent animationType="fade" onRequestClose={() => setShowRegimeModal(false)}>

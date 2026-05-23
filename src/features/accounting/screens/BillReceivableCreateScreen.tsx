@@ -12,10 +12,12 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { accountingService } from "../services/accountingService";
 import { BillReceivable } from "../types/accountingTypes";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const BILL_RECEIVABLE_CACHE_KEY = "accounting_bill_receivables_cache";
 
 export default function BillReceivableCreateScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [billNumber, setBillNumber] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -313,7 +315,9 @@ export default function BillReceivableCreateScreen() {
             <Text style={styles.successText}>{successMessage}</Text>
           </View>
         ) : null}
+      </ScrollView>
 
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) + 16 }]}>
         <Pressable
           style={[styles.primaryButton, loading && styles.disabledButton]}
           onPress={handleSave}
@@ -331,19 +335,30 @@ export default function BillReceivableCreateScreen() {
         >
           <Text style={styles.secondaryButtonText}>Cancel</Text>
         </Pressable>
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  footer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
   container: {
     flex: 1,
     backgroundColor: "#F5F9FF",
   },
   content: {
     padding: 16,
-    paddingBottom: 32,
+    paddingBottom: 150,
   },
   headerRow: {
     flexDirection: "row",

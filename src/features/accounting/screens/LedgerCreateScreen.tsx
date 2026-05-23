@@ -9,6 +9,7 @@ import {
   Pressable,
   ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader } from "../components";
 import { accountingService } from "../services/accountingService";
@@ -40,6 +41,7 @@ const ledgerTypeOptions: { type: LedgerType; label: string; icon: string; color:
 ];
 
 export default function LedgerCreateScreen() {
+    const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams<{ type?: string }>();
   const initialLedgerType = useMemo<LedgerType>(() => {
@@ -97,7 +99,7 @@ export default function LedgerCreateScreen() {
         }
       />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 100 + Math.max(insets.bottom, 0) }]} showsVerticalScrollIndicator={false}>
 
         {/* Ledger Name */}
         <View style={styles.section}>
@@ -190,7 +192,7 @@ export default function LedgerCreateScreen() {
       </ScrollView>
 
       {/* Bottom Save */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
         <Pressable
           style={[styles.saveBtn, loading && styles.saveBtnDisabled]}
           onPress={handleSave}
