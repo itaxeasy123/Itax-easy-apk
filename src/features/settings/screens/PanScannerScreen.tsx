@@ -81,7 +81,7 @@ export default function PanScannerScreen() {
         <View style={styles.header}>
           <Pressable
             style={styles.backBtn}
-            onPress={() => router.push("/dashboard")}
+            onPress={() => router.navigate("/dashboard")}
           >
             <Ionicons name="arrow-back" size={22} color="#0F172A" />
           </Pressable>

@@ -70,7 +70,7 @@ export default function BillReceivableScreen() {
         <Pressable 
           key={item.name} 
           style={[styles.row, index === 0 && styles.firstRow]}
-          onPress={() => router.push(`/accounting/receivable-detail?name=${encodeURIComponent(item.name)}`)}
+          onPress={() => router.navigate(`/accounting/receivable-detail?name=${encodeURIComponent(item.name)}`)}
         >
           <View>
             <Text style={styles.rowTitle}>{item.name}</Text>

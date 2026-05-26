@@ -26,7 +26,7 @@ const DashboardHeader = ({ user, initials }: any) => {
           <Ionicons name="notifications-outline" size={22} color="#111" />
         </Pressable>
 
-        <Pressable onPress={() => router.push("/profile")} hitSlop={8}>
+        <Pressable onPress={() => router.navigate("/profile")} hitSlop={8}>
           <View style={styles.profileIconWrap}>
             <Ionicons name="person" size={20} color="#111" />
           </View>

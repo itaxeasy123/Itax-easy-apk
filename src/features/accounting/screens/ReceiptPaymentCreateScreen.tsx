@@ -218,7 +218,7 @@ export default function ReceiptPaymentCreateScreen() {
   //     return;
   //   }
 
-  //   router.push({
+  //   router.navigate({
   //     pathname: "/accounting/print/receipt",
   //     params: {
   //       partyId: selectedParty.id,
@@ -334,7 +334,7 @@ export default function ReceiptPaymentCreateScreen() {
         <Pressable
           style={styles.unpaidRow}
           onPress={() =>
-            router.push({
+            router.navigate({
               pathname: "/accounting/receipt-unpaid-invoices",
               params: {
                 partyId: selectedPartyId || undefined,

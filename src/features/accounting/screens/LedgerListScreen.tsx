@@ -128,7 +128,7 @@ export default function LedgerListScreen() {
         title="Ledgers"
         showBackButton
         rightContent={
-          <Pressable onPress={() => router.push("/accounting/ledgers/create")}>
+          <Pressable onPress={() => router.navigate("/accounting/ledgers/create")}>
             <Ionicons name="add" size={22} color="#fff" />
           </Pressable>
         }
@@ -195,7 +195,7 @@ export default function LedgerListScreen() {
             <Pressable
               key={ledger.id}
               style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-              onPress={() => router.push(`/accounting/ledgers/${ledger.id}`)}
+              onPress={() => router.navigate(`/accounting/ledgers/${ledger.id}`)}
             >
               {/* Left icon */}
               <View style={[styles.cardIcon, { backgroundColor: `${typeColor(ledger.ledgerType)}18` }]}>
@@ -228,7 +228,7 @@ export default function LedgerListScreen() {
       </ScrollView>
 
       {/* FAB */}
-      <Pressable style={styles.fab} onPress={() => router.push("/accounting/ledgers/create")}>
+      <Pressable style={styles.fab} onPress={() => router.navigate("/accounting/ledgers/create")}>
         <Ionicons name="add" size={20} color="#FFFFFF" />
         <Text style={styles.fabText}>New Ledger</Text>
       </Pressable>

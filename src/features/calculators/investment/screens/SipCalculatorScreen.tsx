@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { calculatorStyles } from '../../../../theme';
@@ -20,13 +20,30 @@ export default function SipCalculatorScreen() {
     timeYears: '0',
   });
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof SipCalculatorInput, string> = {
+      annualRate: '',
+      monthlyInvestment: '',
+      timeYears: '',
+    };
+    
+    if (form.monthlyInvestment && Number(form.monthlyInvestment) <= 0) errs.monthlyInvestment = 'Must be > 0';
+    if (form.annualRate && (Number(form.annualRate) <= 0 || Number(form.annualRate) > 100)) errs.annualRate = 'Rate must be 0-100';
+    if (form.timeYears && Number(form.timeYears) <= 0) errs.timeYears = 'Time must be > 0';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateSip(form), [form]);
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={calculatorStyles.screenSafeArea}>
       <CalculatorHeader onBackPress={() => router.back()} title="SIP Calculator" />
 
-      <View style={calculatorStyles.screenContent}>
+      <ScrollView 
+        contentContainerStyle={calculatorStyles.screenContent}
+        showsVerticalScrollIndicator={false}
+      >
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={sipFieldLabels.monthlyInvestment}
@@ -37,6 +54,7 @@ export default function SipCalculatorScreen() {
           }}
           placeholder="0"
           value={form.monthlyInvestment}
+          error={errors.monthlyInvestment}
         />
 
         <CalculatorInputField
@@ -50,6 +68,7 @@ export default function SipCalculatorScreen() {
           placeholder="0"
           value={form.annualRate}
           infoText="Expected annual return rate (Max 50%)"
+          error={errors.annualRate}
         />
 
         <CalculatorInputField
@@ -63,6 +82,7 @@ export default function SipCalculatorScreen() {
           placeholder="0"
           value={form.timeYears}
           infoText="Time period in years (Max 50 years)"
+          error={errors.timeYears}
         />
 
         <CalculatorSummaryCard
@@ -75,7 +95,7 @@ export default function SipCalculatorScreen() {
             { label: 'Future Value', value: `Rs ${result.futureValue.toFixed(2)}` },
           ]}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

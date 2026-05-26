@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, Button, Card } from "../components";
 import { accountingService } from "../services/accountingService";
+import { useAccountingSessionStore } from "../../../store/accountingSessionStore";
 
 const ITEM_UNITS = [
   "PIECE - PCS",
@@ -34,14 +35,29 @@ const ITEM_UNITS = [
 export default function ItemCreateScreen() {
     const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [itemName, setItemName] = useState("");
-  const [hsnSac, setHsnSac] = useState("");
-  const [unit, setUnit] = useState("");
-  const [itemType, setItemType] = useState<"item" | "service">("item");
   
-  const [salePrice, setSalePrice] = useState("");
-  const [purchasePrice, setPurchasePrice] = useState("");
-  const [taxRate, setTaxRate] = useState("");
+  const { draftItem, setDraftItem, clearDraftItem } = useAccountingSessionStore();
+
+  const [itemName, setItemName] = useState(draftItem?.itemName ?? "");
+  const [hsnSac, setHsnSac] = useState(draftItem?.hsnSac ?? "");
+  const [unit, setUnit] = useState(draftItem?.unit ?? "");
+  const [itemType, setItemType] = useState<"item" | "service">(draftItem?.itemType ?? "item");
+  
+  const [salePrice, setSalePrice] = useState(draftItem?.salePrice ?? "");
+  const [purchasePrice, setPurchasePrice] = useState(draftItem?.purchasePrice ?? "");
+  const [taxRate, setTaxRate] = useState(draftItem?.taxRate ?? "");
+  
+  useEffect(() => {
+    setDraftItem({
+      itemName,
+      hsnSac,
+      unit,
+      itemType,
+      salePrice,
+      purchasePrice,
+      taxRate
+    });
+  }, [itemName, hsnSac, unit, itemType, salePrice, purchasePrice, taxRate, setDraftItem]);
 
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -68,7 +84,8 @@ export default function ItemCreateScreen() {
         sac: hsnSac.trim() || undefined,
       });
 
-      router.push("/accounting/items");
+      clearDraftItem();
+      router.navigate("/accounting/items");
     } catch (err) {
       setError("Unable to create item. Try again.");
     } finally {

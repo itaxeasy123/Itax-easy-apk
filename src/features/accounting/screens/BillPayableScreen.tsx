@@ -67,7 +67,7 @@ export default function BillPayableScreen() {
       <Pressable 
         key={item.name} 
         style={[styles.row, index === 0 && styles.firstRow]}
-        onPress={() => router.push(`/accounting/payable-detail?name=${encodeURIComponent(item.name)}`)}
+        onPress={() => router.navigate(`/accounting/payable-detail?name=${encodeURIComponent(item.name)}`)}
       >
         <View>
           <Text style={styles.rowTitle}>{item.name}</Text>

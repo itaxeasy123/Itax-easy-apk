@@ -74,7 +74,7 @@ export default function VoucherListScreen() {
         <View style={styles.actionArea}>
           <Button
             title="Create Voucher"
-            onPress={() => router.push("/accounting/vouchers-create")}
+            onPress={() => router.navigate("/accounting/vouchers-create")}
             size="large"
             fullWidth
           />
@@ -87,7 +87,7 @@ export default function VoucherListScreen() {
               <Pressable
                 key={item.id}
                 style={styles.quickCard}
-                onPress={() => router.push(item.route)}
+                onPress={() => router.navigate(item.route)}
               >
                 <View style={styles.quickIcon}>
                   <Ionicons name={item.icon} size={18} color="#2563EB" />
@@ -115,7 +115,7 @@ export default function VoucherListScreen() {
                 title="No vouchers found"
                 description="Create a voucher to start tracking debit and credit entries."
                 actionText="Create Voucher"
-                onAction={() => router.push("/accounting/vouchers-create")}
+                onAction={() => router.navigate("/accounting/vouchers-create")}
               />
             </Card>
           </View>
@@ -141,7 +141,7 @@ export default function VoucherListScreen() {
                 <View style={styles.cardActionWrap}>
                   <Pressable
                     onPress={() =>
-                      router.push({
+                      router.navigate({
                         pathname: "/accounting/print/voucher",
                         params: { id: voucher.id },
                       })
@@ -182,7 +182,7 @@ export default function VoucherListScreen() {
                 <Pressable
                   style={styles.detailPrintButton}
                   onPress={() =>
-                    router.push({
+                    router.navigate({
                       pathname: "/accounting/print/voucher",
                       params: { id: selectedVoucher.id },
                     })

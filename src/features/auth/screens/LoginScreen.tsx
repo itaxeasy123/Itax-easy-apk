@@ -112,7 +112,7 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.optionsRow}>
-        <Pressable onPress={() => router.push('/forgot-password')}>
+        <Pressable onPress={() => router.navigate('/forgot-password')}>
           <Text style={styles.linkText}>Forgot Password?</Text>
         </Pressable>
       </View>
@@ -125,7 +125,7 @@ export default function LoginScreen() {
         <View style={styles.line} />
         <Text style={styles.signupText}>
           Don&apos;t have an account?{' '}
-          <Text onPress={() => router.push('/signup')} style={styles.linkText}>
+          <Text onPress={() => router.navigate('/signup')} style={styles.linkText}>
             Sign Up
           </Text>
         </Text>

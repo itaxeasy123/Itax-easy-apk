@@ -11,6 +11,7 @@ type CalculatorInputFieldProps = {
   value: string;
   infoText?: string;
   editable?: boolean;
+  error?: string;
 };
 
 export default function CalculatorInputField({
@@ -21,6 +22,7 @@ export default function CalculatorInputField({
   value,
   infoText,
   editable = true,
+  error,
 }: CalculatorInputFieldProps) {
   const handleTextChange = (text: string) => {
     // Only apply sanitization for numeric pads
@@ -39,15 +41,22 @@ export default function CalculatorInputField({
         onChangeText={handleTextChange}
         placeholder={placeholder}
         placeholderTextColor={colors.textLight}
-        style={calculatorStyles.inputField}
+        style={[
+          calculatorStyles.inputField,
+          error ? { borderColor: '#EF4444', borderWidth: 1 } : null
+        ]}
         value={value}
         editable={editable}
       />
-      {infoText && (
+      {error ? (
+        <Text style={{ fontSize: 12, color: '#EF4444', marginTop: 4, marginLeft: 4 }}>
+          {error}
+        </Text>
+      ) : infoText ? (
         <Text style={{ fontSize: 11, color: colors.textLight, marginTop: 4, marginLeft: 4 }}>
           {infoText}
         </Text>
-      )}
+      ) : null}
     </View>
   );
 }

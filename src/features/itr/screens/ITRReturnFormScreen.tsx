@@ -1270,7 +1270,7 @@ export default function ITRReturnFormScreen() {
         showsVerticalScrollIndicator={false}
       >
         {form16 ? (
-          <Pressable style={styles.importBanner} onPress={() => router.push("/itr/form-16")}>
+          <Pressable style={styles.importBanner} onPress={() => router.navigate("/itr/form-16")}>
             <View style={styles.importBannerLeft}>
               <Ionicons name="document-text-outline" size={18} color={itrColors.primary} />
               <View style={{ flex: 1 }}>

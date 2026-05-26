@@ -10,6 +10,8 @@ import {
   Text,
   TextInput,
   View,
+  Modal,
+  FlatList,
 } from 'react-native';
 
 import { Button, Card, Header, Loading } from '../../accounting/components';
@@ -84,6 +86,8 @@ export default function InvoiceCreateScreen() {
   const [extraDetails, setExtraDetails] = useState('');
   const [credit, setCredit] = useState(false);
   const [isInventory, setIsInventory] = useState(false);
+  const [isPartyModalVisible, setIsPartyModalVisible] = useState(false);
+  const [partySearchQuery, setPartySearchQuery] = useState('');
   const [lines, setLines] = useState<InvoiceLine[]>([
     { itemId: '', quantity: '1', discount: '0', taxPercent: '0' },
   ]);
@@ -115,6 +119,12 @@ export default function InvoiceCreateScreen() {
     loadData();
   }, []);
 
+  const selectedParty = parties.find(p => p.id === partyId);
+  const filteredParties = parties.filter((party) =>
+    party.partyName?.toLowerCase().includes(partySearchQuery.toLowerCase()) ||
+    party.type?.toLowerCase().includes(partySearchQuery.toLowerCase())
+  );
+
   const handleLineChange = (index: number, field: keyof InvoiceLine, value: string) => {
     setLines((current) =>
       current.map((line, lineIndex) =>
@@ -144,7 +154,7 @@ export default function InvoiceCreateScreen() {
     }
 
     if (trimmedGst && !gstRegex.test(trimmedGst)) {
-      setError('Enter a valid GST number in backend format, or leave it empty for testing.');
+      setError('Enter a valid GST number in backend format (e.g., 22AAAAA0000A1Z5), or leave it empty for testing.');
       return;
     }
 
@@ -153,8 +163,18 @@ export default function InvoiceCreateScreen() {
       return;
     }
 
-    if (Number.isNaN(amount) || amount <= 0) {
-      setError('Total amount must be a valid number.');
+    if (!totalAmount.trim() || Number.isNaN(amount) || amount <= 0) {
+      setError('Total amount must be a valid positive number.');
+      return;
+    }
+    
+    if (invoiceDate.trim() && !parseDateInput(invoiceDate)) {
+      setError('Invoice date must be a valid date (e.g. YYYY-MM-DD).');
+      return;
+    }
+    
+    if (dueDate.trim() && !parseDateInput(dueDate)) {
+      setError('Due date must be a valid date (e.g. YYYY-MM-DD).');
       return;
     }
 
@@ -166,6 +186,27 @@ export default function InvoiceCreateScreen() {
         discount: Number(line.discount || '0'),
         taxPercent: Number(line.taxPercent || '0'),
       }));
+      
+    if (invoiceItems.length === 0) {
+      setError('Please add at least one valid item to the invoice.');
+      return;
+    }
+    
+    // Validate that no item has negative values or NaN
+    for (const item of invoiceItems) {
+      if (Number.isNaN(item.quantity) || item.quantity <= 0) {
+        setError('Item quantities must be valid positive numbers.');
+        return;
+      }
+      if (Number.isNaN(item.discount) || item.discount < 0) {
+        setError('Item discount cannot be negative.');
+        return;
+      }
+      if (Number.isNaN(item.taxPercent) || item.taxPercent < 0) {
+        setError('Item tax percent cannot be negative.');
+        return;
+      }
+    }
 
     try {
       setSaving(true);
@@ -222,7 +263,7 @@ export default function InvoiceCreateScreen() {
         showBackButton
         rightContent={
           <Pressable
-            onPress={() => router.push("/accounting/print")}
+            onPress={() => router.navigate("/accounting/print")}
             style={styles.headerActionButton}
           >
             <Ionicons name="print-outline" size={18} color="#fff" />
@@ -264,26 +305,15 @@ export default function InvoiceCreateScreen() {
 
         <View style={styles.field}>
           <Text style={styles.label}>Party *</Text>
-          <View style={styles.partyGrid}>
-            {parties.map((party) => {
-              const active = partyId === party.id;
-              return (
-                <Pressable
-                  key={party.id}
-                  onPress={() => {
-                    setPartyId(party.id);
-                    setStateOfSupply(party.address ?? stateOfSupply);
-                    setGstNumber(party.gstin ?? gstNumber);
-                  }}
-                  style={[styles.partyCard, active && styles.partyCardActive]}
-                >
-                  <Text style={styles.partyTitle}>{party.partyName}</Text>
-                  <Text style={styles.partyMeta}>{party.type}</Text>
-                  <Text style={styles.partyMetaSmall}>{party.id}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
+          <Pressable 
+            style={styles.dropdownSelector} 
+            onPress={() => setIsPartyModalVisible(true)}
+          >
+            <Text style={selectedParty ? styles.dropdownSelectedText : styles.dropdownPlaceholderText}>
+              {selectedParty ? selectedParty.partyName : 'Select a Party'}
+            </Text>
+            <Ionicons name="chevron-down" size={20} color="#64748B" />
+          </Pressable>
         </View>
 
         <View style={styles.field}>
@@ -415,6 +445,49 @@ export default function InvoiceCreateScreen() {
 
         <Button title={saving ? 'Creating...' : 'Create Invoice'} onPress={handleCreate} loading={saving} size="large" fullWidth />
       </Card>
+
+      <Modal visible={isPartyModalVisible} animationType="slide" transparent={true} onRequestClose={() => setIsPartyModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Party</Text>
+              <Pressable onPress={() => setIsPartyModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#0F172A" />
+              </Pressable>
+            </View>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search by name or type..."
+              value={partySearchQuery}
+              onChangeText={setPartySearchQuery}
+            />
+            <FlatList
+              data={filteredParties}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={[styles.modalListItem, item.id === partyId && styles.modalListItemActive]}
+                  onPress={() => {
+                    setPartyId(item.id);
+                    setStateOfSupply(item.address ?? stateOfSupply);
+                    setGstNumber(item.gstin ?? gstNumber);
+                    setIsPartyModalVisible(false);
+                    setPartySearchQuery('');
+                  }}
+                >
+                  <Text style={styles.partyTitle}>{item.partyName}</Text>
+                  <Text style={styles.partyMeta}>{item.type}</Text>
+                  {item.gstin ? <Text style={styles.partyMetaSmall}>GST: {item.gstin}</Text> : null}
+                </Pressable>
+              )}
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>No parties found.</Text>
+              }
+            />
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -618,5 +691,72 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#D64A4A',
     marginBottom: 12,
+  },
+  dropdownSelector: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5EAF3',
+    padding: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dropdownSelectedText: {
+    fontSize: 14,
+    color: '#0F172A',
+    fontWeight: '500',
+  },
+  dropdownPlaceholderText: {
+    fontSize: 14,
+    color: '#94A3B8',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: '80%',
+    padding: 16,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  searchInput: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 14,
+    marginBottom: 16,
+    color: '#0F172A',
+  },
+  modalListItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  modalListItemActive: {
+    backgroundColor: '#EEF4FF',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    borderBottomWidth: 0,
+    marginBottom: 4,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#64748B',
+    marginTop: 20,
   },
 });

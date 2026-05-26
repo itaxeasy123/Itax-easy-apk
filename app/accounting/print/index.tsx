@@ -25,7 +25,7 @@ export default function AccountingPrintIndex() {
           <Card key={item.title} style={styles.card}>
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.note}>{item.note}</Text>
-            <Pressable style={styles.button} onPress={() => router.push(item.route)}>
+            <Pressable style={styles.button} onPress={() => router.navigate(item.route)}>
               <Text style={styles.buttonText}>Open</Text>
             </Pressable>
           </Card>

@@ -172,7 +172,7 @@ export default function PartyListScreen() {
               title="No parties found"
               description="Add a customer or supplier to begin."
               actionText="Add Party"
-              onAction={() => router.push("/accounting/parties/create")}
+              onAction={() => router.navigate("/accounting/parties/create")}
             />
           </Card>
         ) : (
@@ -185,7 +185,7 @@ export default function PartyListScreen() {
                 <Pressable
                   key={party.id}
                   style={styles.partyRowClean}
-                  onPress={() => router.push(`/accounting/parties/${party.id}`)}
+                  onPress={() => router.navigate(`/accounting/parties/${party.id}`)}
                 >
                   <View style={styles.avatar}>
                     <Text style={styles.avatarText}>{initial}</Text>
@@ -199,7 +199,7 @@ export default function PartyListScreen() {
         )}
       </ScrollView>
 
-      <Pressable style={[styles.fab, { bottom: 86 + Math.max(insets.bottom, 0) }]} onPress={() => router.push("/accounting/parties/create")}>
+      <Pressable style={[styles.fab, { bottom: 86 + Math.max(insets.bottom, 0) }]} onPress={() => router.navigate("/accounting/parties/create")}>
         <Ionicons name="person-add" size={18} color="#fff" />
         <Text style={styles.fabText}>Add Party</Text>
       </Pressable>

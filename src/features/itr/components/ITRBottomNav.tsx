@@ -34,7 +34,7 @@ export default function ITRBottomNav({ activeRoute = "/itr" }: ITRBottomNavProps
             <Pressable
               key={item.label}
               style={[styles.navItem, isActive && styles.navItemActive]}
-              onPress={() => router.push(item.route)}
+              onPress={() => router.replace(item.route)}
             >
               <Ionicons
                 name={item.icon}

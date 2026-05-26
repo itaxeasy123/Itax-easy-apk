@@ -75,7 +75,7 @@ export default function LedgerCreateScreen() {
         ledgerType,
         openingBalance: amount,
       });
-      router.push("/accounting/ledgers");
+      router.navigate("/accounting/ledgers");
     } catch (err) {
       setError(getErrorMessage(err, "Unable to create ledger. Try again."));
     } finally {

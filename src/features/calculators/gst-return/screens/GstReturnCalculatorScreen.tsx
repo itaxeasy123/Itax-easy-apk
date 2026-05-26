@@ -19,6 +19,20 @@ export default function GstReturnCalculatorScreen() {
     taxableSales: '0',
   });
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof GstReturnCalculatorInput, string> = {
+      inputTaxCredit: '',
+      outputRate: '',
+      taxableSales: '',
+    };
+    
+    if (form.taxableSales && Number(form.taxableSales) <= 0) errs.taxableSales = 'Sales must be > 0';
+    if (form.outputRate && (Number(form.outputRate) <= 0 || Number(form.outputRate) > 100)) errs.outputRate = 'Rate must be 0-100';
+    if (form.inputTaxCredit && Number(form.inputTaxCredit) < 0) errs.inputTaxCredit = 'ITC cannot be negative';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateGstReturn(form), [form]);
 
   return (
@@ -32,11 +46,12 @@ export default function GstReturnCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              taxableSales: value.replace(/[^0-9.]/g, ''),
+              taxableSales: value,
             }))
           }
           placeholder="0"
           value={form.taxableSales}
+          error={errors.taxableSales}
         />
 
         <CalculatorInputField
@@ -45,11 +60,12 @@ export default function GstReturnCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              outputRate: value.replace(/[^0-9.]/g, ''),
+              outputRate: value,
             }))
           }
           placeholder="0"
           value={form.outputRate}
+          error={errors.outputRate}
         />
 
         <CalculatorInputField
@@ -58,31 +74,14 @@ export default function GstReturnCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              inputTaxCredit: value.replace(/[^0-9.]/g, ''),
+              inputTaxCredit: value,
             }))
           }
           placeholder="0"
           value={form.inputTaxCredit}
+          error={errors.inputTaxCredit}
         />
 
-        <View style={styles.chartWrap}>
-          <View style={styles.chartOuter}>
-            <View style={styles.chartBlueArcTop} />
-            <View style={styles.chartBlueArcBottom} />
-            <View style={styles.chartInner} />
-          </View>
-
-          <View style={styles.legendRow}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, styles.legendDotOutput]} />
-              <Text style={styles.legendText}>Output GST</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, styles.legendDotCredit]} />
-              <Text style={styles.legendText}>ITC</Text>
-            </View>
-          </View>
-        </View>
 
         <CalculatorSummaryCard
           items={[

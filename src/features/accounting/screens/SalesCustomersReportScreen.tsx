@@ -123,10 +123,10 @@ export default function SalesCustomersReportScreen() {
         <View style={styles.switcherWrap}>
           <SalesReportSwitcher
             active="customers"
-            onMonthlyPress={() => router.push("/accounting/reports-sales-monthly")}
+            onMonthlyPress={() => router.navigate("/accounting/reports-sales-monthly")}
             onCustomersPress={() => router.replace("/accounting/reports-sales-customers")}
             thirdLabel="e-Way Bills"
-            onThirdPress={() => router.push("/accounting/reports")}
+            onThirdPress={() => router.navigate("/accounting/reports")}
           />
         </View>
 
@@ -137,7 +137,7 @@ export default function SalesCustomersReportScreen() {
               Financial Year ({String(currentYear - 1).slice(-2)} Apr to {String(currentYear).slice(-2)} Mar)
             </Text>
           </View>
-          <Pressable onPress={() => router.push("/accounting/reports")}>
+          <Pressable onPress={() => router.navigate("/accounting/reports")}>
             <Text style={styles.changeText}>Change</Text>
           </Pressable>
         </View>
@@ -206,7 +206,7 @@ export default function SalesCustomersReportScreen() {
                   return (
                     <Pressable
                       key={row.id}
-                      onPress={canOpenParty ? () => router.push(`/accounting/reports-sales-customers/${row.id}`) : undefined}
+                      onPress={canOpenParty ? () => router.navigate(`/accounting/reports-sales-customers/${row.id}`) : undefined}
                       disabled={!canOpenParty}
                       style={({ pressed }) => [styles.customerRow, pressed && styles.customerRowPressed]}
                     >

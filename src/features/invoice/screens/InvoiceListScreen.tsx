@@ -385,7 +385,7 @@ export default function InvoiceListScreen() {
                         <Text style={styles.amountDate}>{formatDate(invoice.invoiceDate)}</Text>
                         <Pressable
                           onPress={() =>
-                            router.push({
+                            router.navigate({
                               pathname: "/accounting/print/invoice",
                               params: { id: invoice.id },
                             })
@@ -464,7 +464,7 @@ export default function InvoiceListScreen() {
         </ScrollView>
 
         <View style={[styles.bottomDock, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
-          <Pressable style={styles.primaryButton} onPress={() => router.push('/invoice-create')}>
+          <Pressable style={styles.primaryButton} onPress={() => router.navigate('/invoice-create')}>
             <Ionicons color={colors.white} name="add" size={18} />
             <Text style={styles.primaryButtonText}>Create Invoice</Text>
           </Pressable>

@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { AccountingHeader, Button, Card, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { voucherService } from "../services/voucherService";
+import { useAccountingSessionStore } from "../../../store/accountingSessionStore";
 import { Ledger, Party, VoucherLine } from "../types/accountingTypes";
 import {
   addDaysInputValue,
@@ -87,12 +88,15 @@ export default function DealVoucherCreateScreen({
   const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
+  const { draftVouchers, setDraftVoucher, clearDraftVoucher } = useAccountingSessionStore();
+  const draft = draftVouchers[mode];
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [parties, setParties] = useState<Party[]>([]);
   const [items, setItems] = useState<ItemLike[]>([]);
   const [ledgers, setLedgers] = useState<Ledger[]>([]);
-  const [selectedPartyId, setSelectedPartyId] = useState("");
+  const [selectedPartyId, setSelectedPartyId] = useState(draft?.selectedPartyId ?? "");
   const [partySearch, setPartySearch] = useState("");
   const [itemSearch, setItemSearch] = useState("");
   const [showPartySheet, setShowPartySheet] = useState(false);
@@ -106,17 +110,30 @@ export default function DealVoucherCreateScreen({
   const [showOtherCharges, setShowOtherCharges] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState(
-    `${invoicePrefix}-${Date.now().toString().slice(-6)}`
+    draft?.invoiceDate ? `${invoicePrefix}-${Date.now().toString().slice(-6)}` : `${invoicePrefix}-${Date.now().toString().slice(-6)}`
   );
-  const [invoiceDate, setInvoiceDate] = useState(todayInputValue());
-  const [dueDate, setDueDate] = useState(addDaysInputValue(14));
-  const [gstAmount, setGstAmount] = useState("0");
-  const [selectedGstOption, setSelectedGstOption] = useState<string | null>(null);
+  const [invoiceDate, setInvoiceDate] = useState(draft?.invoiceDate ?? todayInputValue());
+  const [dueDate, setDueDate] = useState(draft?.dueDate ?? addDaysInputValue(14));
+  const [gstAmount, setGstAmount] = useState(draft?.gstAmount ?? "0");
+  const [selectedGstOption, setSelectedGstOption] = useState<string | null>(draft?.selectedGstOption ?? null);
   const [gstSearch, setGstSearch] = useState("");
-  const [otherCharges, setOtherCharges] = useState("0");
-  const [notes, setNotes] = useState("");
+  const [otherCharges, setOtherCharges] = useState(draft?.otherCharges ?? "0");
+  const [notes, setNotes] = useState(draft?.notes ?? "");
   const [addressDraft, setAddressDraft] = useState("");
-  const [lineItems, setLineItems] = useState<VoucherLineDraft[]>([defaultLine()]);
+  const [lineItems, setLineItems] = useState<VoucherLineDraft[]>(draft?.lineItems ?? [defaultLine()]);
+
+  useEffect(() => {
+    setDraftVoucher(mode, {
+      selectedPartyId,
+      invoiceDate,
+      dueDate,
+      gstAmount,
+      selectedGstOption,
+      otherCharges,
+      notes,
+      lineItems,
+    });
+  }, [mode, selectedPartyId, invoiceDate, dueDate, gstAmount, selectedGstOption, otherCharges, notes, lineItems, setDraftVoucher]);
 
   useEffect(() => {
     async function loadData() {
@@ -141,7 +158,7 @@ export default function DealVoucherCreateScreen({
           }))
         );
         setLedgers(ledgerResult.data ?? []);
-        setSelectedPartyId((partyResult.data ?? [])[0]?.id ?? "");
+        setSelectedPartyId((prev) => prev || ((partyResult.data ?? [])[0]?.id ?? ""));
       } catch {
         setError("Unable to load voucher form data.");
       } finally {
@@ -300,6 +317,16 @@ export default function DealVoucherCreateScreen({
       setError("Invoice number is required.");
       return;
     }
+    
+    if (invoiceDate.trim() && Number.isNaN(new Date(invoiceDate).getTime())) {
+      setError("Invoice date must be a valid date (e.g. YYYY-MM-DD).");
+      return;
+    }
+    
+    if (dueDate.trim() && Number.isNaN(new Date(dueDate).getTime())) {
+      setError("Due date must be a valid date (e.g. YYYY-MM-DD).");
+      return;
+    }
 
     if (!selectedPartyLedger || !systemLedger) {
       setError("Required ledgers are missing.");
@@ -307,8 +334,20 @@ export default function DealVoucherCreateScreen({
     }
 
     if (summary.total <= 0) {
-      setError("Please add at least one item.");
+      setError("Total amount must be greater than zero. Please add valid items.");
       return;
+    }
+    
+    // Validate individual lines
+    for (const line of lineItems) {
+      if (line.itemId && (toNumber(line.quantity) <= 0)) {
+        setError(`Quantity for item ${line.itemName} must be greater than 0.`);
+        return;
+      }
+      if (line.itemId && (toNumber(line.discount) < 0 || toNumber(line.taxPercent) < 0)) {
+        setError("Discount and GST cannot be negative.");
+        return;
+      }
     }
 
     const partyLine: VoucherLine = {
@@ -353,6 +392,7 @@ export default function DealVoucherCreateScreen({
         lines: [partyLine, businessLine],
       });
 
+      clearDraftVoucher(mode);
       router.replace("/accounting/vouchers");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to create voucher.");

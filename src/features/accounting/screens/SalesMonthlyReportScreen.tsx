@@ -82,7 +82,7 @@ export default function SalesMonthlyReportScreen() {
           <SalesReportSwitcher
             active="monthly"
             onMonthlyPress={() => router.replace("/accounting/reports-sales-monthly")}
-            onCustomersPress={() => router.push("/accounting/reports-sales-customers")}
+            onCustomersPress={() => router.navigate("/accounting/reports-sales-customers")}
             thirdLabel="e-Way Bills"
           />
         </View>

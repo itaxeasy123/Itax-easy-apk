@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { calculatorStyles } from '../../../../theme';
@@ -19,6 +19,20 @@ export default function DepreciationCalculatorScreen() {
     usefulLife: '0',
   });
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof DepreciationCalculatorInput, string> = {
+      purchasePrice: '',
+      scrapValue: '',
+      usefulLife: '',
+    };
+    
+    if (form.purchasePrice && Number(form.purchasePrice) <= 0) errs.purchasePrice = 'Must be > 0';
+    if (form.scrapValue && Number(form.scrapValue) < 0) errs.scrapValue = 'Cannot be negative';
+    if (form.usefulLife && Number(form.usefulLife) <= 0) errs.usefulLife = 'Life must be > 0';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateDepreciation(form), [form]);
 
   return (
@@ -31,18 +45,22 @@ export default function DepreciationCalculatorScreen() {
         title="Depreciation Calculator"
       />
 
-      <View style={calculatorStyles.screenContent}>
+      <ScrollView 
+        contentContainerStyle={calculatorStyles.screenContent}
+        showsVerticalScrollIndicator={false}
+      >
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={depreciationFieldLabels.purchasePrice}
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              purchasePrice: value.replace(/[^0-9.]/g, ''),
+              purchasePrice: value,
             }))
           }
           placeholder="0"
           value={form.purchasePrice}
+          error={errors.purchasePrice}
         />
 
         <CalculatorInputField
@@ -51,11 +69,12 @@ export default function DepreciationCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              scrapValue: value.replace(/[^0-9.]/g, ''),
+              scrapValue: value,
             }))
           }
           placeholder="0"
           value={form.scrapValue}
+          error={errors.scrapValue}
         />
 
         <CalculatorInputField
@@ -64,11 +83,12 @@ export default function DepreciationCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              usefulLife: value.replace(/[^0-9]/g, ''),
+              usefulLife: value,
             }))
           }
           placeholder="0"
           value={form.usefulLife}
+          error={errors.usefulLife}
         />
 
         <CalculatorSummaryCard
@@ -91,7 +111,7 @@ export default function DepreciationCalculatorScreen() {
             },
           ]}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

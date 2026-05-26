@@ -264,7 +264,7 @@ export default function ITRForm16Screen() {
   const applyToItr = () => {
     if (!parseResult) return;
     Alert.alert("Form 16 imported", "The extracted values were saved to your ITR draft.");
-    router.push("/itr/manual");
+    router.navigate("/itr/manual");
   };
 
   const handleDownloadJson = async () => {

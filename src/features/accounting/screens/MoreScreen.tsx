@@ -59,53 +59,53 @@ export default function MoreScreen() {
 
   const handleMenuItemPress = (itemId: string) => {
     if (itemId === 'daybook') {
-      router.push('/accounting/daybook');
+      router.navigate('/accounting/daybook');
       return;
     }
 
     if (itemId === 'vouchers') {
-      router.push('/accounting/vouchers');
+      router.navigate('/accounting/vouchers');
       return;
     }
 
     // if (itemId === 'print-views') {
-    //   router.push('/accounting/print');
+    //   router.navigate('/accounting/print');
     //   return;
     // }
 
     if (itemId === 'trial-balance') {
-      router.push('/accounting/trial-balance');
+      router.navigate('/accounting/trial-balance');
       return;
     }
 
     if (itemId === 'payments') {
-      router.push('/accounting/payments');
+      router.navigate('/accounting/payments');
       return;
     }
 
     if (itemId === 'bank-tools') {
-      router.push('/accounting/bank');
+      router.navigate('/accounting/bank');
       return;
     }
     if (itemId === 'bank-statement') {
-  router.push('/accounting/bank-statement');
+  router.navigate('/accounting/bank-statement');
   return;
 }
     if (itemId === 'driving-licence') {
-      router.push('/accounting/driving-licence');
+      router.navigate('/accounting/driving-licence');
       return;
     }
 
     if (itemId === 'invoice-ocr') {
-      router.push('/accounting/invoice');
+      router.navigate('/accounting/invoice');
       return;
     }
     if (itemId === 'gst-ocr') {
-      router.push('/accounting/gst-ocr');
+      router.navigate('/accounting/gst-ocr');
       return;
     }
     if (itemId === 'company-create') {
-      router.push('/accounting/company-create');
+      router.navigate('/accounting/company-create');
       return;
     }
 

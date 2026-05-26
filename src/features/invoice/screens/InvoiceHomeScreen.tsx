@@ -275,22 +275,22 @@ export default function InvoiceHomeScreen() {
 
   function handleShortcutPress(id: string) {
     if (id === 'create') {
-      router.push('/invoice-create');
+      router.navigate('/invoice-create');
       return;
     }
 
     if (id === 'parties') {
-      router.push('/accounting/parties');
+      router.navigate('/accounting/parties');
       return;
     }
 
     if (id === 'items') {
-      router.push('/accounting/items');
+      router.navigate('/accounting/items');
       return;
     }
 
     if (id === 'einvoice') {
-      router.push('/accounting/more');
+      router.navigate('/accounting/more');
     }
   }
 
@@ -309,6 +309,12 @@ export default function InvoiceHomeScreen() {
         >
           <View style={styles.headerRow}>
             <View style={styles.titleWrap}>
+              <Pressable 
+                onPress={() => router.canGoBack() ? router.back() : router.replace('/dashboard')} 
+                style={[styles.headerIconButton, { marginRight: 4 }]}
+              >
+                <Ionicons color={colors.textMuted} name="arrow-back" size={20} />
+              </Pressable>
               <View style={styles.titleIconBox}>
                 <Ionicons color={colors.white} name="receipt-outline" size={16} />
               </View>
@@ -406,7 +412,7 @@ export default function InvoiceHomeScreen() {
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Invoices</Text>
-            <Pressable onPress={() => router.push('/invoices')}>
+            <Pressable onPress={() => router.navigate('/invoices')}>
               <Text style={styles.sectionAction}>View All</Text>
             </Pressable>
           </View>
@@ -477,7 +483,7 @@ export default function InvoiceHomeScreen() {
         </ScrollView>
 
         <View style={[styles.bottomDock, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
-          <Pressable style={styles.createButton} onPress={() => router.push('/invoice-create')}>
+          <Pressable style={styles.createButton} onPress={() => router.navigate('/invoice-create')}>
             <Ionicons color={colors.white} name="add" size={18} />
             <Text style={styles.createButtonText}>Create Invoice</Text>
           </Pressable>

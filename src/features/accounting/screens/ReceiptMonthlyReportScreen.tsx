@@ -87,7 +87,7 @@ export default function ReceiptMonthlyReportScreen() {
           <SalesReportSwitcher
             active="monthly"
             onMonthlyPress={() => router.replace("/accounting/reports-receipt-monthly")}
-            onCustomersPress={() => router.push("/accounting/reports-receipt-customers")}
+            onCustomersPress={() => router.navigate("/accounting/reports-receipt-customers")}
           />
         </View>
 

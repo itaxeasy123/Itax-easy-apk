@@ -80,11 +80,11 @@ export default function ItemsScreen() {
   });
 
   const handleAddItem = () => {
-    router.push("/accounting/items-create");
+    router.navigate("/accounting/items-create");
   };
 
   const handleItemPress = (item: Item) => {
-    router.push({
+    router.navigate({
       pathname: "/accounting/items/[id]",
       params: { id: item.id },
     });

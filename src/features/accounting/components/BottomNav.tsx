@@ -31,7 +31,7 @@ export default function BottomNav({ activeRoute = '/accounting' }: BottomNavProp
   const router = useRouter();
 
   const handleNavigation = (route: Href) => {
-    router.push(route);
+    router.replace(route);
   };
 
   return (

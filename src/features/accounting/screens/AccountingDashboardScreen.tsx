@@ -136,7 +136,7 @@ export default function AccountingDashboardScreen() {
               {/* <Text style={styles.title}>Business snapshot</Text> */}
             </View>
           </View>
-          <Pressable onPress={() => router.push("/accounting/more")}>
+          <Pressable onPress={() => router.back()}>
             <Ionicons name="ellipsis-horizontal" size={22} color="#0F172A" />
           </Pressable>
         </View>
@@ -219,7 +219,7 @@ export default function AccountingDashboardScreen() {
               <View style={styles.quickRow}>
                 <Pressable
                   style={styles.quickCard}
-                  onPress={() => router.push("/accounting/create-sales")}
+                  onPress={() => router.navigate("/accounting/create-sales")}
                 >
                   <Ionicons name="pricetag" size={20} color="#2563EB" />
                   <Text style={styles.quickText}>Sales Invoice</Text>
@@ -227,7 +227,7 @@ export default function AccountingDashboardScreen() {
 
                 <Pressable
                   style={styles.quickCard}
-                  onPress={() => router.push("/accounting/parties/create")}
+                  onPress={() => router.navigate("/accounting/parties/create")}
                 >
                   <Ionicons name="person-add" size={20} color="#10B981" />
                   <Text style={styles.quickText}>New Party</Text>
@@ -235,7 +235,7 @@ export default function AccountingDashboardScreen() {
 
                 <Pressable
                   style={styles.quickCard}
-                  onPress={() => router.push("/accounting/items-create")}
+                  onPress={() => router.navigate("/accounting/items-create")}
                 >
                   <Ionicons name="cube" size={20} color="#F59E0B" />
                   <Text style={styles.quickText}>New Item</Text>
@@ -249,7 +249,7 @@ export default function AccountingDashboardScreen() {
               <View style={styles.overviewGrid}>
                 <Pressable
                   style={styles.overviewCard}
-                  onPress={() => router.push("/invoice")}
+                  onPress={() => router.navigate("/invoice")}
                 >
                   <Ionicons name="document-text" size={18} color="#10B981" />
                   <Text style={styles.overviewText}>Invoices</Text>
@@ -260,7 +260,7 @@ export default function AccountingDashboardScreen() {
 
                 <Pressable
                   style={styles.overviewCard}
-                  onPress={() => router.push("/accounting/bill-payable")}
+                  onPress={() => router.navigate("/accounting/bill-payable")}
                 >
                   <Ionicons name="wallet" size={18} color="#EF4444" />
                   <Text style={styles.overviewText}>Bills</Text>
@@ -271,7 +271,7 @@ export default function AccountingDashboardScreen() {
 
                 <Pressable
                   style={styles.overviewCard}
-                  onPress={() => router.push("/accounting/parties")}
+                  onPress={() => router.navigate("/accounting/parties")}
                 >
                   <Ionicons name="people" size={18} color="#2563EB" />
                   <Text style={styles.overviewText}>Parties</Text>
@@ -280,7 +280,7 @@ export default function AccountingDashboardScreen() {
 
                 <Pressable
                   style={styles.overviewCard}
-                  onPress={() => router.push("/accounting/items")}
+                  onPress={() => router.navigate("/accounting/items")}
                 >
                   <Ionicons name="layers" size={18} color="#8B5CF6" />
                   <Text style={styles.overviewText}>Items</Text>
@@ -292,7 +292,7 @@ export default function AccountingDashboardScreen() {
         ) : null}
       </ScrollView>
 
-      <Pressable style={[styles.fab, { bottom: 84 + Math.max(insets.bottom, 0) }]} onPress={() => router.push("/invoice")}>
+      <Pressable style={[styles.fab, { bottom: 84 + Math.max(insets.bottom, 0) }]} onPress={() => router.navigate("/invoice")}>
         <Text style={styles.fabText}>Create Invoice</Text>
       </Pressable>
 

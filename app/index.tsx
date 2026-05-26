@@ -1,20 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
-  withTiming,
+  useSharedValue,
   withDelay,
   withRepeat,
+  withTiming,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useAuthStore } from '../src/store/authStore';
 
 const { width } = Dimensions.get('window');
 
 export default function IndexScreen() {
   const router = useRouter();
+
+    // App start hote hi phone memory se purana token nikalne ke liye
+  const loadAuth = useAuthStore((state) => state.loadAuth);
+  const token = useAuthStore((state) => state.token);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
+  useEffect(() => {
+    loadAuth(); // Auth data load karo
+  }, [loadAuth]);
 
   // 🔥 TITLE (IMMEDIATE)
   const titleOpacity = useSharedValue(1); // 👈 already visible
@@ -45,17 +54,40 @@ export default function IndexScreen() {
     );
 
     // ⏱ TEXT SEQUENCE
+  //   text1Opacity.value = withDelay(1000, withTiming(1, { duration: 500 }));
+  //   text2Opacity.value = withDelay(2000, withTiming(1, { duration: 500 }));
+
+  //   // 🚀 NAVIGATION
+  //   const timer = setTimeout(() => {
+  //     router.replace('/login');
+  //   }, 4000);
+
+  //   return () => clearTimeout(timer);
+  // }, []);
+
+      // ⏱ TEXT SEQUENCE
     text1Opacity.value = withDelay(1000, withTiming(1, { duration: 500 }));
     text2Opacity.value = withDelay(2000, withTiming(1, { duration: 500 }));
+  }, []);
 
-    // 🚀 NAVIGATION
+  // 🚀 NAVIGATION LOGIC
+  useEffect(() => {
+    // Jab tak phone memory se auth data load na ho jaye, tab tak wait karo
+    if (!isHydrated) return;
+
     const timer = setTimeout(() => {
-      router.replace('/login');
+      if (token) {
+        // Agar login session milta hai toh directly dashboard bhejo
+        router.replace('/dashboard');
+      } else {
+        // Agar nahi milta hai toh wapas login par bhejo
+        router.replace('/login');
+      }
     }, 4000);
 
     return () => clearTimeout(timer);
-  }, []);
-
+  }, [isHydrated, token]);
+console.log("Hydrated:", isHydrated, "| Token:", token);
   // 🎯 STYLES
   const titleStyle = useAnimatedStyle(() => ({
     opacity: titleOpacity.value,

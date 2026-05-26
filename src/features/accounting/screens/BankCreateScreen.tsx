@@ -8,6 +8,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,14 +16,69 @@ import { useRouter } from "expo-router";
 import { AccountingHeader } from "../components";
 
 export default function BankCreateScreen() {
-    const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
+  
   const [ifsc, setIfsc] = useState("");
   const [bankName, setBankName] = useState("");
   const [branchName, setBranchName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [confirmAccountNumber, setConfirmAccountNumber] = useState("");
+  const [accountHolderName, setAccountHolderName] = useState("");
+  const [upiId, setUpiId] = useState("");
   const [showOtherDetails, setShowOtherDetails] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSave = () => {
+    setError(null);
+
+    const trimmedIfsc = ifsc.trim();
+    if (!trimmedIfsc) {
+      setError("IFSC code is required.");
+      return;
+    }
+    if (trimmedIfsc.length !== 11) {
+      setError("IFSC code must be exactly 11 characters.");
+      return;
+    }
+
+    if (!bankName.trim()) {
+      setError("Bank name is required.");
+      return;
+    }
+
+    if (!branchName.trim()) {
+      setError("Branch name is required.");
+      return;
+    }
+
+    const trimmedAcc = accountNumber.trim();
+    if (!trimmedAcc) {
+      setError("Account number is required.");
+      return;
+    }
+    if (!/^\d+$/.test(trimmedAcc)) {
+      setError("Account number must contain only digits.");
+      return;
+    }
+
+    if (trimmedAcc !== confirmAccountNumber.trim()) {
+      setError("Account numbers do not match.");
+      return;
+    }
+    
+    if (showOtherDetails && upiId.trim()) {
+      if (!upiId.includes('@')) {
+        setError("Please enter a valid UPI ID (must contain '@').");
+        return;
+      }
+    }
+
+    // Since there is no API call mapped currently, we simulate success
+    Alert.alert("Success", "Bank details validated successfully!", [
+      { text: "OK", onPress: () => router.back() }
+    ]);
+  };
 
   return (
     <KeyboardAvoidingView 
@@ -45,6 +101,7 @@ export default function BankCreateScreen() {
               placeholder="Enter IFSC"
               style={styles.ifscInput}
               autoCapitalize="characters"
+              maxLength={11}
             />
             <Pressable style={styles.fetchButton}>
               <Text style={styles.fetchButtonText}>Fetch Bank Details</Text>
@@ -71,7 +128,7 @@ export default function BankCreateScreen() {
             placeholder="Bank account number"
             style={styles.input}
             keyboardType="number-pad"
-            secureTextEntry // Usually confirm is hidden or first is hidden, but standard inputs are fine
+            secureTextEntry 
           />
 
           <TextInput
@@ -97,20 +154,32 @@ export default function BankCreateScreen() {
           {showOtherDetails && (
             <View style={styles.otherDetailsContainer}>
               <TextInput
+                value={accountHolderName}
+                onChangeText={setAccountHolderName}
                 placeholder="Account Holder Name"
                 style={styles.input}
               />
               <TextInput
+                value={upiId}
+                onChangeText={setUpiId}
                 placeholder="UPI ID"
                 style={styles.input}
+                autoCapitalize="none"
               />
             </View>
           )}
+          
+          {error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={20} color="#DC2626" />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
-        <Pressable style={styles.saveButton}>
+        <Pressable style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>Save</Text>
         </Pressable>
       </View>
@@ -123,7 +192,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8FAFC",
   },
-
   content: {
     flex: 1,
     padding: 16,
@@ -196,6 +264,23 @@ const styles = StyleSheet.create({
   },
   otherDetailsContainer: {
     paddingTop: 16,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF2F2',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    gap: 8,
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 13,
+    fontWeight: '500',
+    flex: 1,
   },
   footer: {
     backgroundColor: "#FFFFFF",

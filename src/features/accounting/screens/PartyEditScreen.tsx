@@ -294,7 +294,7 @@ export default function PartyEditScreen() {
             ) : (
               linkedLedgers.map((ledger: Ledger) => (
                 <Card key={ledger.id} style={styles.ledgerCard}>
-                  <Pressable onPress={() => router.push(`/accounting/ledgers/${ledger.id}`)}>
+                  <Pressable onPress={() => router.navigate(`/accounting/ledgers/${ledger.id}`)}>
                     <View style={styles.ledgerRow}>
                       <View style={styles.ledgerLeft}>
                         <Text style={styles.ledgerName}>{ledger.ledgerName}</Text>

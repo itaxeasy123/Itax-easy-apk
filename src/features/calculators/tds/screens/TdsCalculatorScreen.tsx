@@ -51,6 +51,19 @@ export default function TdsCalculatorScreen() {
     }
   }, [form.variantLabel, variantOptions]);
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof TdsCalculatorInput, string> = {
+      panAvailable: '',
+      paymentAmount: '',
+      sectionKey: '',
+      variantLabel: '',
+    };
+    
+    if (form.paymentAmount && Number(form.paymentAmount) <= 0) errs.paymentAmount = 'Amount must be > 0';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateTds(form), [form]);
 
   return (
@@ -67,11 +80,12 @@ export default function TdsCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              paymentAmount: value.replace(/[^0-9.]/g, ''),
+              paymentAmount: value,
             }))
           }
           placeholder="0"
           value={form.paymentAmount}
+          error={errors.paymentAmount}
         />
 
         <TdsSelectField

@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { calculatorStyles } from '../../../../theme';
@@ -20,24 +20,42 @@ export default function FdCalculatorScreen() {
     timeYears: '0',
   });
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof FixedDepositCalculatorInput, string> = {
+      principal: '',
+      rate: '',
+      timeYears: '',
+    };
+    
+    if (form.principal && Number(form.principal) <= 0) errs.principal = 'Must be > 0';
+    if (form.rate && (Number(form.rate) <= 0 || Number(form.rate) > 100)) errs.rate = 'Rate must be 0-100';
+    if (form.timeYears && Number(form.timeYears) <= 0) errs.timeYears = 'Time must be > 0';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateFd(form), [form]);
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={calculatorStyles.screenSafeArea}>
       <CalculatorHeader onBackPress={() => router.back()} title="FD Calculator" />
 
-      <View style={calculatorStyles.screenContent}>
+      <ScrollView 
+        contentContainerStyle={calculatorStyles.screenContent}
+        showsVerticalScrollIndicator={false}
+      >
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={fdFieldLabels.principal}
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              principal: value.replace(/[^0-9.]/g, ''),
+              principal: value,
             }))
           }
           placeholder="0"
           value={form.principal}
+          error={errors.principal}
         />
 
         <CalculatorInputField
@@ -46,11 +64,12 @@ export default function FdCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              rate: value.replace(/[^0-9.]/g, ''),
+              rate: value,
             }))
           }
           placeholder="0"
           value={form.rate}
+          error={errors.rate}
         />
 
         <CalculatorInputField
@@ -59,11 +78,12 @@ export default function FdCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              timeYears: value.replace(/[^0-9.]/g, ''),
+              timeYears: value,
             }))
           }
           placeholder="0"
           value={form.timeYears}
+          error={errors.timeYears}
         />
 
         <CalculatorSummaryCard
@@ -75,7 +95,7 @@ export default function FdCalculatorScreen() {
             { label: 'Maturity Amount', value: `Rs ${result.maturityAmount.toFixed(2)}` },
           ]}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

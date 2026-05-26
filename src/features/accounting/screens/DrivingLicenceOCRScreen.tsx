@@ -322,9 +322,7 @@ const DrivingLicenceOCRScreen =
         >
           <TouchableOpacity
             onPress={() =>
-              router.push(
-                '/accounting/more'
-              )
+              router.back()
             }
           >
             <Ionicons

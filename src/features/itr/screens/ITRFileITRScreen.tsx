@@ -56,9 +56,9 @@ export default function ITRFileITRScreen() {
                 onPress={() => {
                   setSelected(option.key);
                   if (option.key === "dept") {
-                    router.push("/itr/form-16");
+                    router.navigate("/itr/form-16");
                   } else {
-                    router.push("/itr/manual");
+                    router.navigate("/itr/manual");
                   }
                 }}
                 style={[

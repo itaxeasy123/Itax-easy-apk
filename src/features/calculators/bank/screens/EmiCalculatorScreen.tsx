@@ -20,6 +20,20 @@ export default function EmiCalculatorScreen() {
     tenureYears: '0',
   });
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof EmiCalculatorInput, string> = {
+      annualRate: '',
+      principal: '',
+      tenureYears: '',
+    };
+    
+    if (form.principal && Number(form.principal) <= 0) errs.principal = 'Loan amount must be > 0';
+    if (form.annualRate && Number(form.annualRate) <= 0) errs.annualRate = 'Rate must be > 0';
+    if (form.tenureYears && Number(form.tenureYears) <= 0) errs.tenureYears = 'Tenure must be > 0';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateEmi(form), [form]);
 
   return (
@@ -38,6 +52,7 @@ export default function EmiCalculatorScreen() {
           placeholder="0"
           value={form.principal}
           infoText="Total loan amount you want to borrow"
+          error={errors.principal}
         />
 
         <CalculatorInputField
@@ -51,6 +66,7 @@ export default function EmiCalculatorScreen() {
           placeholder="0"
           value={form.annualRate}
           infoText="Yearly interest rate (Max 50%)"
+          error={errors.annualRate}
         />
 
         <CalculatorInputField
@@ -64,6 +80,7 @@ export default function EmiCalculatorScreen() {
           placeholder="0"
           value={form.tenureYears}
           infoText="Duration of the loan in years (Max 40 years)"
+          error={errors.tenureYears}
         />
 
         <CalculatorSummaryCard

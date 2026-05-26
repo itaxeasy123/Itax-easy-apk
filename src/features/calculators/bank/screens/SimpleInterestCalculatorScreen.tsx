@@ -20,6 +20,20 @@ export default function SimpleInterestCalculatorScreen() {
     time: '0',
   });
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof SimpleInterestCalculatorInput, string> = {
+      principal: '',
+      rate: '',
+      time: '',
+    };
+    
+    if (form.principal && Number(form.principal) <= 0) errs.principal = 'Principal must be > 0';
+    if (form.rate && (Number(form.rate) <= 0 || Number(form.rate) > 100)) errs.rate = 'Rate must be 0-100';
+    if (form.time && Number(form.time) <= 0) errs.time = 'Time must be > 0';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateSimpleInterest(form), [form]);
 
   return (
@@ -36,11 +50,12 @@ export default function SimpleInterestCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              principal: value.replace(/[^0-9.]/g, ''),
+              principal: value,
             }))
           }
           placeholder="0"
           value={form.principal}
+          error={errors.principal}
         />
 
         <CalculatorInputField
@@ -49,11 +64,12 @@ export default function SimpleInterestCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              rate: value.replace(/[^0-9.]/g, ''),
+              rate: value,
             }))
           }
           placeholder="0"
           value={form.rate}
+          error={errors.rate}
         />
 
         <CalculatorInputField
@@ -62,11 +78,12 @@ export default function SimpleInterestCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              time: value.replace(/[^0-9.]/g, ''),
+              time: value,
             }))
           }
           placeholder="0"
           value={form.time}
+          error={errors.time}
         />
 
         <CalculatorSummaryCard

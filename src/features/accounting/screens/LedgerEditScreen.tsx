@@ -94,7 +94,7 @@ export default function LedgerEditScreen() {
         ledgerType,
         openingBalance: amount,
       });
-      router.push("/accounting/ledgers");
+      router.navigate("/accounting/ledgers");
     } catch {
       setError("Unable to save changes. Try again.");
     } finally {

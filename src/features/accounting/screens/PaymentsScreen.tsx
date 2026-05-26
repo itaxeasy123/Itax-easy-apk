@@ -91,7 +91,7 @@ export default function PaymentsScreen() {
         <Pressable 
           key={item.label} 
           style={[styles.row, index === 0 && styles.firstRow]}
-          onPress={() => router.push(`/accounting/payment-monthly-detail?month=${encodeURIComponent(item.label)}`)}
+          onPress={() => router.navigate(`/accounting/payment-monthly-detail?month=${encodeURIComponent(item.label)}`)}
         >
           <Text style={styles.rowTitle}>{item.label}</Text>
           <Text style={styles.rowAmount}>{formatCurrency(item.amount)}</Text>
@@ -113,7 +113,7 @@ export default function PaymentsScreen() {
         <Pressable 
           key={item.name} 
           style={[styles.row, index === 0 && styles.firstRow]}
-          onPress={() => router.push(`/accounting/payment-customer-detail?name=${encodeURIComponent(item.name)}`)}
+          onPress={() => router.navigate(`/accounting/payment-customer-detail?name=${encodeURIComponent(item.name)}`)}
         >
           <Text style={styles.rowTitle}>{item.name}</Text>
           <Text style={styles.rowAmount}>{formatCurrency(item.amount)}</Text>
@@ -173,7 +173,7 @@ export default function PaymentsScreen() {
         
         <Pressable 
           style={styles.fab}
-          onPress={() => router.push("/accounting/payment-create")}
+          onPress={() => router.navigate("/accounting/payment-create")}
         >
           <Ionicons name="add" size={32} color="#fff" />
         </Pressable>

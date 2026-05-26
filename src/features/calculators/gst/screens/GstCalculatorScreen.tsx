@@ -30,10 +30,22 @@ function cycleValue<T>(items: T[], current: T) {
 export default function GstCalculatorScreen() {
   const router = useRouter();
   const [form, setForm] = useState<GstCalculatorInput>({
-    amount: '3000',
+    amount: '0',
     mode: 'inclusive',
     rate: 5,
   });
+
+  const errors = useMemo(() => {
+    const errs: Record<keyof GstCalculatorInput, string> = {
+      amount: '',
+      mode: '',
+      rate: '',
+    };
+    
+    if (form.amount && Number(form.amount) <= 0) errs.amount = 'Amount must be > 0';
+    
+    return errs;
+  }, [form]);
 
   const result = useMemo(() => calculateGst(form), [form]);
   const selectedMode = GST_MODES.find((item) => item.value === form.mode);
@@ -67,6 +79,7 @@ export default function GstCalculatorScreen() {
           }}
           placeholder="0"
           value={form.amount}
+          error={errors.amount}
         />
 
         <CalculatorSelectField

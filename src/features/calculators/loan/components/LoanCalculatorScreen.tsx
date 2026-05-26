@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { calculatorStyles } from '../../../../theme';
@@ -29,6 +29,20 @@ export default function LoanCalculatorScreen({
     tenureYears: '0',
   });
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof LoanCalculatorInput, string> = {
+      annualRate: '',
+      loanAmount: '',
+      tenureYears: '',
+    };
+    
+    if (form.loanAmount && Number(form.loanAmount) <= 0) errs.loanAmount = 'Loan amount must be > 0';
+    if (form.annualRate && Number(form.annualRate) <= 0) errs.annualRate = 'Rate must be > 0';
+    if (form.tenureYears && Number(form.tenureYears) <= 0) errs.tenureYears = 'Tenure must be > 0';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateLoan(form), [form]);
 
   const rateFieldLabel = rateLabel;
@@ -39,18 +53,22 @@ export default function LoanCalculatorScreen({
     <SafeAreaView edges={['top', 'bottom']} style={calculatorStyles.screenSafeArea}>
       <CalculatorHeader onBackPress={() => router.back()} title={title} />
 
-      <View style={calculatorStyles.screenContent}>
+      <ScrollView 
+        contentContainerStyle={calculatorStyles.screenContent}
+        showsVerticalScrollIndicator={false}
+      >
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={amountFieldLabel}
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              loanAmount: value.replace(/[^0-9.]/g, ''),
+              loanAmount: value,
             }))
           }
           placeholder="0"
           value={form.loanAmount}
+          error={errors.loanAmount}
         />
 
         <CalculatorInputField
@@ -59,11 +77,12 @@ export default function LoanCalculatorScreen({
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              annualRate: value.replace(/[^0-9.]/g, ''),
+              annualRate: value,
             }))
           }
           placeholder="0"
           value={form.annualRate}
+          error={errors.annualRate}
         />
 
         <CalculatorInputField
@@ -72,11 +91,12 @@ export default function LoanCalculatorScreen({
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              tenureYears: value.replace(/[^0-9.]/g, ''),
+              tenureYears: value,
             }))
           }
           placeholder="0"
           value={form.tenureYears}
+          error={errors.tenureYears}
         />
 
         <CalculatorSummaryCard
@@ -89,7 +109,7 @@ export default function LoanCalculatorScreen({
             { label: 'Total Payment', value: `Rs ${result.totalPayment.toFixed(2)}` },
           ]}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

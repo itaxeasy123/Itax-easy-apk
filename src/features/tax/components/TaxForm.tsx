@@ -45,21 +45,38 @@ export default function TaxForm({ onSubmit }: any) {
     <Controller
       control={control}
       name={name as any}
-      render={({ field }) => (
-        <View style={calculatorStyles.fieldGroup}>
-          <Text style={calculatorStyles.fieldLabel}>{label}</Text>
+      render={({ field }) => {
+        return (
+          <View style={calculatorStyles.fieldGroup}>
+            <Text style={calculatorStyles.fieldLabel}>{label}</Text>
 
-          <TextInput
-            keyboardType="numeric"
-            value={String(field.value)}
-            onChangeText={(v) => field.onChange(Number(v) || 0)}
-            placeholder={`Enter ${label}`}
-            style={calculatorStyles.inputField}
-          />
-        </View>
-      )}
+            <TextInput
+              keyboardType="numeric"
+              value={field.value === 0 && name !== 'deductions' && name !== 'tds' && name !== 'advancePaid' && name !== 'salary' && name !== 'business' && name !== 'stcg' && name !== 'ltcg' && name !== 'otherIncome' ? '0' : String(field.value)}
+              onChangeText={(v) => {
+                if (v === '') {
+                  field.onChange('');
+                } else {
+                  field.onChange(Number(v) || 0);
+                }
+              }}
+              placeholder={`Enter ${label}`}
+              style={calculatorStyles.inputField}
+            />
+          </View>
+        );
+      }}
     />
   );
+
+  const watchSalary = Number(watch("salary")) || 0;
+  const watchBusiness = Number(watch("business")) || 0;
+  const watchStcg = Number(watch("stcg")) || 0;
+  const watchLtcg = Number(watch("ltcg")) || 0;
+  const watchOtherIncome = Number(watch("otherIncome")) || 0;
+
+  const totalIncome = watchSalary + watchBusiness + watchStcg + watchLtcg + watchOtherIncome;
+  const isIncomeZero = totalIncome <= 0;
 
   return (
     <ScrollView
@@ -144,14 +161,24 @@ export default function TaxForm({ onSubmit }: any) {
         {Input("tds", "TDS")}
         {Input("advancePaid", "Advance Paid")}
 
+        {isIncomeZero && (
+          <Text style={{ color: '#ef4444', textAlign: 'center', marginTop: 12, fontWeight: '500' }}>
+            Please enter at least one source of income to calculate tax.
+          </Text>
+        )}
+
         <TouchableOpacity
-          onPress={handleSubmit(onSubmit)}
+          onPress={() => {
+            if (isIncomeZero) return;
+            handleSubmit(onSubmit)();
+          }}
           style={{
-            backgroundColor: "#2563eb",
+            backgroundColor: isIncomeZero ? "#9ca3af" : "#2563eb",
             borderRadius: 12,
-            marginTop: 18,
+            marginTop: isIncomeZero ? 8 : 18,
             padding: 16,
           }}
+          activeOpacity={isIncomeZero ? 1 : 0.7}
         >
           <Text
             style={{

@@ -86,7 +86,7 @@ export default function SignupScreen() {
         phone: form.mobileNumber,
       });
 
-      router.push({
+      router.navigate({
         params: { email: form.email, mode: 'signup', password: form.password },
         pathname: '/otp',
       });

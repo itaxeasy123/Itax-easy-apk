@@ -127,12 +127,12 @@ function MarqueeBanner({ onNavigate }: { onNavigate: (route: string) => void }) 
       <Animated.View style={[styles.marqueeScroll, { transform: [{ translateX: scrollX }] }]}>
         {marqueeItems.map((item, index) => (
           <Pressable key={index} onPress={() => onNavigate(item.route)}>
-            <LinearGradient colors={item.colors} style={styles.marqueeCard}>
-              <View style={styles.marqueeCardIcon}>
-                <Ionicons name={item.icon as any} size={16} color="#fff" />
-              </View>
+            <View style={styles.marqueeCard}>
+              <LinearGradient colors={item.colors as any} style={styles.marqueeCardIcon}>
+                <Ionicons name={item.icon as any} size={22} color="#fff" />
+              </LinearGradient>
               <Text style={styles.marqueeCardText}>{item.title}</Text>
-            </LinearGradient>
+            </View>
           </Pressable>
         ))}
       </Animated.View>
@@ -440,13 +440,18 @@ export default function DashboardScreen() {
         > */}
         <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 80 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
       >
 
           <View style={styles.searchBox}>
             <Ionicons name="search" size={18} color="#666" />
             <TextInput
-              onChangeText={setSearchQuery}
+              onChangeText={(text) => {
+                setSearchQuery(text);
+                if (text.trim() && activeTab !== "home" && activeTab !== "tools" && activeTab !== "more") {
+                  setActiveTab("home");
+                }
+              }}
               placeholder="Search"
               placeholderTextColor="#999"
               style={styles.searchInput}
@@ -454,7 +459,7 @@ export default function DashboardScreen() {
             />
           </View>
 
-          <MarqueeBanner onNavigate={(route) => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.push(route as any)); }} />
+          <MarqueeBanner onNavigate={(route) => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.navigate(route as any)); }} />
 
           {activeTab === "home" ? (
             <>
@@ -463,7 +468,7 @@ export default function DashboardScreen() {
                   <Text style={styles.sectionTitle}>Quick Actions</Text>
                   <View style={styles.quickActionsContainer}>
                     {filteredQA.map((item, idx) => (
-                      <Pressable key={idx} style={{ flex: 1 }} onPress={() => { if (item.route) { blurActiveElement(); globalThis.requestAnimationFrame(() => router.push(item.route as any)); } }}>
+                      <Pressable key={idx} style={{ flex: 1 }} onPress={() => { if (item.route) { blurActiveElement(); globalThis.requestAnimationFrame(() => router.navigate(item.route as any)); } }}>
                         <View style={styles.quickActionCard}>
                           <LinearGradient colors={item.colors as any} style={styles.quickActionIconContainer}>
                             <Ionicons name={item.icon as any} size={22} color="#fff" />
@@ -483,7 +488,7 @@ export default function DashboardScreen() {
                     {filteredAS.map((item, idx) => (
                       <Pressable key={idx} style={styles.serviceCard} onPress={() => {
                         if (item.isTool) openCalculatorSheet(item.isTool);
-                        else if (item.route) { blurActiveElement(); globalThis.requestAnimationFrame(() => router.push(item.route as any)); }
+                        else if (item.route) { blurActiveElement(); globalThis.requestAnimationFrame(() => router.navigate(item.route as any)); }
                       }}>
                         <View style={styles.serviceCardIconContainer}><Ionicons name={item.icon as any} size={20} color={item.color} /></View>
                         <Text style={styles.serviceCardText}>{item.title}</Text>
@@ -520,7 +525,7 @@ export default function DashboardScreen() {
                   <Ionicons name="rocket" size={40} color="#fff" />
                   <View style={styles.itrBannerTextContainer}>
                     <Text style={styles.itrBannerTitle}>File your ITR in just 3 minutes!</Text>
-                    <Pressable style={styles.itrBannerButton} onPress={() => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.push('/itr')); }}>
+                    <Pressable style={styles.itrBannerButton} onPress={() => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.navigate('/itr')); }}>
                       <Text style={styles.itrBannerButtonText}>Get Started</Text>
                     </Pressable>
                   </View>
@@ -599,104 +604,70 @@ export default function DashboardScreen() {
             <>
               <Text style={styles.sectionTitle}>More Options</Text>
               <View style={styles.moreSection}>
-                <Text style={styles.moreMenuName}>{fullName}</Text>
-                <Text style={styles.moreSectionSub}>
-                  Manage your profile and session settings from here.
-                </Text>
+                {!normalizedQuery && (
+                  <>
+                    <Text style={styles.moreMenuName}>{fullName}</Text>
+                    <Text style={styles.moreSectionSub}>
+                      Manage your profile and session settings from here.
+                    </Text>
+                  </>
+                )}
 
-                <Pressable
-                  onPress={() => {
-                    blurActiveElement();
-                    router.push("/help-support");
-                  }}
-                  style={styles.moreMenuButton}
-                >
-                  <Text style={styles.moreMenuButtonText}>Help & Support</Text>
-                </Pressable>
+                {[
+                  { title: "Help & Support", route: "/help-support" as any },
+                  { title: "Privacy Policy", route: "/privacy-policy" as any },
+                  { title: "About", route: "/about" as any },
+                  { title: "PAN OCR Scan", route: "/pan-scan" as any },
+                  { title: "Aadhaar OCR Scan", route: "/adhaar-scan" as any },
+                  { title: "Export Excel", route: "/excel" as any },
+                  { title: "Export CSV", route: "/csv" as any },
+                  { title: "Profile", route: "/profile" as any },
+                  { title: "Logout", action: () => { logout(); router.replace("/login"); } }
+                ]
+                  .filter(item => !normalizedQuery || item.title.toLowerCase().includes(normalizedQuery))
+                  .map((item, index) => (
+                    <Pressable
+                      key={index}
+                      onPress={() => {
+                        blurActiveElement();
+                        if (item.action) {
+                          item.action();
+                        } else if (item.route) {
+                          router.navigate(item.route);
+                        }
+                      }}
+                      style={[
+                        styles.moreMenuButton,
+                        item.title === "Logout" ? styles.moreMenuLogout : null
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.moreMenuButtonText,
+                          item.title === "Logout" ? styles.moreMenuLogoutText : null
+                        ]}
+                      >
+                        {item.title}
+                      </Text>
+                    </Pressable>
+                  ))}
 
-                <Pressable
-                  onPress={() => {
-                    blurActiveElement();
-                    router.push("/privacy-policy");
-                  }}
-                  style={styles.moreMenuButton}
-                >
-                  <Text style={styles.moreMenuButtonText}>Privacy Policy</Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => {
-                    blurActiveElement();
-                    router.push("/about");
-                  }}
-                  style={styles.moreMenuButton}
-                >
-                  <Text style={styles.moreMenuButtonText}>About</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    blurActiveElement();
-                    router.push("/pan-scan" as any);
-                  }}
-                  style={styles.moreMenuButton}
-                >
-                  <Text style={styles.moreMenuButtonText}>PAN OCR Scan</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    blurActiveElement();
-                    router.push("/adhaar-scan" as any);
-                  }}
-                  style={styles.moreMenuButton}
-                >
-                  <Text style={styles.moreMenuButtonText}>
-                    Aadhaar OCR Scan
-                  </Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    blurActiveElement();
-                    router.push("/excel");
-                  }}
-                  style={styles.moreMenuButton}
-                >
-                  <Text style={styles.moreMenuButtonText}>Export Excel</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    blurActiveElement();
-                    router.push("/csv");
-                  }}
-                  style={styles.moreMenuButton}
-                >
-                  <Text style={styles.moreMenuButtonText}>Export CSV</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    blurActiveElement();
-                    router.push("/profile");
-                  }}
-                  style={styles.moreMenuButton}
-                >
-                  <Text style={styles.moreMenuButtonText}>Profile</Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => {
-                    logout();
-                    router.replace("/login");
-                  }}
-                  style={[styles.moreMenuButton, styles.moreMenuLogout]}
-                >
-                  <Text
-                    style={[
-                      styles.moreMenuButtonText,
-                      styles.moreMenuLogoutText,
-                    ]}
-                  >
-                    Logout
-                  </Text>
-                </Pressable>
+                  {normalizedQuery && [
+                    { title: "Help & Support", route: "/help-support" as any },
+                    { title: "Privacy Policy", route: "/privacy-policy" as any },
+                    { title: "About", route: "/about" as any },
+                    { title: "PAN OCR Scan", route: "/pan-scan" as any },
+                    { title: "Aadhaar OCR Scan", route: "/adhaar-scan" as any },
+                    { title: "Export Excel", route: "/excel" as any },
+                    { title: "Export CSV", route: "/csv" as any },
+                    { title: "Profile", route: "/profile" as any },
+                    { title: "Logout", action: () => { logout(); router.replace("/login"); } }
+                  ].filter(item => item.title.toLowerCase().includes(normalizedQuery)).length === 0 && (
+                    <View style={styles.emptyState}>
+                      <Text style={styles.emptyStateTitle}>No results found</Text>
+                      <Text style={styles.emptyStateSub}>No options match your search.</Text>
+                    </View>
+                  )}
               </View>
             </>
           ) : null}
@@ -750,7 +721,7 @@ export default function DashboardScreen() {
                       const route = calculator.route;
                       setSelectedService(null);
                       globalThis.requestAnimationFrame(() => {
-                        router.push(route as never);
+                        router.navigate(route as never);
                       });
                     } else {
                       closeCalculatorSheet();

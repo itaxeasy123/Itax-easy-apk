@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { calculatorStyles, calculatorTheme, colors } from '../../../../theme';
@@ -23,24 +23,45 @@ export default function HraCalculatorScreen() {
     rentPaid: '0',
   });
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof HraCalculatorInput, string> = {
+      basicSalary: '',
+      dearnessAllowance: '',
+      hraReceived: '',
+      isMetroCity: '',
+      otherAllowances: '',
+      rentPaid: '',
+    };
+    
+    if (form.basicSalary && Number(form.basicSalary) <= 0) errs.basicSalary = 'Basic salary must be > 0';
+    if (form.hraReceived && Number(form.hraReceived) <= 0) errs.hraReceived = 'HRA must be > 0';
+    if (form.rentPaid && Number(form.rentPaid) <= 0) errs.rentPaid = 'Rent must be > 0';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateHra(form), [form]);
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={calculatorStyles.screenSafeArea}>
       <CalculatorHeader onBackPress={() => router.back()} title="HRA Calculator" />
 
-      <View style={calculatorStyles.screenContent}>
+      <ScrollView 
+        contentContainerStyle={calculatorStyles.screenContent}
+        showsVerticalScrollIndicator={false}
+      >
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={hraFieldLabels.basicSalary}
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              basicSalary: value.replace(/[^0-9.]/g, ''),
+              basicSalary: value,
             }))
           }
           placeholder="0"
           value={form.basicSalary}
+          error={errors.basicSalary}
         />
 
         <CalculatorInputField
@@ -49,11 +70,12 @@ export default function HraCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              hraReceived: value.replace(/[^0-9.]/g, ''),
+              hraReceived: value,
             }))
           }
           placeholder="0"
           value={form.hraReceived}
+          error={errors.hraReceived}
         />
 
         <CalculatorInputField
@@ -62,11 +84,12 @@ export default function HraCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              rentPaid: value.replace(/[^0-9.]/g, ''),
+              rentPaid: value,
             }))
           }
           placeholder="0"
           value={form.rentPaid}
+          error={errors.rentPaid}
         />
 
         <CalculatorInputField
@@ -75,11 +98,12 @@ export default function HraCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              dearnessAllowance: value.replace(/[^0-9.]/g, ''),
+              dearnessAllowance: value,
             }))
           }
           placeholder="0"
           value={form.dearnessAllowance}
+          error={errors.dearnessAllowance}
         />
 
         <CalculatorInputField
@@ -88,11 +112,12 @@ export default function HraCalculatorScreen() {
           onChangeText={(value) =>
             setForm((current) => ({
               ...current,
-              otherAllowances: value.replace(/[^0-9.]/g, ''),
+              otherAllowances: value,
             }))
           }
           placeholder="0"
           value={form.otherAllowances}
+          error={errors.otherAllowances}
         />
 
         <Pressable
@@ -133,7 +158,7 @@ export default function HraCalculatorScreen() {
             { label: 'HRA Exemption', value: `Rs ${result.hraExemption.toFixed(2)}` },
           ]}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

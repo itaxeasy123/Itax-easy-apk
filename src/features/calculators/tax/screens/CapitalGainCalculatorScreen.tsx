@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { calculatorStyles } from '../../../../theme';
@@ -21,6 +21,20 @@ export default function CapitalGainCalculatorScreen() {
     holdingPeriod: 'short',
   });
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof CapitalGainCalculatorInput, string> = {
+      purchasePrice: '',
+      salePrice: '',
+      assetType: '',
+      holdingPeriod: '',
+    };
+    
+    if (form.purchasePrice && Number(form.purchasePrice) <= 0) errs.purchasePrice = 'Must be > 0';
+    if (form.salePrice && Number(form.salePrice) <= 0) errs.salePrice = 'Must be > 0';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateCapitalGain(form), [form]);
 
   return (
@@ -30,7 +44,10 @@ export default function CapitalGainCalculatorScreen() {
         title="Capital Gain Calculator"
       />
 
-      <View style={calculatorStyles.screenContent}>
+      <ScrollView 
+        contentContainerStyle={calculatorStyles.screenContent}
+        showsVerticalScrollIndicator={false}
+      >
         <CalculatorInputField
           keyboardType="decimal-pad"
           label={capitalGainFieldLabels.purchasePrice}
@@ -41,6 +58,7 @@ export default function CapitalGainCalculatorScreen() {
           }}
           placeholder="0"
           value={form.purchasePrice}
+          error={errors.purchasePrice}
         />
 
         <CalculatorInputField
@@ -53,6 +71,7 @@ export default function CapitalGainCalculatorScreen() {
           }}
           placeholder="0"
           value={form.salePrice}
+          error={errors.salePrice}
         />
 
         <CalculatorSelectField
@@ -101,7 +120,7 @@ export default function CapitalGainCalculatorScreen() {
             },
           ]}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

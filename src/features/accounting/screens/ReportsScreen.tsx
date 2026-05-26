@@ -173,7 +173,7 @@ export default function ReportsScreen() {
 
   const handleCardPress = (card: ReportCard) => {
     if (card.route) {
-      router.push(card.route as Href);
+      router.navigate(card.route as Href);
       return;
     }
     Alert.alert("Coming soon", `${card.title} report will be available soon.`);

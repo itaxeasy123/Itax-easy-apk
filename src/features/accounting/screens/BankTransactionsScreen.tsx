@@ -148,7 +148,7 @@ export default function BankTransactionsScreen() {
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <Pressable style={styles.secondaryButton} onPress={() => router.push("/accounting")}>
+      <Pressable style={styles.secondaryButton} onPress={() => router.navigate("/accounting")}>
         <Text style={styles.secondaryButtonText}>Back to Accounting</Text>
       </Pressable>
     </ScrollView>

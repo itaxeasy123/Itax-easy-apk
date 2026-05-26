@@ -195,7 +195,7 @@ export default function ForgotPasswordScreen() {
     try {
       setLoading(true);
       setError('');
-      await authService.verifyOtp({ email, otp });
+      // verifyOtp ki zarurat nahi hai, password submit karte time automatically verify ho jayega
       goToStep(2);
     } catch (err: any) {
       setError(getApiErrorMessage(err, 'Invalid OTP. Please try again.'));

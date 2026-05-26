@@ -72,7 +72,7 @@ export default function PaymentCreateScreen() {
 
         <View style={styles.rowGroup}>
           <Text style={styles.label}>Bank Details</Text>
-          <Pressable onPress={() => router.push("/accounting/bank-create")}>
+          <Pressable onPress={() => router.navigate("/accounting/bank-create")}>
             <Text style={styles.addLink}>Add</Text>
           </Pressable>
         </View>

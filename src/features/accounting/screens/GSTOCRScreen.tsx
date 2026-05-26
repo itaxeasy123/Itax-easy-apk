@@ -170,9 +170,7 @@ const GSTOCRScreen = () => {
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() =>
-            router.push(
-              '/accounting/more'
-            )
+            router.back()
           }
         >
           <Ionicons

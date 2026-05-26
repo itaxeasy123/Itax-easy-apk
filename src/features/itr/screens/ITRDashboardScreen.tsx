@@ -23,7 +23,7 @@ export default function ITRDashboardScreen() {
 
   const openFileITR = (route: "/itr/file-itr" | "/itr/manual" | "/itr/challan") => {
     setShowFileOptions(false);
-    router.push(route);
+    router.navigate(route);
   };
 
   return (

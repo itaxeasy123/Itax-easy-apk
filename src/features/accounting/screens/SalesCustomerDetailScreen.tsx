@@ -143,7 +143,7 @@ export default function SalesCustomerDetailScreen() {
               Financial Year ({String(new Date().getFullYear() - 1).slice(-2)} Apr to {String(new Date().getFullYear()).slice(-2)} Mar)
             </Text>
           </View>
-          <Pressable onPress={() => router.push("/accounting/reports-sales-customers")}>
+          <Pressable onPress={() => router.navigate("/accounting/reports-sales-customers")}>
             <Text style={styles.changeText}>Change</Text>
           </Pressable>
         </View>

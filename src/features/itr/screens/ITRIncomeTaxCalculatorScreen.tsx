@@ -31,11 +31,11 @@ export default function ITRIncomeTaxCalculatorScreen() {
       >
         <OptionCard
           title="Advance & Assessment Tax"
-          onPress={() => router.push("/itr/advance-assessment-tax")}
+          onPress={() => router.navigate("/itr/advance-assessment-tax")}
         />
-        <OptionCard title="TDS Details" onPress={() => router.push("/itr/tds-details")} />
-        <OptionCard title="TDS Non Salary" onPress={() => router.push("/itr/tds-non-salary")} />
-        <OptionCard title="TDS On Salary" onPress={() => router.push("/itr/tds-on-salary")} />
+        <OptionCard title="TDS Details" onPress={() => router.navigate("/itr/tds-details")} />
+        <OptionCard title="TDS Non Salary" onPress={() => router.navigate("/itr/tds-non-salary")} />
+        <OptionCard title="TDS On Salary" onPress={() => router.navigate("/itr/tds-on-salary")} />
       </ScrollView>
 
       <ITRBottomNav activeRoute="/itr" />

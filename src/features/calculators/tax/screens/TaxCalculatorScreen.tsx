@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { calculatorStyles } from '../../../../theme';
@@ -20,6 +20,19 @@ export default function TaxCalculatorScreen() {
     taxpayerType: 'individual',
   });
 
+  const errors = useMemo(() => {
+    const errs: Record<keyof TaxCalculatorInput, string> = {
+      income: '',
+      deductions: '',
+      taxpayerType: '',
+    };
+    
+    if (form.income && Number(form.income) < 0) errs.income = 'Income cannot be negative';
+    if (form.deductions && Number(form.deductions) < 0) errs.deductions = 'Deductions cannot be negative';
+    
+    return errs;
+  }, [form]);
+
   const result = useMemo(() => calculateTax(form), [form]);
 
   return (
@@ -29,7 +42,10 @@ export default function TaxCalculatorScreen() {
         title="Tax Calculator"
       />
 
-      <View style={calculatorStyles.screenContent}>
+      <ScrollView 
+        contentContainerStyle={calculatorStyles.screenContent} 
+        showsVerticalScrollIndicator={false}
+      >
 
         {/* Income */}
         <CalculatorInputField
@@ -40,9 +56,10 @@ export default function TaxCalculatorScreen() {
           onChangeText={(value) =>
             setForm((prev) => ({
               ...prev,
-              income: value.replace(/[^0-9.]/g, ''),
+              income: value,
             }))
           }
+          error={errors.income}
         />
 
         {/* Deductions */}
@@ -54,9 +71,10 @@ export default function TaxCalculatorScreen() {
           onChangeText={(value) =>
             setForm((prev) => ({
               ...prev,
-              deductions: value.replace(/[^0-9.]/g, ''),
+              deductions: value,
             }))
           }
+          error={errors.deductions}
         />
 
         {/* Result */}
@@ -88,7 +106,7 @@ export default function TaxCalculatorScreen() {
             },
           ]}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

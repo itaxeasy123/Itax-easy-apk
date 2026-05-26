@@ -65,7 +65,7 @@ export default function BankCashReportScreen() {
   );
 
   const handleOpenLedger = (ledgerId: string, ledgerName: string, ledgerType: Ledger["ledgerType"]) => {
-    router.push({
+    router.navigate({
       pathname: "/accounting/reports-bank-cash/[id]",
       params: {
         id: ledgerId,
@@ -77,7 +77,7 @@ export default function BankCashReportScreen() {
 
   const handleAddLedger = () => {
     if (activeTab === "bank") {
-      router.push("/accounting/bank-create");
+      router.navigate("/accounting/bank-create");
     } else {
       setShowCashCategoryModal(true);
     }

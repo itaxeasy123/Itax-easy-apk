@@ -122,14 +122,14 @@ export default function ITRManualFillScreen() {
 
         <Pressable
           style={styles.profileBtnFull}
-          onPress={() => router.push("/itr/profile")}
+          onPress={() => router.navigate("/itr/profile")}
         >
           <Text style={styles.profileBtnText}>Profile Section</Text>
           <Ionicons name="person-circle-outline" size={18} color="#64748B" />
         </Pressable>
 
         {form16 ? (
-          <Pressable style={styles.form16Banner} onPress={() => router.push("/itr/form-16")}>
+          <Pressable style={styles.form16Banner} onPress={() => router.navigate("/itr/form-16")}>
             <View style={styles.form16BannerLeft}>
               <Ionicons name="document-text-outline" size={18} color={itrColors.primary} />
               <View>
@@ -145,12 +145,12 @@ export default function ITRManualFillScreen() {
         ) : null}
       </View>
 
-        <SectionCard title="Salary Less SD & P Tax" amount={`₹ ${salary.netSalary.toLocaleString()}`} onPress={() => router.push("/itr/salary-less-sd-p-tax")} />
-        <SectionCard title="Income from House Property" amount={`₹ ${houseProperty.incomeFromHP.toLocaleString()}`} onPress={() => router.push("/itr/house-property")} />
-        <SectionCard title="Capital Gain" amount={`₹ ${capitalGains.totalGains.toLocaleString()}`} onPress={() => router.push("/itr/capital-gains")} />
-        <SectionCard title="Other Source" amount={`₹ ${otherSources.totalOtherIncome.toLocaleString()}`} onPress={() => router.push("/itr/other-sources")} />
-        <SectionCard title="Business & Profession" amount={`₹ ${businessProfession.totalIncome.toLocaleString()}`} onPress={() => router.push("/itr/business-profession")} />
-        <SectionCard title="Exemption & Deduction" amount={`₹ ${deductions.totalDeductions.toLocaleString()}`} onPress={() => router.push("/itr/exemptions-deductions")} />
+        <SectionCard title="Salary Less SD & P Tax" amount={`₹ ${salary.netSalary.toLocaleString()}`} onPress={() => router.navigate("/itr/salary-less-sd-p-tax")} />
+        <SectionCard title="Income from House Property" amount={`₹ ${houseProperty.incomeFromHP.toLocaleString()}`} onPress={() => router.navigate("/itr/house-property")} />
+        <SectionCard title="Capital Gain" amount={`₹ ${capitalGains.totalGains.toLocaleString()}`} onPress={() => router.navigate("/itr/capital-gains")} />
+        <SectionCard title="Other Source" amount={`₹ ${otherSources.totalOtherIncome.toLocaleString()}`} onPress={() => router.navigate("/itr/other-sources")} />
+        <SectionCard title="Business & Profession" amount={`₹ ${businessProfession.totalIncome.toLocaleString()}`} onPress={() => router.navigate("/itr/business-profession")} />
+        <SectionCard title="Exemption & Deduction" amount={`₹ ${deductions.totalDeductions.toLocaleString()}`} onPress={() => router.navigate("/itr/exemptions-deductions")} />
         
         <Text style={styles.sectionTitle}>Regime Comparison</Text>
         <SectionCard title="Old Tax Regime Liability" amount={`₹ ${taxResults.comparison.old.toLocaleString()}`} amountStyle={{color: '#64748B'}} />
@@ -161,14 +161,14 @@ export default function ITRManualFillScreen() {
             <SectionCard 
                 title="Total Tax Payable (Gross)" 
                 amount={`₹ ${taxResults.grossTax.toLocaleString()}`} 
-                onPress={() => router.push("/itr/tax-payable")}
+                onPress={() => router.navigate("/itr/tax-payable")}
                 titleStyle={{color: '#475569'}}
             />
 
             <SectionCard 
                 title="Taxes Paid & TDS" 
                 amount={`₹ ${taxResults.totalPaid.toLocaleString()}`} 
-                onPress={() => router.push("/itr/income-tax-calculator")}
+                onPress={() => router.navigate("/itr/income-tax-calculator")}
                 amountStyle={{color: '#059669'}}
             />
 
@@ -184,7 +184,7 @@ export default function ITRManualFillScreen() {
 
         <Pressable
           style={styles.returnFormButton}
-          onPress={() => router.push("/itr/return-form")}
+          onPress={() => router.navigate("/itr/return-form")}
         >
           <Ionicons name="document-text-outline" size={18} color="#fff" />
           <Text style={styles.returnFormButtonText}>Open ITR Return Form</Text>

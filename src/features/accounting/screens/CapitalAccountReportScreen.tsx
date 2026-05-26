@@ -98,7 +98,7 @@ export default function CapitalAccountReportScreen() {
       {/* FAB Print */}
       <Pressable 
         style={[styles.fabPrint, { bottom: 80 + Math.max(insets.bottom, 0) }]} 
-        onPress={() => router.push("/accounting/reports-capital-account-preview")}
+        onPress={() => router.navigate("/accounting/reports-capital-account-preview")}
       >
         <Ionicons name="print-outline" size={20} color="#FFFFFF" />
         <Text style={styles.fabPrintText}>Print</Text>

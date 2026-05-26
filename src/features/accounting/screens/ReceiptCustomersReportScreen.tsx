@@ -93,7 +93,7 @@ export default function ReceiptCustomersReportScreen() {
         <View style={styles.switcherWrap}>
           <SalesReportSwitcher
             active="customers"
-            onMonthlyPress={() => router.push("/accounting/reports-receipt-monthly")}
+            onMonthlyPress={() => router.navigate("/accounting/reports-receipt-monthly")}
             onCustomersPress={() => router.replace("/accounting/reports-receipt-customers")}
           />
         </View>
@@ -105,7 +105,7 @@ export default function ReceiptCustomersReportScreen() {
               Financial Year ({String(currentYear - 1).slice(-2)} Apr to {String(currentYear).slice(-2)} Mar)
             </Text>
           </View>
-          <Pressable onPress={() => router.push("/accounting/reports-receipt-monthly")}>
+          <Pressable onPress={() => router.navigate("/accounting/reports-receipt-monthly")}>
             <Text style={styles.changeText}>Change</Text>
           </Pressable>
         </View>
@@ -128,7 +128,7 @@ export default function ReceiptCustomersReportScreen() {
                   <Pressable
                       key={row.id}
                       onPress={() =>
-                        router.push({
+                        router.navigate({
                           pathname: "/accounting/reports-receipt-customers/[id]",
                           params: { id: row.id, name: row.customerName },
                         })

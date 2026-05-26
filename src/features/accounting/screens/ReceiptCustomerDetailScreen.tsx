@@ -102,7 +102,7 @@ export default function ReceiptCustomerDetailScreen() {
               Financial Year ({String(new Date().getFullYear() - 1).slice(-2)} Apr to {String(new Date().getFullYear()).slice(-2)} Mar)
             </Text>
           </View>
-          <Pressable onPress={() => router.push("/accounting/reports-receipt-customers")}>
+          <Pressable onPress={() => router.navigate("/accounting/reports-receipt-customers")}>
             <Text style={styles.changeText}>Change</Text>
           </Pressable>
         </View>

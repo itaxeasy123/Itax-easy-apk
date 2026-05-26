@@ -281,9 +281,7 @@ const exportData = async (
       >
         <TouchableOpacity
           onPress={() =>
-            router.push(
-              '/accounting/more'
-            )
+            router.back()
           }
         >
           <Ionicons
