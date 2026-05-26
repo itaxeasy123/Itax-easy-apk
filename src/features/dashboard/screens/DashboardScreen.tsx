@@ -50,6 +50,7 @@ type CalculatorRoute =
   | "/split-pdf" // ✅ add karo
   | "/accounting"
   | "/itr"
+  | "/gst"
   | null;
 
 type CalculatorItem = {
@@ -92,6 +93,13 @@ const ALL_SERVICES: ServiceItem[] = [
     hasBottomSheet: true,
     calculators: [{ title: "ITR Dashboard", route: "/itr" }],
   },
+  {
+    title: "GST",
+    icon: "document-text",
+    hasBottomSheet: true,
+    calculators: [{ title: "GST Dashboard", route: "/gst" }],
+  },
+  
   {
     title: "Bank",
     icon: "business",
