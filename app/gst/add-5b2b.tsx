@@ -1,0 +1,1 @@
+export {default} from "../../src/features/gst/screens/Add5B2BScreen";
