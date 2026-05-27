@@ -1,0 +1,1 @@
+export {default} from "../../src/features/gst/screens/EditAmendedB2BInvoiceScreen";

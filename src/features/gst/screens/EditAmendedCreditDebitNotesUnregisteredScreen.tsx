@@ -1,0 +1,835 @@
+// FILE:
+// app/EditAmendedCreditDebitNotesUnregisteredScreen.tsx
+
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  View,
+  Text,
+ StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Alert,
+} from "react-native";
+
+import {
+  ArrowLeft,
+  Check,
+} from "lucide-react-native";
+
+import {
+  router,
+  useLocalSearchParams,
+} from "expo-router";
+
+import GSTBottomBar from "../components/GSTBottomBar";
+
+export default function EditAmendedCreditDebitNotesUnregisteredScreen() {
+
+  // ROUTE PARAMS
+  const params =
+    useLocalSearchParams();
+
+  // GET TABLE DATA
+  const editData = JSON.parse(
+    params?.invoiceData as string
+  );
+
+  // CHECKBOX STATES
+  const [
+    deemedExports,
+    setDeemedExports,
+  ] = useState(false);
+
+  const [
+    sezSupplyWithPayment,
+    setSezSupplyWithPayment,
+  ] = useState(false);
+
+  const [
+    sezSupplyWithoutPayment,
+    setSezSupplyWithoutPayment,
+  ] = useState(false);
+
+  const [
+    reverseCharge,
+    setReverseCharge,
+  ] = useState(false);
+
+  const [
+    intraStateSupply,
+    setIntraStateSupply,
+  ] = useState(false);
+
+  // FORM STATES
+  const [
+    recipientGSTIN,
+    setRecipientGSTIN,
+  ] = useState("");
+
+  const [
+    recipientName,
+    setRecipientName,
+  ] = useState("");
+
+  const [
+    revisedInvoiceNo,
+    setRevisedInvoiceNo,
+  ] = useState("");
+
+  const [
+    revisedInvoiceDate,
+    setRevisedInvoiceDate,
+  ] = useState("");
+
+  const [
+    revisedOriginalInvoiceDate,
+    setRevisedOriginalInvoiceDate,
+  ] = useState("");
+
+  const [
+    totalInvoiceValue,
+    setTotalInvoiceValue,
+  ] = useState("");
+
+  const [
+    taxableValue,
+    setTaxableValue,
+  ] = useState("");
+
+  const [
+    integratedTax,
+    setIntegratedTax,
+  ] = useState("");
+
+  const [
+    centralTax,
+    setCentralTax,
+  ] = useState("");
+
+  const [
+    stateTax,
+    setStateTax,
+  ] = useState("");
+
+  const [cess, setCess] =
+    useState("");
+
+  // AUTO FILL DATA
+  useEffect(() => {
+
+    if (editData) {
+
+      setRecipientGSTIN(
+        "23BPLM0446C1D4"
+      );
+
+      setRecipientName(
+        "MUNICIPAL CORPORATION GWALIOR"
+      );
+
+      setRevisedInvoiceNo(
+        editData.invoiceNo || ""
+      );
+
+      setRevisedInvoiceDate(
+        editData.invoiceDate || ""
+      );
+
+      setRevisedOriginalInvoiceDate(
+        editData.invoiceDate || ""
+      );
+
+      setTotalInvoiceValue(
+        String(
+          editData.totalInvoiceValue || ""
+        )
+      );
+
+      setTaxableValue(
+        String(
+          editData.taxableValue || ""
+        )
+      );
+
+      setIntegratedTax(
+        String(
+          editData.integratedTax || ""
+        )
+      );
+
+      setCentralTax(
+        String(
+          editData.centralTax || ""
+        )
+      );
+
+      setStateTax(
+        String(
+          editData.stateTax || ""
+        )
+      );
+
+      setCess(
+        String(
+          editData.cess || ""
+        )
+      );
+
+    }
+
+  }, []);
+
+  // SAVE
+  const handleSave = () => {
+
+    const updatedInvoice = {
+
+      id: editData.id,
+
+      invoiceNo:
+        revisedInvoiceNo,
+
+      invoiceDate:
+        revisedInvoiceDate,
+
+      totalInvoiceValue:
+        Number(
+          totalInvoiceValue
+        ),
+
+      taxableValue:
+        Number(
+          taxableValue
+        ),
+
+      integratedTax:
+        Number(
+          integratedTax
+        ),
+
+      centralTax:
+        Number(
+          centralTax
+        ),
+
+      stateTax:
+        Number(
+          stateTax
+        ),
+
+      cess:
+        Number(cess),
+
+    };
+
+    // UPDATE TABLE
+    router.push({
+      pathname:
+        "/gst/amended-credit-debit-notes-unregistered",
+
+      params: {
+        updatedInvoice:
+          JSON.stringify(
+            updatedInvoice
+          ),
+      },
+    });
+
+    Alert.alert(
+      "Success",
+      "Record Updated Successfully"
+    );
+
+  };
+
+  // CUSTOM CHECKBOX
+  const renderCheckbox = (
+    label: string,
+    value: boolean,
+    setValue: any
+  ) => {
+
+    return (
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={
+          styles.checkboxRow
+        }
+        onPress={() =>
+          setValue(!value)
+        }
+      >
+
+        <View
+          style={[
+            styles.checkbox,
+            value &&
+              styles.checkboxActive,
+          ]}
+        >
+
+          {value && (
+            <Check
+              size={10}
+              color="#ffffff"
+              strokeWidth={3}
+            />
+          )}
+
+        </View>
+
+        <Text
+          style={
+            styles.checkboxLabel
+          }
+        >
+          {label}
+        </Text>
+
+      </TouchableOpacity>
+    );
+
+  };
+
+  return (
+    <View style={styles.container}>
+
+      {/* HEADER */}
+      <View style={styles.header}>
+
+        <TouchableOpacity
+          style={
+            styles.backButton
+          }
+          onPress={() =>
+            router.push(
+              "/gst/amended-credit-debit-notes-unregistered"
+            )
+          }
+        >
+
+          <ArrowLeft
+            size={18}
+            color="#ffffff"
+          />
+
+        </TouchableOpacity>
+
+        <Text
+          style={
+            styles.headerTitle
+          }
+        >
+          9A-Amended Credit/Debit Notes
+          {"\n"}
+          (Not-Registered)
+        </Text>
+
+      </View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={
+          false
+        }
+        contentContainerStyle={{
+          paddingBottom: 120,
+        }}
+      >
+
+        {/* CHECKBOX AREA */}
+        <View style={styles.topBox}>
+
+          {renderCheckbox(
+            "Deemed Exports",
+            deemedExports,
+            setDeemedExports
+          )}
+
+          {renderCheckbox(
+            "SEZ Supplies with payment",
+            sezSupplyWithPayment,
+            setSezSupplyWithPayment
+          )}
+
+          {renderCheckbox(
+            "SEZ Supplies without payment",
+            sezSupplyWithoutPayment,
+            setSezSupplyWithoutPayment
+          )}
+
+          {renderCheckbox(
+            "Supply attract reverse charge",
+            reverseCharge,
+            setReverseCharge
+          )}
+
+          {renderCheckbox(
+            "Intra-State Supplies attracting IGST",
+            intraStateSupply,
+            setIntraStateSupply
+          )}
+
+          <Text style={styles.noteText}>
+            Is the supply eligible to be taxed at a
+            differential percentage (%) of the
+            existing rate of tax, as notified by
+            the Government?
+          </Text>
+
+        </View>
+
+        {/* FORM */}
+        <View
+          style={
+            styles.formContainer
+          }
+        >
+
+          {/* GSTIN */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              Recipient GSTIN/UIN
+            </Text>
+
+            <TextInput
+              value={
+                recipientGSTIN
+              }
+              onChangeText={
+                setRecipientGSTIN
+              }
+              style={
+                styles.input
+              }
+            />
+
+          </View>
+
+          {/* NAME */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              Recipient Name
+            </Text>
+
+            <TextInput
+              value={
+                recipientName
+              }
+              onChangeText={
+                setRecipientName
+              }
+              style={
+                styles.input
+              }
+            />
+
+          </View>
+
+          {/* INVOICE */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              Revised/Original Invoice No.
+            </Text>
+
+            <TextInput
+              value={
+                revisedInvoiceNo
+              }
+              onChangeText={
+                setRevisedInvoiceNo
+              }
+              style={
+                styles.input
+              }
+            />
+
+          </View>
+
+          {/* DATE */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              Revised/Original Invoice Date
+            </Text>
+
+            <TextInput
+              value={
+                revisedInvoiceDate
+              }
+              onChangeText={
+                setRevisedInvoiceDate
+              }
+              style={
+                styles.input
+              }
+            />
+
+          </View>
+
+          {/* ORIGINAL DATE */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              Revised/Original Invoice Date
+            </Text>
+
+            <TextInput
+              value={
+                revisedOriginalInvoiceDate
+              }
+              onChangeText={
+                setRevisedOriginalInvoiceDate
+              }
+              style={
+                styles.input
+              }
+            />
+
+          </View>
+
+          {/* TOTAL */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              Total Invoice Value
+            </Text>
+
+            <TextInput
+              value={
+                totalInvoiceValue
+              }
+              onChangeText={
+                setTotalInvoiceValue
+              }
+              style={
+                styles.input
+              }
+              keyboardType="numeric"
+            />
+
+          </View>
+
+          {/* TAXABLE */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              Taxable Value
+            </Text>
+
+            <TextInput
+              value={
+                taxableValue
+              }
+              onChangeText={
+                setTaxableValue
+              }
+              style={
+                styles.input
+              }
+              keyboardType="numeric"
+            />
+
+          </View>
+
+          {/* IGST */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              Integrated Tax
+            </Text>
+
+            <TextInput
+              value={
+                integratedTax
+              }
+              onChangeText={
+                setIntegratedTax
+              }
+              style={
+                styles.input
+              }
+              keyboardType="numeric"
+            />
+
+          </View>
+
+          {/* CGST */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              Central Tax
+            </Text>
+
+            <TextInput
+              value={
+                centralTax
+              }
+              onChangeText={
+                setCentralTax
+              }
+              style={
+                styles.input
+              }
+              keyboardType="numeric"
+            />
+
+          </View>
+
+          {/* SGST */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              State/UT Tax
+            </Text>
+
+            <TextInput
+              value={
+                stateTax
+              }
+              onChangeText={
+                setStateTax
+              }
+              style={
+                styles.input
+              }
+              keyboardType="numeric"
+            />
+
+          </View>
+
+          {/* CESS */}
+          <View
+            style={
+              styles.inputBox
+            }
+          >
+
+            <Text
+              style={styles.label}
+            >
+              Cess
+            </Text>
+
+            <TextInput
+              value={cess}
+              onChangeText={
+                setCess
+              }
+              style={
+                styles.input
+              }
+              keyboardType="numeric"
+            />
+
+          </View>
+
+          {/* SAVE BUTTON */}
+          <TouchableOpacity
+            style={
+              styles.saveButton
+            }
+            onPress={handleSave}
+          >
+
+            <Text
+              style={
+                styles.saveButtonText
+              }
+            >
+              Save
+            </Text>
+
+          </TouchableOpacity>
+
+        </View>
+
+      </ScrollView>
+
+      {/* BOTTOM BAR */}
+      <GSTBottomBar />
+
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+
+  container: {
+    flex: 1,
+    backgroundColor: "#efefef",
+  },
+
+  header: {
+    height: 72,
+    backgroundColor: "#4d84dc",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+    paddingTop: 10,
+  },
+
+  backButton: {
+    position: "absolute",
+    left: 14,
+    top: 28,
+  },
+
+  headerTitle: {
+    color: "#ffffff",
+    fontSize: 13,
+    fontWeight: "600",
+    textAlign: "center",
+    lineHeight: 18,
+  },
+
+  topBox: {
+    paddingHorizontal: 14,
+    paddingTop: 14,
+  },
+
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  checkbox: {
+    width: 14,
+    height: 14,
+    borderWidth: 1,
+    borderColor: "#777",
+    backgroundColor: "#ffffff",
+    marginRight: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  checkboxActive: {
+    backgroundColor: "#4d84dc",
+    borderColor: "#4d84dc",
+  },
+
+  checkboxLabel: {
+    fontSize: 11,
+    color: "#333333",
+  },
+
+  noteText: {
+    fontSize: 10,
+    color: "#555",
+    lineHeight: 14,
+    marginLeft: 22,
+    marginTop: 2,
+  },
+
+  formContainer: {
+    paddingHorizontal: 14,
+    marginTop: 12,
+  },
+
+  inputBox: {
+    marginBottom: 14,
+  },
+
+  label: {
+    fontSize: 11,
+    color: "#333",
+    marginBottom: 5,
+    fontWeight: "500",
+  },
+
+  input: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#bdbdbd",
+    backgroundColor: "#f4f4f4",
+    borderRadius: 2,
+    paddingHorizontal: 10,
+    fontSize: 11,
+    color: "#000",
+  },
+
+  saveButton: {
+    height: 42,
+    backgroundColor: "#4d84dc",
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 12,
+  },
+
+  saveButtonText: {
+    color: "#ffffff",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+
+});
