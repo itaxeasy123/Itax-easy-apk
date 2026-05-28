@@ -39,7 +39,28 @@ const invoiceSections = [
     count: 0,
     route: "/gst/amended-credit-debit-notes-unregistered",
   },
+{
+    title: "Amended B2B (Other)",
+    count: 0,
+    route: "/gst/amended-b2b-others",
+  },
 
+  {
+    title: "Amended Tax Liability (Advances Received)",
+    count: 0,
+    route: "/gst/amended-tax-liability-advances-received",
+  },
+
+ {
+    title: " 11A-Amended Tax Liability (Advances Received)",
+    count: 0,
+    route: "/gst/amended-advance-received",
+  },
+{
+    title: " 11B-Amended of Adjustment of Advances",
+    count: 0,
+    route: "/gst/amended-adjustment-of-advances",
+  },
 ];
 
 export default function GSTR1AmendRecordsScreen() {
