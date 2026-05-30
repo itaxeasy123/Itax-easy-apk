@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, BottomNav } from "../components";
 import { accountingService } from "../services/accountingService";
 import { CashFlowReport } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const format = (value: number) =>
   `Rs ${Math.abs(value).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
@@ -56,16 +57,16 @@ export default function CashFlowReportScreen() {
       <AccountingHeader
         title="Cash Flow"
         showBackButton
-        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color="#fff" />}
+        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />}
       />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.periodBar}>
           <Pressable style={styles.iconBtn} onPress={() => moveMonth(-1)}>
-            <Ionicons name="chevron-back" size={16} color="#2563EB" />
+            <Ionicons name="chevron-back" size={16} color={accountingTheme.colors.primary} />
           </Pressable>
           <Text style={styles.periodText}>{`${month.toString().padStart(2, "0")}/${year}`}</Text>
           <Pressable style={styles.iconBtn} onPress={() => moveMonth(1)}>
-            <Ionicons name="chevron-forward" size={16} color="#2563EB" />
+            <Ionicons name="chevron-forward" size={16} color={accountingTheme.colors.primary} />
           </Pressable>
         </View>
 
@@ -106,15 +107,15 @@ export default function CashFlowReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F9FF" },
-  content: { padding: 16, paddingBottom: 24 },
+  container: { flex: 1, backgroundColor: accountingTheme.colors.background },
+  content: { padding: accountingTheme.spacing.lg, paddingBottom: accountingTheme.spacing.xxl },
   periodBar: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: accountingTheme.colors.border,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: accountingTheme.spacing.sm,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -122,41 +123,41 @@ const styles = StyleSheet.create({
   iconBtn: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: accountingTheme.radius.xl,
     backgroundColor: "#EFF6FF",
     alignItems: "center",
     justifyContent: "center",
   },
-  periodText: { fontSize: 14, fontWeight: "700", color: "#0F172A" },
-  stateText: { marginTop: 12, color: "#64748B" },
-  errorText: { marginTop: 12, color: "#DC2626" },
+  periodText: { fontSize: accountingTheme.fontSizes.lg, fontWeight: accountingTheme.fontWeights.bold, color: accountingTheme.colors.text },
+  stateText: { marginTop: accountingTheme.spacing.md, color: accountingTheme.colors.textSecondary },
+  errorText: { marginTop: accountingTheme.spacing.md, color: accountingTheme.colors.error },
   card: {
-    marginTop: 12,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    marginTop: accountingTheme.spacing.md,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: accountingTheme.colors.border,
     padding: 14,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: accountingTheme.spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
-  label: { fontSize: 13, color: "#475569" },
-  value: { fontSize: 13, fontWeight: "700", color: "#0F172A" },
+  label: { fontSize: accountingTheme.fontSizes.md, color: "#475569" },
+  value: { fontSize: accountingTheme.fontSizes.md, fontWeight: accountingTheme.fontWeights.bold, color: accountingTheme.colors.text },
   totalRow: {
-    marginTop: 8,
-    paddingTop: 8,
+    marginTop: accountingTheme.spacing.sm,
+    paddingTop: accountingTheme.spacing.sm,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  totalLabel: { fontSize: 15, fontWeight: "700", color: "#0F172A" },
-  totalValue: { fontSize: 15, fontWeight: "800" },
+  totalLabel: { fontSize: 15, fontWeight: accountingTheme.fontWeights.bold, color: accountingTheme.colors.text },
+  totalValue: { fontSize: 15, fontWeight: accountingTheme.fontWeights.extraBold },
   positive: { color: "#059669" },
-  negative: { color: "#DC2626" },
+  negative: { color: accountingTheme.colors.error },
 });

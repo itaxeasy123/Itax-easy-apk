@@ -21,8 +21,22 @@ const INITIAL_FIELDS: FieldConfig[] = [
 ];
 
 export default function ITRTDSOnSalaryScreen() {
-  const { taxesPaid, setTaxesPaid } = useITRStore();
-  const [fields, setFields] = useState<FieldConfig[]>(INITIAL_FIELDS);
+  const { taxesPaid, setTaxesPaid, form16 } = useITRStore();
+  
+  const cleanEmployerName = (name?: string) => {
+    if (!name) return "";
+    // Split by newline and take the first line to avoid address/email bleeding into the name field
+    return name.split("\n")[0].trim();
+  };
+  
+  const initialFields = taxesPaid.tdsSalaryEntries.length === 0 && form16 ? [
+    { id: "tan", placeholder: "Enter TAN of Employer", value: form16.tan || "" },
+    { id: "name", placeholder: "Name of Employer", value: cleanEmployerName(form16.employerName) },
+    { id: "salary", placeholder: "Income chargeable under Salaries", value: form16.salaryChargeable ? String(form16.salaryChargeable) : "" },
+    { id: "tax", placeholder: "Total Tax Deducted", value: form16.totalTaxDeducted ? String(form16.totalTaxDeducted) : "" },
+  ] : INITIAL_FIELDS;
+
+  const [fields, setFields] = useState<FieldConfig[]>(initialFields);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const updateFieldValue = (id: string, value: string) => {

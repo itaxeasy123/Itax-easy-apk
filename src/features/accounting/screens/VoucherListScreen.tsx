@@ -6,6 +6,7 @@ import { Button, Card, EmptyState, Header, Loading } from "../components";
 import { voucherService } from "../services/voucherService";
 import { VoucherEntry } from "../types/accountingTypes";
 import AccountingHeader from "../components/AccountingHeader";
+import { accountingTheme } from "../../../theme/accounting";
 
 type QuickVoucherIcon = React.ComponentProps<typeof Ionicons>["name"];
 const formatDate = (value: string) => {
@@ -90,7 +91,7 @@ export default function VoucherListScreen() {
                 onPress={() => router.navigate(item.route)}
               >
                 <View style={styles.quickIcon}>
-                  <Ionicons name={item.icon} size={18} color="#2563EB" />
+                  <Ionicons name={item.icon} size={18} color={accountingTheme.colors.primary} />
                 </View>
                 <Text style={styles.quickCardTitle}>{item.title}</Text>
                 <Text style={styles.quickCardSubtitle}>{item.subtitle}</Text>
@@ -129,7 +130,7 @@ export default function VoucherListScreen() {
                   setSelectedVoucher((current) => (current?.id === voucher.id ? null : voucher))
                 }
               >
-                <View style={{ flex: 1, paddingRight: 12 }}>
+                <View style={{ flex: 1, paddingRight: accountingTheme.spacing.md }}>
                   <Text style={styles.voucherNo}>{voucher.voucherNumber}</Text>
                   <Text style={styles.meta}>
                     {voucher.voucherType.toUpperCase()} • {formatDate(voucher.entryDate)}
@@ -148,13 +149,13 @@ export default function VoucherListScreen() {
                     }
                     style={styles.printPill}
                   >
-                    <Ionicons name="print-outline" size={16} color="#2563EB" />
+                    <Ionicons name="print-outline" size={16} color={accountingTheme.colors.primary} />
                   </Pressable>
                   <Pressable
                     onPress={() => handleDelete(voucher.id)}
                     style={styles.deletePill}
                   >
-                    <Ionicons name="trash-outline" size={16} color="#DC2626" />
+                    <Ionicons name="trash-outline" size={16} color={accountingTheme.colors.error} />
                   </Pressable>
                 </View>
               </Card>
@@ -188,7 +189,7 @@ export default function VoucherListScreen() {
                     })
                   }
                 >
-                  <Ionicons name="print-outline" size={16} color="#fff" />
+                  <Ionicons name="print-outline" size={16} color={accountingTheme.colors.card} />
                   <Text style={styles.detailPrintText}>Print PDF</Text>
                 </Pressable>
               </Card>
@@ -206,19 +207,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
   },
   content: {
-    paddingBottom: 24,
+    paddingBottom: accountingTheme.spacing.xxl,
   },
   actionArea: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.lg,
   },
   quickSection: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.md,
   },
   quickTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#111827",
   },
   quickGrid: {
@@ -229,103 +230,103 @@ const styles = StyleSheet.create({
   },
   quickCard: {
     width: "48%",
-    backgroundColor: "#fff",
-    borderRadius: 16,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.xxl,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: accountingTheme.colors.border,
     padding: 14,
     marginBottom: 10,
   },
   quickIcon: {
     width: 34,
     height: 34,
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     backgroundColor: "#DBEAFE",
     alignItems: "center",
     justifyContent: "center",
   },
   quickCardTitle: {
-    fontSize: 14,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#111827",
     marginTop: 10,
   },
   quickCardSubtitle: {
     fontSize: 11,
     color: "#6B7280",
-    marginTop: 4,
+    marginTop: accountingTheme.spacing.xs,
     lineHeight: 15,
   },
   cardArea: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.md,
   },
   cardActionWrap: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   voucherNo: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#111827",
   },
   meta: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#6B7280",
-    marginTop: 4,
+    marginTop: accountingTheme.spacing.xs,
   },
   deletePill: {
     padding: 10,
-    borderRadius: 999,
+    borderRadius: accountingTheme.radius.full,
     backgroundColor: "#FEE2E2",
   },
   printPill: {
     padding: 10,
-    borderRadius: 999,
+    borderRadius: accountingTheme.radius.full,
     backgroundColor: "#DBEAFE",
   },
   detailCard: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   detailTitle: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#111827",
   },
   detailText: {
-    fontSize: 13,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#4B5563",
     marginTop: 6,
   },
   linesBlock: {
-    marginTop: 12,
-    gap: 8,
+    marginTop: accountingTheme.spacing.md,
+    gap: accountingTheme.spacing.sm,
   },
   detailPrintButton: {
     marginTop: 14,
-    backgroundColor: "#2563EB",
-    borderRadius: 14,
-    paddingVertical: 12,
+    backgroundColor: accountingTheme.colors.primary,
+    borderRadius: accountingTheme.radius.xl,
+    paddingVertical: accountingTheme.spacing.md,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   detailPrintText: {
-    color: "#fff",
-    fontWeight: "800",
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
   lineRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 12,
-    paddingVertical: 8,
+    gap: accountingTheme.spacing.md,
+    paddingVertical: accountingTheme.spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: accountingTheme.colors.border,
   },
   lineLabel: {
-    fontSize: 13,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#111827",
     flex: 1,
   },

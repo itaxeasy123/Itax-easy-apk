@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Card, EmptyState, Loading, AccountingHeader } from "../components";
 import { accountingService } from "../services/accountingService";
+import { accountingTheme } from "../../../theme/accounting";
 
 const formatCurrency = (value: number) =>
   `₹ ${Math.abs(value || 0).toLocaleString("en-IN", {
@@ -158,14 +159,14 @@ export default function ItemDetailsScreen() {
         showBackButton
         rightContent={
           <Pressable onPress={() => setShowActionModal(true)}>
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </Pressable>
         }
         headerContent={
           <View style={styles.headerProfileArea}>
             <View style={styles.profileRow}>
               <View style={styles.itemIconCircle}>
-                <Ionicons name="cube" size={28} color="#F59E0B" />
+                <Ionicons name="cube" size={28} color={accountingTheme.colors.warning} />
               </View>
               <View style={styles.profileInfo}>
                 <Text style={styles.itemTitle}>{item?.itemName || "Item Name"}</Text>
@@ -308,7 +309,7 @@ export default function ItemDetailsScreen() {
               </Pressable>
 
               <Pressable style={styles.optionRow} onPress={() => { setShowActionModal(false); handleDeleteItem(); }}>
-                <Ionicons name="trash" size={18} color="#DC2626" style={styles.optionIcon} />
+                <Ionicons name="trash" size={18} color={accountingTheme.colors.error} style={styles.optionIcon} />
                 <Text style={[styles.optionText, styles.dangerText]}>Delete Item</Text>
               </Pressable>
             </View>
@@ -325,19 +326,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#F2F7FA",
   },
   headerProfileArea: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   profileRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
-    marginBottom: 20,
+    gap: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.xl,
   },
   itemIconCircle: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -345,27 +346,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.xxxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   itemPriceText: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    marginTop: 4,
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
+    marginTop: accountingTheme.spacing.xs,
   },
   itemPriceLabel: {
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.medium,
     color: "rgba(255, 255, 255, 0.8)",
   },
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 8,
-    paddingBottom: 8,
+    marginTop: accountingTheme.spacing.sm,
+    paddingBottom: accountingTheme.spacing.sm,
   },
   statColumn: {
     flex: 1,
@@ -373,15 +374,15 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 11,
     color: "rgba(255, 255, 255, 0.8)",
-    marginBottom: 4,
+    marginBottom: accountingTheme.spacing.xs,
   },
   statValue: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   headerSection: {
-    paddingBottom: 24,
+    paddingBottom: accountingTheme.spacing.xxl,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
   },
@@ -389,46 +390,46 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     paddingTop: 48,
     marginBottom: 10,
   },
   iconButton: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
   },
   pageTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#fff",
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   itemHeaderCard: {
     backgroundColor: "rgba(255,255,255,0.12)",
-    marginHorizontal: 16,
+    marginHorizontal: accountingTheme.spacing.lg,
     borderRadius: 24,
-    padding: 16,
+    padding: accountingTheme.spacing.lg,
   },
   content: {
     paddingBottom: 32,
     paddingHorizontal: 0,
-    paddingTop: 24,
+    paddingTop: accountingTheme.spacing.xxl,
   },
   sectionArea: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.lg,
   },
   detailCard: {
     borderRadius: 24,
     overflow: "hidden",
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
     marginBottom: 14,
   },
   detailRow: {
@@ -436,98 +437,98 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: "#E5EAF3",
   },
   detailRowFull: {
     paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
   },
   detailLabel: {
-    fontSize: 12,
-    color: "#64748B",
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.textSecondary,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   detailValue: {
-    fontSize: 13,
-    color: "#0F172A",
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.bold,
     textAlign: "right",
     flex: 1,
   },
   descriptionText: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
     lineHeight: 18,
     textAlign: "right",
   },
   actionsBottom: {
     flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    gap: accountingTheme.spacing.md,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.md,
   },
   bottomButton: {
     flex: 1,
-    paddingVertical: 16,
+    paddingVertical: accountingTheme.spacing.lg,
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
   stockOutButton: {
-    backgroundColor: "#DC2626",
+    backgroundColor: accountingTheme.colors.error,
   },
   stockInButton: {
     backgroundColor: "#22C55E",
   },
   bottomButtonText: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#fff",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   actionCard: {
     borderRadius: 20,
-    padding: 16,
+    padding: accountingTheme.spacing.lg,
   },
   formArea: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.lg,
   },
   actionTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginBottom: 16,
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
+    marginBottom: accountingTheme.spacing.lg,
   },
   field: {
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.lg,
   },
   label: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#60708A",
-    marginBottom: 8,
+    marginBottom: accountingTheme.spacing.sm,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.xl,
     borderWidth: 1,
     borderColor: "#E5EAF3",
     padding: 14,
-    fontSize: 14,
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
   },
   actionButtons: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 12,
+    gap: accountingTheme.spacing.md,
+    marginTop: accountingTheme.spacing.md,
   },
   actionButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: accountingTheme.radius.xl,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -535,17 +536,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#E5EAF3",
   },
   cancelButtonText: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#475569",
   },
   confirmButton: {
-    backgroundColor: "#2563EB",
+    backgroundColor: accountingTheme.colors.primary,
   },
   confirmButtonText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#fff",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.card,
   },
   modalBackdrop: {
     flex: 1,
@@ -556,40 +557,40 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 30,
   },
   sheetHandleWrap: {
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: accountingTheme.colors.borderMedium,
     borderRadius: 2,
   },
   sheetOptions: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: accountingTheme.spacing.lg,
+    paddingHorizontal: accountingTheme.spacing.xxl,
   },
   optionIcon: {
-    marginRight: 12,
+    marginRight: accountingTheme.spacing.md,
   },
   optionText: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.lg,
     color: "#475569",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   dangerText: {
-    color: "#DC2626",
+    color: accountingTheme.colors.error,
   },
 });
 

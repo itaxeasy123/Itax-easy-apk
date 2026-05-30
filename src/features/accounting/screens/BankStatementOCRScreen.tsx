@@ -25,6 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 import { uploadBankStatementOCR } from '../../../api/ocr.service';
+import { accountingTheme } from "../../../theme/accounting";
 
 import {
   saveBankStatement,
@@ -189,7 +190,7 @@ const exportData = async (
           <Ionicons
             name="document-text"
             size={24}
-            color="#2563eb"
+            color={accountingTheme.colors.primary}
           />
 
           <View
@@ -287,7 +288,7 @@ const exportData = async (
           <Ionicons
             name="chevron-back"
             size={28}
-            color="#fff"
+            color={accountingTheme.colors.card}
           />
         </TouchableOpacity>
 
@@ -308,7 +309,7 @@ const exportData = async (
           false
         }
         contentContainerStyle={{
-          padding: 16,
+          padding: accountingTheme.spacing.lg,
           paddingBottom: 40,
         }}
         ListHeaderComponent={
@@ -376,41 +377,41 @@ const styles = StyleSheet.create({
 
   header: {
     height: 90,
-    backgroundColor: '#2563EB',
+    backgroundColor: accountingTheme.colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    gap: 12,
-    paddingTop: 20,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    gap: accountingTheme.spacing.md,
+    paddingTop: accountingTheme.spacing.xl,
   },
 
   headerTitle: {
-    color: '#fff',
+    color: accountingTheme.colors.card,
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 
   uploadCard: {
-    backgroundColor: '#fff',
+    backgroundColor: accountingTheme.colors.card,
     borderRadius: 28,
-    padding: 24,
-    marginTop: 20,
+    padding: accountingTheme.spacing.xxl,
+    marginTop: accountingTheme.spacing.xl,
     alignItems: 'center',
   },
 
   title: {
     fontSize: 28,
-    fontWeight: '800',
-    marginTop: 16,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    marginTop: accountingTheme.spacing.lg,
     color: '#111827',
   },
 
   subtitle: {
     textAlign: 'center',
-    marginTop: 12,
+    marginTop: accountingTheme.spacing.md,
     color: '#6b7280',
     lineHeight: 24,
-    fontSize: 16,
+    fontSize: accountingTheme.fontSizes.xl,
   },
 
   uploadButton: {
@@ -418,78 +419,78 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingVertical: 18,
     borderRadius: 18,
-    marginTop: 24,
+    marginTop: accountingTheme.spacing.xxl,
     alignItems: 'center',
   },
 
   uploadText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 18,
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.xxl,
   },
 
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: accountingTheme.colors.card,
     borderRadius: 24,
     padding: 18,
-    marginTop: 20,
+    marginTop: accountingTheme.spacing.xl,
   },
 
   topRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
+    gap: accountingTheme.spacing.md,
+    marginBottom: accountingTheme.spacing.lg,
   },
 
   fileName: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: '#111827',
   },
 
   date: {
     color: '#6b7280',
-    marginTop: 4,
+    marginTop: accountingTheme.spacing.xs,
   },
 
   responseBox: {
     backgroundColor: '#111827',
-    borderRadius: 16,
+    borderRadius: accountingTheme.radius.xxl,
     maxHeight: 300,
     padding: 14,
   },
 
   responseText: {
-    color: '#fff',
-    fontSize: 12,
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.sm,
     lineHeight: 20,
   },
 
   actionRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
+    gap: accountingTheme.spacing.md,
+    marginTop: accountingTheme.spacing.lg,
   },
 
   exportButton: {
     flex: 1,
-    backgroundColor: '#2563eb',
-    paddingVertical: 16,
-    borderRadius: 16,
+    backgroundColor: accountingTheme.colors.primary,
+    paddingVertical: accountingTheme.spacing.lg,
+    borderRadius: accountingTheme.radius.xxl,
     alignItems: 'center',
   },
 
   clearButton: {
     flex: 1,
-    backgroundColor: '#ef4444',
-    paddingVertical: 16,
-    borderRadius: 16,
+    backgroundColor: accountingTheme.colors.danger,
+    paddingVertical: accountingTheme.spacing.lg,
+    borderRadius: accountingTheme.radius.xxl,
     alignItems: 'center',
   },
 
   actionText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 16,
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.xl,
   },
 });

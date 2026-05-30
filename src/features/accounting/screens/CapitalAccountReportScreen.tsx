@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { AccountingHeader } from "../components";
+import { accountingTheme } from "../../../theme/accounting";
 
 const format = (value: number | undefined) => {
   if (value === undefined || isNaN(value)) return "₹ 0.00";
@@ -24,14 +25,14 @@ export default function CapitalAccountReportScreen() {
         showBackButton
         rightContent={
           <Pressable>
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </Pressable>
         }
       />
 
       <View style={styles.userInfoCard}>
         <View style={styles.userAvatar}>
-          <Ionicons name="person" size={24} color="#94A3B8" />
+          <Ionicons name="person" size={24} color={accountingTheme.colors.textMuted} />
         </View>
         <View style={styles.userInfoTextWrap}>
           <View style={styles.infoRow}>
@@ -54,7 +55,7 @@ export default function CapitalAccountReportScreen() {
 
       <View style={styles.periodBar}>
         <View style={styles.periodLeft}>
-          <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
+          <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
           <Text style={styles.periodText}>
             Financial Year <Text style={styles.periodSubText}>(1 Apr 24 to 31 Mar 25)</Text>
           </Text>
@@ -93,14 +94,14 @@ export default function CapitalAccountReportScreen() {
         <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalDebit)}</Text>
         <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalCredit)}</Text>
       </View>
-      <View style={{ backgroundColor: "#FFFFFF", height: Math.max(insets.bottom, 0) }} />
+      <View style={{ backgroundColor: accountingTheme.colors.card, height: Math.max(insets.bottom, 0) }} />
 
       {/* FAB Print */}
       <Pressable 
-        style={[styles.fabPrint, { bottom: 80 + Math.max(insets.bottom, 0) }]} 
+        style={[styles.fabPrint, { bottom: 86 + Math.max(insets.bottom, 0) }]} 
         onPress={() => router.navigate("/accounting/reports-capital-account-preview")}
       >
-        <Ionicons name="print-outline" size={20} color="#FFFFFF" />
+        <Ionicons name="print-outline" size={20} color={accountingTheme.colors.card} />
         <Text style={styles.fabPrintText}>Print</Text>
       </Pressable>
     </View>
@@ -110,161 +111,161 @@ export default function CapitalAccountReportScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
   },
   userInfoCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#DCFCE7", // Light green as per screenshot
-    padding: 16,
+    backgroundColor: accountingTheme.colors.successLight, // Light green as per screenshot
+    padding: accountingTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
+    borderBottomColor: accountingTheme.colors.borderMedium,
   },
   userAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#E2E8F0",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: accountingTheme.colors.borderMedium,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 16,
+    marginRight: accountingTheme.spacing.md,
   },
   userInfoTextWrap: {
     flex: 1,
   },
   infoRow: {
     flexDirection: "row",
-    marginBottom: 4,
+    marginBottom: accountingTheme.spacing.xs,
   },
   infoLabel: {
-    width: 100,
-    fontSize: 13,
+    width: 90,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#334155",
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   infoValue: {
     flex: 1,
-    fontSize: 13,
-    color: "#0F172A",
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#1E293B",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.md,
+    paddingBottom: accountingTheme.spacing.sm,
   },
   periodBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: 10,
   },
   periodLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   periodText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#1E293B",
   },
   periodSubText: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#64748B",
+    fontSize: 11,
+    fontWeight: accountingTheme.fontWeights.regular,
+    color: accountingTheme.colors.textSecondary,
   },
   changeText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#3B82F6",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.primary,
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#3B82F6",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    backgroundColor: accountingTheme.colors.primary,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.md,
   },
   thText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   content: {
     paddingBottom: 80,
   },
   tableCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 18,
+    paddingHorizontal: 14,
+    paddingVertical: accountingTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
   particular: {
     flex: 2,
-    fontSize: 12,
+    fontSize: 11,
     color: "#475569",
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   amount: {
     flex: 1.5,
-    fontSize: 12,
-    color: "#0F172A",
-    fontWeight: "700",
+    fontSize: 11,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.bold,
     textAlign: "right",
   },
   emptyText: {
     textAlign: "center",
-    padding: 24,
-    color: "#94A3B8",
+    padding: accountingTheme.spacing.xxl,
+    color: accountingTheme.colors.textMuted,
   },
   footer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#3B82F6",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    backgroundColor: accountingTheme.colors.primary,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.lg,
   },
   footerLabel: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "700",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   footerValue: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "700",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   fabPrint: {
     position: "absolute",
     right: 16,
-    bottom: 80,
-    backgroundColor: "#3B82F6",
+    bottom: 86,
+    backgroundColor: accountingTheme.colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: accountingTheme.spacing.xl,
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: accountingTheme.radius.full,
     elevation: 4,
-    shadowColor: "#3B82F6",
+    shadowColor: accountingTheme.colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   fabPrintText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
 });

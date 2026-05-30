@@ -11,6 +11,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { AccountingHeader, BottomNav, EmptyState } from "../components";
 import { accountingService } from "../services/accountingService";
 import { BillReceivable } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 type Tab = "customers" | "ageing";
 
@@ -109,9 +110,9 @@ export default function BillReceivableScreen() {
         showBackButton
         rightContent={
           <View style={styles.headerRightIcons}>
-            <Ionicons name="search" size={20} color="#fff" />
-            <Ionicons name="filter" size={20} color="#fff" />
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="search" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="filter" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </View>
         }
         headerContent={
@@ -166,72 +167,72 @@ const styles = StyleSheet.create({
   headerRightIcons: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: accountingTheme.spacing.lg,
   },
   headerBlock: {
     alignItems: "center",
     marginTop: 10,
-    marginBottom: 20,
+    marginBottom: accountingTheme.spacing.xl,
   },
   headerAmount: {
     fontSize: 28,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   headerMeta: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: accountingTheme.spacing.xs,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#EAFDFC",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   mainContainer: {
     flex: 1,
     marginTop: -8,
   },
   topWhiteSection: {
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.lg,
+    paddingBottom: accountingTheme.spacing.sm,
+    borderTopLeftRadius: accountingTheme.radius.xxl,
+    borderTopRightRadius: accountingTheme.radius.xxl,
   },
   switcherWrap: {
-    marginBottom: 8,
+    marginBottom: accountingTheme.spacing.sm,
   },
   listContent: {
     paddingBottom: 110,
   },
   listContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     minHeight: 400,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   firstRow: {
     borderTopWidth: 0,
   },
   rowTitle: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#334155",
   },
   rowSubtitle: {
     fontSize: 11,
-    color: "#64748B",
-    marginTop: 4,
+    color: accountingTheme.colors.textSecondary,
+    marginTop: accountingTheme.spacing.xs,
   },
   rowAmount: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   switcherContainer: {
     flexDirection: "row",
@@ -239,23 +240,23 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    backgroundColor: "#EEF2F7",
-    borderRadius: 999,
+    backgroundColor: accountingTheme.colors.surfaceLight,
+    borderRadius: accountingTheme.radius.full,
     paddingVertical: 10,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
   },
   tabActive: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#2563EB",
+    backgroundColor: accountingTheme.colors.card,
+    borderColor: accountingTheme.colors.primary,
   },
   tabLabel: {
-    color: "#64748B",
-    fontSize: 12,
-    fontWeight: "700",
+    color: accountingTheme.colors.textSecondary,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   tabLabelActive: {
-    color: "#2563EB",
+    color: accountingTheme.colors.primary,
   },
 });

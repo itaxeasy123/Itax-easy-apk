@@ -20,6 +20,7 @@ import {
   AccountingHeader,
 } from "../components";
 import { accountingService } from "../services/accountingService";
+import { accountingTheme } from "../../../theme/accounting";
 
 type ItemFilterKey = "all" | "instock" | "outofstock";
 
@@ -96,7 +97,7 @@ export default function ItemsScreen() {
         title="Items"
         subtitle="Manage your inventory"
         showBackButton
-        rightContent={<Ionicons name="options-outline" size={18} color="#fff" />}
+        rightContent={<Ionicons name="options-outline" size={18} color={accountingTheme.colors.card} />}
         headerContent={(
           <>
             <View style={styles.headerTabs}>
@@ -126,16 +127,16 @@ export default function ItemsScreen() {
             </View>
 
             <View style={styles.searchBoxTop}>
-              <Ionicons name="search" size={18} color="#64748B" />
+              <Ionicons name="search" size={18} color={accountingTheme.colors.textSecondary} />
               <TextInput
                 value={search}
                 onChangeText={setSearch}
                 placeholder="Search items"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={accountingTheme.colors.textMuted}
                 style={styles.searchInput}
               />
               <Pressable style={styles.filterIcon}>
-                <Ionicons name="filter" size={18} color="#0F172A" />
+                <Ionicons name="filter" size={18} color={accountingTheme.colors.text} />
               </Pressable>
             </View>
           </>
@@ -184,7 +185,7 @@ export default function ItemsScreen() {
                   <Pressable onPress={() => handleItemPress(item)}>
                       <View style={styles.itemRowClean}>
                         <View style={styles.itemIcon}>
-                          <Ionicons name="cube" size={24} color="#F59E0B" />
+                          <Ionicons name="cube" size={24} color={accountingTheme.colors.warning} />
                         </View>
                         <View style={styles.itemContent}>
                           <View style={styles.itemTopRow}>
@@ -225,7 +226,7 @@ export default function ItemsScreen() {
       </ScrollView>
 
       <Pressable style={[styles.fab, { bottom: 84 + Math.max(insets.bottom, 0) }]} onPress={handleAddItem}>
-        <Ionicons name="add" size={20} color="#fff" />
+        <Ionicons name="add" size={20} color={accountingTheme.colors.card} />
         <Text style={styles.fabText}>Add Item</Text>
       </Pressable>
 
@@ -241,8 +242,8 @@ const styles = StyleSheet.create({
   },
   topGradient: {
     paddingTop: 48,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
+    paddingBottom: accountingTheme.spacing.lg,
+    paddingHorizontal: accountingTheme.spacing.lg,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
@@ -250,78 +251,78 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.lg,
   },
   iconButton: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     backgroundColor: "rgba(255,255,255,0.18)",
     alignItems: "center",
     justifyContent: "center",
   },
   headerTitle: {
     fontSize: 22,
-    fontWeight: "800",
-    color: "#fff",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   headerTabs: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 16,
+    gap: accountingTheme.spacing.sm,
+    marginBottom: 10,
   },
   headerTab: {
     flex: 1,
-    borderRadius: 999,
-    paddingVertical: 10,
+    borderRadius: accountingTheme.radius.full,
+    paddingVertical: 6,
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.24)",
   },
   headerTabActive: {
-    backgroundColor: "#fff",
+    backgroundColor: accountingTheme.colors.card,
   },
   headerTabText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#fff",
+    fontSize: 11,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.card,
   },
   headerTabTextActive: {
-    color: "#0F172A",
+    color: accountingTheme.colors.text,
   },
   searchBoxTop: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 999,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    gap: 10,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.full,
+    paddingVertical: 6,
+    paddingHorizontal: accountingTheme.spacing.md,
+    gap: accountingTheme.spacing.sm,
   },
   searchInput: {
     flex: 1,
-    height: 40,
-    color: "#0F172A",
-    fontSize: 14,
+    height: 36,
+    color: accountingTheme.colors.text,
+    fontSize: accountingTheme.fontSizes.md,
   },
   filterIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: "#F1F5F9",
+    width: 32,
+    height: 32,
+    borderRadius: accountingTheme.radius.md,
+    backgroundColor: accountingTheme.colors.borderLight,
     alignItems: "center",
     justifyContent: "center",
   },
   scrollContent: {
     paddingBottom: 120,
-    paddingTop: 16,
+    paddingTop: accountingTheme.spacing.lg,
   },
   errorContainer: {
-    paddingHorizontal: 16,
-    marginTop: 20,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    marginTop: accountingTheme.spacing.xl,
   },
   emptyContainer: {
-    paddingHorizontal: 16,
-    marginTop: 20,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    marginTop: accountingTheme.spacing.xl,
   },
   emptyCard: {
     borderRadius: 20,
@@ -330,42 +331,42 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   emptyTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginTop: 12,
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
+    marginTop: accountingTheme.spacing.md,
   },
   emptyDescription: {
-    fontSize: 13,
-    color: "#64748B",
-    marginTop: 4,
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.textSecondary,
+    marginTop: accountingTheme.spacing.xs,
     textAlign: "center",
   },
   emptyLink: {
-    marginTop: 12,
-    fontSize: 13,
-    color: "#2563EB",
-    fontWeight: "700",
+    marginTop: accountingTheme.spacing.md,
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   itemsContainer: {
-    paddingHorizontal: 16,
-    gap: 12,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    gap: accountingTheme.spacing.sm,
   },
   itemCard: {
-    borderRadius: 16,
+    borderRadius: accountingTheme.radius.lg,
     padding: 0,
     overflow: "hidden",
   },
   itemRowClean: {
     flexDirection: "row",
-    padding: 16,
-    gap: 12,
+    padding: accountingTheme.spacing.md,
+    gap: 10,
   },
   itemIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "#FEF3C7",
+    width: 40,
+    height: 40,
+    borderRadius: accountingTheme.radius.md,
+    backgroundColor: accountingTheme.colors.warningLight,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -376,36 +377,36 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.sm,
   },
   itemNameClean: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.text,
     flex: 1,
-    marginRight: 8,
+    marginRight: accountingTheme.spacing.sm,
   },
   actionPillRow: {
     flexDirection: "row",
-    gap: 6,
+    gap: accountingTheme.spacing.xs,
   },
   smallButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 6,
+    paddingVertical: accountingTheme.spacing.xs,
+    paddingHorizontal: 6,
+    borderRadius: accountingTheme.radius.sm,
     borderWidth: 1,
   },
   inButton: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderColor: "#D1D5DB",
   },
   outButton: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderColor: "#D1D5DB",
   },
   smallButtonText: {
-    fontSize: 10,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.xs,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#374151",
   },
   itemStatsRow: {
@@ -417,39 +418,41 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statLabelClean: {
-    fontSize: 10,
-    color: "#94A3B8",
-    marginBottom: 4,
+    fontSize: 9,
+    color: accountingTheme.colors.textMuted,
+    marginBottom: accountingTheme.spacing.xs,
   },
   statValueClean: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#0F172A",
+    fontSize: 11,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.text,
   },
   stockPositive: {
     color: "#22C55E",
   },
   stockNegative: {
-    color: "#EF4444",
+    color: accountingTheme.colors.danger,
   },
   fab: {
     position: "absolute",
-    bottom: 84,
-    left: "50%",
-    transform: [{ translateX: -80 }],
-    width: 160,
-    height: 48,
-    backgroundColor: "#2563EB",
-    borderRadius: 999,
+    right: 16,
+    bottom: 86,
+    backgroundColor: accountingTheme.colors.primary,
+    borderRadius: accountingTheme.radius.full,
+    paddingHorizontal: accountingTheme.spacing.xl,
+    paddingVertical: 14,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    elevation: 8,
+    gap: accountingTheme.spacing.sm,
+    elevation: 4,
+    shadowColor: accountingTheme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   fabText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "800",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 });

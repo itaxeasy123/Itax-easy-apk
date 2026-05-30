@@ -16,26 +16,29 @@ type RowConfig = {
 const roundMoney = (value: number) => Math.round(value);
 
 export default function ITRHousePropertyScreen() {
-  const { houseProperty, setHouseProperty } = useITRStore();
+  const { houseProperty, setHouseProperty, form16 } = useITRStore();
+
+  const initField = (manualVal: string, form16Val?: number | string, defaultFreq: Frequency = "Monthly"): { value: string, frequency: Frequency } => {
+    if (manualVal) return { value: manualVal, frequency: defaultFreq };
+    if (form16Val) return { value: String(form16Val), frequency: "Yearly" };
+    return { value: "", frequency: defaultFreq };
+  };
 
   const [rows, setRows] = useState<RowConfig[]>([
     {
       id: "gross-rent",
       label: "1. Annual Rent Received / Receivable",
-      frequency: "Monthly",
-      value: houseProperty.grossRent,
+      ...initField(houseProperty.grossRent, form16?.housePropertyIncome, "Yearly"),
     },
     {
       id: "municipal-taxes",
       label: "2. Municipal Taxes Paid during the year",
-      frequency: "Yearly",
-      value: houseProperty.municipalTaxes,
+      ...initField(houseProperty.municipalTaxes, undefined, "Yearly"),
     },
     {
       id: "housing-loan-interest",
       label: "3. Interest Paid on Housing Loan",
-      frequency: "Yearly",
-      value: houseProperty.interestOnLoan,
+      ...initField(houseProperty.interestOnLoan, undefined, "Yearly"),
     },
   ]);
 

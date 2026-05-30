@@ -7,6 +7,7 @@ import { AccountingHeader, Button, Card, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Party } from "../types/accountingTypes";
 import { formatMoney, todayInputValue } from "./voucherFlowUtils";
+import { accountingTheme } from "../../../theme/accounting";
 
 const paymentModes = ["Cash", "Cheque/DD", "Bank Transfer", "UPI"];
 const banks = ["HDFC Bank", "ICICI Bank", "State Bank of India", "Axis Bank"];
@@ -148,7 +149,7 @@ export default function QuickEditsScreen() {
               <Text style={styles.fieldLabel}>Select Party</Text>
               <View style={styles.selectBox}>
                 <Text style={styles.selectBoxText}>{selectedParty?.partyName ?? "Select Party"}</Text>
-                <Ionicons name="chevron-down" size={16} color="#64748B" />
+                <Ionicons name="chevron-down" size={16} color={accountingTheme.colors.textSecondary} />
               </View>
             </View>
             <View style={styles.field}>
@@ -234,7 +235,7 @@ export default function QuickEditsScreen() {
             <Text style={styles.fieldLabel}>Select Bank</Text>
             <View style={styles.selectBox}>
               <Text style={styles.selectBoxText}>{selectedBank}</Text>
-              <Ionicons name="chevron-down" size={16} color="#64748B" />
+              <Ionicons name="chevron-down" size={16} color={accountingTheme.colors.textSecondary} />
             </View>
           </View>
           <View style={styles.field}>
@@ -355,7 +356,7 @@ export default function QuickEditsScreen() {
 
         {error ? (
           <View style={styles.errorBox}>
-            <Ionicons name="alert-circle" size={18} color="#DC2626" />
+            <Ionicons name="alert-circle" size={18} color={accountingTheme.colors.error} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
         ) : null}
@@ -365,75 +366,75 @@ export default function QuickEditsScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#F5F9FF" },
-  content: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 24 },
+  screen: { flex: 1, backgroundColor: accountingTheme.colors.background },
+  content: { paddingHorizontal: 14, paddingTop: accountingTheme.spacing.sm, paddingBottom: accountingTheme.spacing.xxl },
   label: {
     color: "#9CA3AF",
-    fontWeight: "700",
-    fontSize: 18,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.xxl,
     marginTop: 2,
     marginBottom: 6,
   },
   panel: { marginBottom: 10 },
-  headerRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
-  panelTitle: { fontSize: 12, fontWeight: "800", color: "#111827" },
-  panelMeta: { fontSize: 10, color: "#9CA3AF" },
-  row: { flexDirection: "row", gap: 8 },
-  field: { flex: 1, marginBottom: 8 },
-  fieldLabel: { fontSize: 10, color: "#64748B", fontWeight: "700", marginBottom: 4 },
+  headerRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: accountingTheme.spacing.sm },
+  panelTitle: { fontSize: accountingTheme.fontSizes.sm, fontWeight: accountingTheme.fontWeights.extraBold, color: "#111827" },
+  panelMeta: { fontSize: accountingTheme.fontSizes.xs, color: "#9CA3AF" },
+  row: { flexDirection: "row", gap: accountingTheme.spacing.sm },
+  field: { flex: 1, marginBottom: accountingTheme.spacing.sm },
+  fieldLabel: { fontSize: accountingTheme.fontSizes.xs, color: accountingTheme.colors.textSecondary, fontWeight: accountingTheme.fontWeights.bold, marginBottom: accountingTheme.spacing.xs },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 10,
+    borderColor: accountingTheme.colors.border,
+    borderRadius: accountingTheme.radius.md,
     paddingHorizontal: 10,
-    paddingVertical: 8,
-    fontSize: 12,
+    paddingVertical: accountingTheme.spacing.sm,
+    fontSize: accountingTheme.fontSizes.sm,
   },
   multiLine: { minHeight: 56, textAlignVertical: "top" },
   selectBox: {
-    backgroundColor: "#fff",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 10,
+    borderColor: accountingTheme.colors.border,
+    borderRadius: accountingTheme.radius.md,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: accountingTheme.spacing.sm,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  selectBoxText: { fontSize: 12, color: "#111827", fontWeight: "700" },
+  selectBoxText: { fontSize: accountingTheme.fontSizes.sm, color: "#111827", fontWeight: accountingTheme.fontWeights.bold },
   optionColumn: { gap: 6 },
   optionRow: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 10,
+    borderColor: accountingTheme.colors.border,
+    borderRadius: accountingTheme.radius.md,
     paddingHorizontal: 10,
-    paddingVertical: 8,
-    backgroundColor: "#fff",
+    paddingVertical: accountingTheme.spacing.sm,
+    backgroundColor: accountingTheme.colors.card,
   },
-  optionRowActive: { borderColor: "#2563EB", backgroundColor: "#EFF6FF" },
-  optionText: { color: "#475569", fontSize: 12, fontWeight: "700" },
-  optionTextActive: { color: "#2563EB" },
+  optionRowActive: { borderColor: accountingTheme.colors.primary, backgroundColor: "#EFF6FF" },
+  optionText: { color: "#475569", fontSize: accountingTheme.fontSizes.sm, fontWeight: accountingTheme.fontWeights.bold },
+  optionTextActive: { color: accountingTheme.colors.primary },
   summaryBox: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
+    borderColor: accountingTheme.colors.border,
+    borderRadius: accountingTheme.radius.lg,
     backgroundColor: "#F8FAFC",
     padding: 10,
-    marginBottom: 8,
+    marginBottom: accountingTheme.spacing.sm,
   },
-  summaryLine: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
-  summaryLabel: { fontSize: 10, color: "#64748B", fontWeight: "700" },
-  summaryValue: { fontSize: 11, color: "#111827", fontWeight: "800" },
+  summaryLine: { flexDirection: "row", justifyContent: "space-between", marginBottom: accountingTheme.spacing.xs },
+  summaryLabel: { fontSize: accountingTheme.fontSizes.xs, color: accountingTheme.colors.textSecondary, fontWeight: accountingTheme.fontWeights.bold },
+  summaryValue: { fontSize: 11, color: "#111827", fontWeight: accountingTheme.fontWeights.extraBold },
   errorBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: "#FEF2F2",
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 12,
+    gap: accountingTheme.spacing.sm,
+    backgroundColor: accountingTheme.colors.dangerLight,
+    borderRadius: accountingTheme.radius.lg,
+    padding: accountingTheme.spacing.md,
+    marginTop: accountingTheme.spacing.md,
   },
-  errorText: { color: "#DC2626", fontSize: 12, fontWeight: "600" },
+  errorText: { color: accountingTheme.colors.error, fontSize: accountingTheme.fontSizes.sm, fontWeight: accountingTheme.fontWeights.semiBold },
 });

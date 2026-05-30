@@ -7,6 +7,7 @@ import { AccountingHeader, Card, Loading } from "../components";
 import { voucherService } from "../services/voucherService";
 import { buildA4Html, escapeHtml, exportHtmlToPdf, formatINR } from "../print/printHelpers";
 import { VoucherEntry } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const formatDate = (value: string) => {
   const date = new Date(value);
@@ -106,7 +107,7 @@ export default function PrintVoucherScreen() {
           <Text style={styles.title}>{voucher.voucherNumber}</Text>
           <Text style={styles.meta}>{voucher.voucherType.toUpperCase()} | {formatDate(voucher.entryDate)}</Text>
           <Pressable style={styles.btn} onPress={handlePrint}>
-            <Ionicons name="print-outline" size={18} color="#fff" />
+            <Ionicons name="print-outline" size={18} color={accountingTheme.colors.card} />
             <Text style={styles.btnText}>{saving ? "Preparing..." : "Export PDF"}</Text>
           </Pressable>
         </Card>
@@ -116,12 +117,12 @@ export default function PrintVoucherScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F9FF" },
-  content: { padding: 16 },
-  title: { fontSize: 22, fontWeight: "800", color: "#0F172A" },
-  meta: { fontSize: 13, color: "#64748B", marginTop: 4 },
-  btn: { marginTop: 16, backgroundColor: "#2563EB", borderRadius: 14, paddingVertical: 14, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8 },
-  btnText: { color: "#fff", fontWeight: "800" },
-  empty: { padding: 16 },
-  error: { color: "#DC2626" },
+  container: { flex: 1, backgroundColor: accountingTheme.colors.background },
+  content: { padding: accountingTheme.spacing.lg },
+  title: { fontSize: 22, fontWeight: accountingTheme.fontWeights.extraBold, color: accountingTheme.colors.text },
+  meta: { fontSize: accountingTheme.fontSizes.md, color: accountingTheme.colors.textSecondary, marginTop: accountingTheme.spacing.xs },
+  btn: { marginTop: accountingTheme.spacing.lg, backgroundColor: accountingTheme.colors.primary, borderRadius: accountingTheme.radius.xl, paddingVertical: 14, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: accountingTheme.spacing.sm },
+  btnText: { color: accountingTheme.colors.card, fontWeight: accountingTheme.fontWeights.extraBold },
+  empty: { padding: accountingTheme.spacing.lg },
+  error: { color: accountingTheme.colors.error },
 });

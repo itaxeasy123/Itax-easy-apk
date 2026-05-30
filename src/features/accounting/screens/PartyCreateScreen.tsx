@@ -7,6 +7,7 @@ import { AccountingHeader, Button, Card } from "../components";
 import { accountingService } from "../services/accountingService";
 import { PartyType } from "../types/accountingTypes";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { accountingTheme } from "../../../theme/accounting";
 
 const partyTypeOptions: { label: string; value: PartyType }[] = [
   { label: "Customer", value: "customer" },
@@ -80,7 +81,7 @@ export default function PartyCreateScreen() {
         subtitle="Enter party details"
       />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 100 }]} showsVerticalScrollIndicator={false}>
         {/* Basic Details Card */}
         <View style={styles.cardArea}>
           <Card>
@@ -167,7 +168,7 @@ export default function PartyCreateScreen() {
                 <Ionicons
                   name="briefcase"
                   size={18}
-                  color="#2563EB"
+                  color={accountingTheme.colors.primary}
                   style={styles.sectionIcon}
                 />
                 <Text style={styles.sectionTitle}>Business Info (Optional)</Text>
@@ -179,7 +180,7 @@ export default function PartyCreateScreen() {
                     : "chevron-down"
                 }
                 size={18}
-                color="#64748B"
+                color={accountingTheme.colors.textSecondary}
               />
             </Pressable>
 
@@ -260,7 +261,7 @@ export default function PartyCreateScreen() {
                 <Ionicons
                   name="location"
                   size={18}
-                  color="#2563EB"
+                  color={accountingTheme.colors.primary}
                   style={styles.sectionIcon}
                 />
                 <Text style={styles.sectionTitle}>Billing Address</Text>
@@ -272,7 +273,7 @@ export default function PartyCreateScreen() {
                     : "chevron-down"
                 }
                 size={18}
-                color="#64748B"
+                color={accountingTheme.colors.textSecondary}
               />
             </Pressable>
 
@@ -343,17 +344,18 @@ export default function PartyCreateScreen() {
           </View>
         ) : null}
 
-        {/* Save Button */}
-        <View style={styles.cardArea}>
-          <Button
-            title={loading ? "Saving..." : "Save"}
-            onPress={handleSave}
-            loading={loading}
-            size="large"
-            fullWidth
-          />
-        </View>
       </ScrollView>
+
+      {/* Fixed Footer with Save Button */}
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
+        <Button
+          title={loading ? "Saving..." : "Save"}
+          onPress={handleSave}
+          loading={loading}
+          size="large"
+          fullWidth
+        />
+      </View>
     </View>
   );
 }
@@ -364,56 +366,56 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9FAFB",
   },
   content: {
-    paddingBottom: 24,
+    paddingBottom: accountingTheme.spacing.xxl,
   },
   cardArea: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: accountingTheme.spacing.md,
+    paddingVertical: 6,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.sm,
   },
   sectionHeaderContent: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
     flex: 1,
   },
   sectionIcon: {
-    marginRight: 4,
+    marginRight: accountingTheme.spacing.xs,
   },
   expandedDivider: {
     height: 1,
     backgroundColor: "#E5EAF3",
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.sm,
   },
   field: {
-    marginBottom: 14,
+    marginBottom: 10,
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#60708A",
-    marginBottom: 6,
+    marginBottom: accountingTheme.spacing.xs,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "#E5EAF3",
-    padding: 12,
-    fontSize: 13,
-    color: "#0F172A",
+    padding: 10,
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.text,
   },
   multilineInput: {
     minHeight: 80,
@@ -421,51 +423,67 @@ const styles = StyleSheet.create({
   },
   typeRow: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
+    gap: accountingTheme.spacing.sm,
+    marginTop: 6,
   },
   typeOption: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    gap: accountingTheme.spacing.sm,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "#E5EAF3",
-    backgroundColor: "#fff",
+    backgroundColor: accountingTheme.colors.card,
   },
   typeOptionActive: {
     backgroundColor: "#E0F2FE",
-    borderColor: "#2563EB",
+    borderColor: accountingTheme.colors.primary,
   },
   radioButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: "#D1D5DB",
     justifyContent: "center",
     alignItems: "center",
   },
   radioButtonActive: {
-    borderColor: "#2563EB",
+    borderColor: accountingTheme.colors.primary,
   },
   radioButtonInner: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#2563EB",
+    backgroundColor: accountingTheme.colors.primary,
   },
   typeOptionText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.text,
   },
   errorText: {
-    color: "#DC2626",
-    fontSize: 13,
-    fontWeight: "600",
+    color: accountingTheme.colors.error,
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+  },
+  footer: {
+    backgroundColor: accountingTheme.colors.card,
+    borderTopWidth: 1,
+    borderTopColor: "#E5EAF3",
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.lg,
+    elevation: 8,
+    shadowColor: accountingTheme.colors.black,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });

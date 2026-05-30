@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AccountingHeader } from "../components";
 import { Ionicons } from "@expo/vector-icons";
 import { accountingService } from "../services/accountingService";
+import { accountingTheme } from "../../../theme/accounting";
 
 const format = (value: number | undefined) => {
   if (value === undefined || isNaN(value)) return "₹ 0.00";
@@ -64,7 +65,7 @@ export default function BalanceSheetReportScreen() {
         showBackButton
         rightContent={
           <Pressable>
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </Pressable>
         }
         headerContent={
@@ -88,7 +89,7 @@ export default function BalanceSheetReportScreen() {
       {/* Financial Year Bar */}
       <View style={styles.periodBar}>
         <View style={styles.periodLeft}>
-          <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
+          <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
           <Text style={styles.periodText}>
             Financial Year <Text style={styles.periodSubText}>(1 Apr 24 to 31 Mar 25)</Text>
           </Text>
@@ -101,7 +102,7 @@ export default function BalanceSheetReportScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {loading ? (
           <View style={styles.loaderWrap}>
-            <ActivityIndicator size="large" color="#3B82F6" />
+            <ActivityIndicator size="large" color={accountingTheme.colors.primary} />
           </View>
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
@@ -112,28 +113,28 @@ export default function BalanceSheetReportScreen() {
                 <View style={styles.row}>
                   <View style={styles.labelWrap}>
                     <Text style={styles.label}>Current Assets</Text>
-                    <Ionicons name="information-circle-outline" size={14} color="#94A3B8" />
+                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
                   </View>
                   <Text style={styles.value}>{format(report?.currentAssets)}</Text>
                 </View>
                 <View style={styles.row}>
                   <View style={styles.labelWrap}>
                     <Text style={styles.label}>Fixed Assets</Text>
-                    <Ionicons name="information-circle-outline" size={14} color="#94A3B8" />
+                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
                   </View>
                   <Text style={styles.value}>{format(report?.fixedAssets)}</Text>
                 </View>
                 <View style={styles.row}>
                   <View style={styles.labelWrap}>
                     <Text style={styles.label}>Investments</Text>
-                    <Ionicons name="information-circle-outline" size={14} color="#94A3B8" />
+                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
                   </View>
                   <Text style={styles.value}>{format(report?.investments)}</Text>
                 </View>
                 <View style={styles.row}>
                   <View style={styles.labelWrap}>
                     <Text style={styles.label}>Loan Advances</Text>
-                    <Ionicons name="information-circle-outline" size={14} color="#94A3B8" />
+                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
                   </View>
                   <Text style={styles.value}>{format(report?.loanAdvances)}</Text>
                 </View>
@@ -143,28 +144,28 @@ export default function BalanceSheetReportScreen() {
                 <View style={styles.row}>
                   <View style={styles.labelWrap}>
                     <Text style={styles.label}>Capital</Text>
-                    <Ionicons name="information-circle-outline" size={14} color="#94A3B8" />
+                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
                   </View>
                   <Text style={styles.value}>{format(report?.capital)}</Text>
                 </View>
                 <View style={styles.row}>
                   <View style={styles.labelWrap}>
                     <Text style={styles.label}>Current Liability</Text>
-                    <Ionicons name="information-circle-outline" size={14} color="#94A3B8" />
+                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
                   </View>
                   <Text style={styles.value}>{format(report?.currentLiability)}</Text>
                 </View>
                 <View style={styles.row}>
                   <View style={styles.labelWrap}>
                     <Text style={styles.label}>Loan</Text>
-                    <Ionicons name="information-circle-outline" size={14} color="#94A3B8" />
+                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
                   </View>
                   <Text style={styles.value}>{format(report?.loan)}</Text>
                 </View>
                 <View style={styles.row}>
                   <View style={styles.labelWrap}>
                     <Text style={styles.label}>Net Income</Text>
-                    <Ionicons name="information-circle-outline" size={14} color="#94A3B8" />
+                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
                   </View>
                   <Text style={styles.value}>{format(report?.netIncome)}</Text>
                 </View>
@@ -175,8 +176,8 @@ export default function BalanceSheetReportScreen() {
       </ScrollView>
 
       {/* FAB */}
-      <Pressable style={[styles.fab, { bottom: 72 + Math.max(insets.bottom, 0) }]} onPress={() => setShowEntryModal(true)}>
-        <Ionicons name="add" size={20} color="#FFFFFF" />
+      <Pressable style={[styles.fab, { bottom: 86 + Math.max(insets.bottom, 0) }]} onPress={() => setShowEntryModal(true)}>
+        <Ionicons name="add" size={18} color={accountingTheme.colors.card} />
         <Text style={styles.fabText}>Add New Entry</Text>
       </Pressable>
 
@@ -189,7 +190,7 @@ export default function BalanceSheetReportScreen() {
           {format(tab === "assets" ? report?.totalAssets : report?.totalLiabilities)}
         </Text>
       </View>
-      <View style={{ backgroundColor: "#FFFFFF", height: Math.max(insets.bottom, 0) }} />
+      <View style={{ backgroundColor: accountingTheme.colors.card, height: Math.max(insets.bottom, 0) }} />
 
       {/* Add Entry Bottom Sheet Modal */}
       <Modal
@@ -217,7 +218,7 @@ export default function BalanceSheetReportScreen() {
                   onPress={() => setShowCategoryModal(true)}
                 >
                   <Text style={styles.dropdownValue}>{entryCategory}</Text>
-                  <Ionicons name="chevron-down" size={16} color="#64748B" />
+                  <Ionicons name="chevron-down" size={16} color={accountingTheme.colors.textSecondary} />
                 </Pressable>
               </View>
 
@@ -227,9 +228,9 @@ export default function BalanceSheetReportScreen() {
                   placeholder="Select Date"
                   value={entryDate}
                   onChangeText={setEntryDate}
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor={accountingTheme.colors.textMuted}
                 />
-                <Ionicons name="calendar-outline" size={16} color="#94A3B8" style={styles.inputIcon} />
+                <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.textMuted} style={styles.inputIcon} />
               </View>
 
               <View style={styles.inputWrap}>
@@ -239,7 +240,7 @@ export default function BalanceSheetReportScreen() {
                   value={entryAmount}
                   onChangeText={setEntryAmount}
                   keyboardType="numeric"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor={accountingTheme.colors.textMuted}
                 />
               </View>
 
@@ -310,10 +311,10 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderRadius: 24,
-    marginTop: 16,
-    padding: 4,
+    marginTop: accountingTheme.spacing.lg,
+    padding: accountingTheme.spacing.xs,
   },
   tabBtn: {
     flex: 1,
@@ -322,17 +323,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   tabBtnActive: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#3B82F6",
+    borderColor: accountingTheme.colors.primary,
   },
   tabText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.textSecondary,
   },
   tabTextActive: {
-    color: "#3B82F6",
+    color: accountingTheme.colors.primary,
   },
   content: {
     paddingBottom: 100,
@@ -341,52 +342,52 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
+    borderBottomColor: accountingTheme.colors.borderMedium,
   },
   periodLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   periodText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#1E293B",
   },
   periodSubText: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.regular,
+    color: accountingTheme.colors.textSecondary,
   },
   changeText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#3B82F6",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.primary,
   },
   loaderWrap: {
     padding: 40,
     alignItems: "center",
   },
   errorText: {
-    color: "#DC2626",
+    color: accountingTheme.colors.error,
     textAlign: "center",
-    marginTop: 24,
+    marginTop: accountingTheme.spacing.xxl,
   },
   tableCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 18,
+    paddingHorizontal: 14,
+    paddingVertical: accountingTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
   labelWrap: {
     flexDirection: "row",
@@ -394,54 +395,54 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   label: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#475569",
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   value: {
-    fontSize: 14,
-    color: "#0F172A",
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   fab: {
     position: "absolute",
     right: 16,
-    bottom: 72,
-    backgroundColor: "#3B82F6",
+    bottom: 86,
+    backgroundColor: accountingTheme.colors.primary,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 24,
+    paddingHorizontal: accountingTheme.spacing.xl,
+    paddingVertical: 14,
+    borderRadius: accountingTheme.radius.full,
     elevation: 4,
-    shadowColor: "#3B82F6",
+    shadowColor: accountingTheme.colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    gap: 6,
+    gap: accountingTheme.spacing.sm,
   },
   fabText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
   footer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#3B82F6",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    backgroundColor: accountingTheme.colors.primary,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.lg,
   },
   footerLabel: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   footerValue: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "700",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   modalBackdrop: {
     flex: 1,
@@ -452,43 +453,43 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingBottom: 24,
+    paddingBottom: accountingTheme.spacing.xxl,
   },
   sheetHandleWrap: {
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: accountingTheme.colors.borderMedium,
     borderRadius: 2,
   },
   sheetContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
+    paddingHorizontal: accountingTheme.spacing.xxl,
+    paddingBottom: accountingTheme.spacing.lg,
   },
   sheetTitle: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#1E293B",
-    marginBottom: 20,
+    marginBottom: accountingTheme.spacing.xl,
   },
   inputGroup: {
     position: "relative",
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.lg,
   },
   inputLabelOverlay: {
     position: "absolute",
     top: -8,
     left: 12,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 4,
-    fontSize: 10,
-    color: "#64748B",
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.xs,
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.textSecondary,
     zIndex: 1,
   },
   dropdownInput: {
@@ -498,12 +499,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#CBD5E1",
     borderRadius: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     height: 44,
   },
   dropdownValue: {
-    fontSize: 14,
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
   },
   inputWrap: {
     flexDirection: "row",
@@ -511,30 +512,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#CBD5E1",
     borderRadius: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     height: 44,
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.lg,
   },
   input: {
     flex: 1,
-    fontSize: 14,
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
   },
   inputIcon: {
-    marginLeft: 8,
+    marginLeft: accountingTheme.spacing.sm,
   },
   saveBtn: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: accountingTheme.colors.primary,
     borderRadius: 8,
     height: 44,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   saveBtnText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   categoryList: {
     marginTop: -8,
@@ -542,19 +543,19 @@ const styles = StyleSheet.create({
   categoryItem: {
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
   categoryItemActive: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: accountingTheme.colors.borderLight,
     marginHorizontal: -24,
-    paddingHorizontal: 24,
+    paddingHorizontal: accountingTheme.spacing.xxl,
   },
   categoryItemText: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.lg,
     color: "#475569",
   },
   categoryItemTextActive: {
-    color: "#0F172A",
-    fontWeight: "600",
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
 });

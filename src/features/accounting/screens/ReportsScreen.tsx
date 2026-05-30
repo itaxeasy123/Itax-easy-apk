@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
 import { AccountingHeader, BottomNav } from "../components";
+import { accountingTheme } from "../../../theme/accounting";
 
 type ReportCard = {
   id: string;
@@ -33,7 +34,7 @@ export default function ReportsScreen() {
         icon: "stats-chart",
         route: "/accounting/reports-sales-monthly",
         bg: "#DCEBFF",
-        iconColor: "#2563EB",
+        iconColor: accountingTheme.colors.primary,
       },
       {
         id: "sales-customers",
@@ -48,7 +49,7 @@ export default function ReportsScreen() {
         title: "Debit Notes",
         icon: "receipt",
         route: "/accounting/reports-debit-note",
-        bg: "#FEF3C7",
+        bg: accountingTheme.colors.warningLight,
         iconColor: "#D97706",
       },
     ],
@@ -62,7 +63,7 @@ export default function ReportsScreen() {
         icon: "download",
         route: "/accounting/reports-receipt-monthly",
         bg: "#DCEBFF",
-        iconColor: "#2563EB",
+        iconColor: accountingTheme.colors.primary,
       },
       {
         id: "receipt-customers",
@@ -120,7 +121,7 @@ export default function ReportsScreen() {
         icon: "wallet",
         route: "/accounting/reports-bank-cash",
         bg: "#EAF6FF",
-        iconColor: "#2563EB",
+        iconColor: accountingTheme.colors.primary,
       },
     ],
     []
@@ -190,7 +191,7 @@ export default function ReportsScreen() {
       <AccountingHeader
         title="Reports"
         showBackButton
-        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color="#fff" />}
+        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />}
       />
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <Text style={styles.sectionTitle}>Sales Reports</Text>
@@ -287,13 +288,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.md,
     paddingBottom: 110,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#32323F",
     marginBottom: 10,
   },
@@ -303,18 +304,18 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    rowGap: 12,
-    columnGap: 12,
+    rowGap: accountingTheme.spacing.md,
+    columnGap: accountingTheme.spacing.md,
   },
   reportCard: {
     minHeight: 92,
-    borderRadius: 10,
+    borderRadius: accountingTheme.radius.md,
     paddingTop: 10,
     paddingHorizontal: 6,
-    paddingBottom: 8,
+    paddingBottom: accountingTheme.spacing.sm,
     alignItems: "center",
     justifyContent: "space-between",
-    shadowColor: "#000",
+    shadowColor: accountingTheme.colors.black,
     shadowOpacity: 0.1,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 2 },
@@ -326,10 +327,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   reportTitle: {
-    marginTop: 4,
+    marginTop: accountingTheme.spacing.xs,
     textAlign: "center",
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#343341",
   },
 });

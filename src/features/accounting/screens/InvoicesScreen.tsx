@@ -14,8 +14,11 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { colors, fontSizes, fontWeights, radius, spacing } from '../../../theme';
 import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
-import { invoiceService } from '../services/invoiceService';
-import type { Invoice, InvoiceSummary } from '../types/invoice.types';
+import { accountingService as invoiceService } from '../services/accountingService';
+import type { Invoice, InvoiceSummary } from '../types/accountingTypes';
+import CreateInvoiceSheet from '../components/CreateInvoiceSheet';
+import { AccountingHeader, BottomNav, Button, Card, EmptyState, Loading } from '../components';
+import { accountingTheme } from '../../../theme/accounting';
 
 type HomeFilter = 'all' | 'sales' | 'purchase' | 'returns';
 
@@ -115,24 +118,19 @@ async function buildPartyNameMap(invoices: Invoice[]) {
     invoices.map((invoice) => invoice.partyId).filter(Boolean)
   );
   const partyNameMap = new Map<string, string>();
-  let currentPage = 1;
-  let hasMore = true;
 
-  while (hasMore && unresolvedIds.size > 0) {
-    const response = await invoiceService.getParties({
-      limit: PARTY_PAGE_LIMIT,
-      page: currentPage,
-    });
+  try {
+    const response = await invoiceService.getParties();
+    const parties = response.data || [];
 
-    response.parties.forEach((party) => {
+    parties.forEach((party: any) => {
       if (unresolvedIds.has(party.id)) {
         partyNameMap.set(party.id, party.partyName);
         unresolvedIds.delete(party.id);
       }
     });
-
-    hasMore = response.parties.length === PARTY_PAGE_LIMIT;
-    currentPage += 1;
+  } catch (error) {
+    console.error(error);
   }
 
   return partyNameMap;
@@ -150,6 +148,7 @@ export default function InvoiceHomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const [isSheetVisible, setIsSheetVisible] = useState(false);
 
   const loadDashboard = useCallback(async (mode: 'initial' | 'refresh' = 'initial') => {
     try {
@@ -169,7 +168,7 @@ export default function InvoiceHomeScreen() {
         purchaseInvoicesCount,
         purchaseReturnsCount,
       ] = await Promise.all([
-        invoiceService.getSummary(),
+        invoiceService.getInvoiceSummary(),
         invoiceService.getInvoices({ limit: RECENT_FETCH_LIMIT, page: 1 }),
         fetchInvoiceDocumentCount('sales'),
         fetchInvoiceDocumentCount('sales_return'),
@@ -191,7 +190,7 @@ export default function InvoiceHomeScreen() {
         partyName: partyMap.get(invoice.partyId) || invoice.party?.partyName || 'Party linked',
       }));
 
-      setSummary(summaryData);
+      setSummary(summaryData.data || EMPTY_SUMMARY);
       setRecentInvoices(recent);
       setSalesCount(salesInvoicesCount + salesReturnsCount);
       setPurchaseCount(purchaseInvoicesCount + purchaseReturnsCount);
@@ -275,7 +274,7 @@ export default function InvoiceHomeScreen() {
 
   function handleShortcutPress(id: string) {
     if (id === 'create') {
-      router.navigate('/invoice-create');
+      setIsSheetVisible(true);
       return;
     }
 
@@ -295,87 +294,54 @@ export default function InvoiceHomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.screen}>
+    <View style={styles.container}>
+      <AccountingHeader
+        title="Invoices"
+        showBackButton
+        rightContent={
+          <Pressable onPress={() => void loadDashboard('refresh')} style={{ padding: 4 }}>
+            <Ionicons name="refresh" size={20} color={accountingTheme.colors.card} />
+          </Pressable>
+        }
+        headerContent={(
+          <View style={styles.headerTabsWrap}>
+            <View style={styles.balanceRow}>
+              <View style={styles.balanceColumn}>
+                <Text style={styles.balanceValue}>{loading ? '...' : formatAmount(summary.total_sales)}</Text>
+                <Text style={styles.balanceLabel}>Total Sales ({salesCount})</Text>
+              </View>
+              <View style={styles.verticalDivider} />
+              <View style={styles.balanceColumn}>
+                <Text style={styles.balanceValue}>{loading ? '...' : formatAmount(summary.total_purchases)}</Text>
+                <Text style={styles.balanceLabel}>Total Purchases ({purchaseCount})</Text>
+              </View>
+            </View>
+          </View>
+        )}
+      />
+
         <ScrollView
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingBottom: 96 + Math.max(insets.bottom, spacing.sm) },
+            { paddingBottom: 120 },
           ]}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={() => void loadDashboard('refresh')} />
           }
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.headerRow}>
-            <View style={styles.titleWrap}>
-              <Pressable 
-                onPress={() => router.canGoBack() ? router.back() : router.replace('/dashboard')} 
-                style={[styles.headerIconButton, { marginRight: 4 }]}
-              >
-                <Ionicons color={colors.textMuted} name="arrow-back" size={20} />
-              </Pressable>
-              <View style={styles.titleIconBox}>
-                <Ionicons color={colors.white} name="receipt-outline" size={16} />
-              </View>
-              <Text style={styles.headerTitle}>Invoices</Text>
-            </View>
 
-            <View style={styles.headerActions}>
-              <Pressable onPress={() => void loadDashboard('refresh')} style={styles.headerIconButton}>
-                <Ionicons color={colors.textMuted} name="refresh-outline" size={20} />
-              </Pressable>
-            </View>
-          </View>
-
-          <View style={styles.dashboardCard}>
-            <View style={styles.summaryRow}>
-              <View style={[styles.summaryBlock, styles.summaryBlockDivider]}>
-                <View style={styles.summaryLabelRow}>
-                  <Ionicons color={colors.primary} name="bar-chart-outline" size={14} />
-                  <Text style={styles.summaryLabel}>Total Sales</Text>
-                </View>
-                <Text style={styles.summaryValue}>
-                  {loading ? '...' : formatAmount(summary.total_sales)}
-                </Text>
-                <Text style={styles.summaryMeta}>
-                  {loading
-                    ? 'Loading...'
-                    : `${salesCount} ${salesCount === 1 ? 'document' : 'documents'}`}
-                </Text>
-              </View>
-
-              <View style={styles.summaryBlock}>
-                <Text style={styles.summaryLabel}>Total Purchases</Text>
-                <Text style={styles.summaryValue}>
-                  {loading ? '...' : formatAmount(summary.total_purchases)}
-                </Text>
-                <Text style={styles.summaryMeta}>
-                  {loading
-                    ? 'Loading...'
-                    : `${purchaseCount} ${purchaseCount === 1 ? 'document' : 'documents'}`}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.panelDivider} />
-
-            <View style={styles.shortcutRow}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Quick Actions</Text>
+            <View style={styles.quickRow}>
               {shortcuts.map((shortcut) => (
                 <Pressable
                   key={shortcut.id}
                   onPress={() => handleShortcutPress(shortcut.id)}
-                  style={styles.shortcutItem}
+                  style={styles.quickCard}
                 >
-                  <View
-                    style={[
-                      styles.shortcutIconBox,
-                      { backgroundColor: shortcut.backgroundColor },
-                    ]}
-                  >
-                    <Ionicons color={shortcut.iconColor} name={shortcut.icon} size={18} />
-                  </View>
-                  <Text style={styles.shortcutLabel}>{shortcut.label}</Text>
+                  <Ionicons color={shortcut.iconColor} name={shortcut.icon} size={20} />
+                  <Text style={styles.quickText}>{shortcut.label}</Text>
                 </Pressable>
               ))}
             </View>
@@ -482,138 +448,156 @@ export default function InvoiceHomeScreen() {
           )}
         </ScrollView>
 
-        <View style={[styles.bottomDock, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
-          <Pressable style={styles.createButton} onPress={() => router.navigate('/invoice-create')}>
-            <Ionicons color={colors.white} name="add" size={18} />
-            <Text style={styles.createButtonText}>Create Invoice</Text>
-          </Pressable>
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
+          <Button
+            title="Create Invoice"
+            onPress={() => setIsSheetVisible(true)}
+            icon={<Ionicons name="add" size={20} color={accountingTheme.colors.card} />}
+            size="large"
+            fullWidth
+          />
         </View>
+        <CreateInvoiceSheet visible={isSheetVisible} onClose={() => setIsSheetVisible(false)} />
       </View>
-    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: accountingTheme.colors.card,
+  },
+  headerTabsWrap: {
+    alignItems: 'center',
+    marginTop: accountingTheme.spacing.xs,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: accountingTheme.spacing.md,
+    paddingBottom: accountingTheme.spacing.xs,
+    width: '100%',
+  },
+  balanceColumn: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  balanceValue: {
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+  },
+  balanceLabel: {
+    color: '#EAFDFC',
+    fontSize: accountingTheme.fontSizes.xs,
+    marginTop: 2,
+    fontWeight: accountingTheme.fontWeights.medium,
+  },
+  verticalDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
   safeArea: {
-    backgroundColor: '#EEF3FB',
+    backgroundColor: '#F5F9FF',
     flex: 1,
   },
   screen: {
-    backgroundColor: '#EEF3FB',
+    backgroundColor: '#F5F9FF',
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
   },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.md,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
   },
-  titleWrap: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: spacing.sm,
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
-  titleIconBox: {
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    height: 22,
-    justifyContent: 'center',
-    width: 22,
+  backBtn: {
+    marginRight: 4,
+    padding: 4,
+    marginLeft: -4,
   },
-  headerTitle: {
-    color: '#304766',
-    fontSize: fontSizes.xxl,
-    fontWeight: fontWeights.bold,
+  eyebrow: {
+    fontSize: 15,
+    color: "#121213ff",
+    fontWeight: "700",
+    letterSpacing: 0.4,
   },
-  headerActions: {
-    alignItems: 'center',
-    flexDirection: 'row',
+  statsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 4,
+    marginTop: 8,
   },
-  headerIconButton: {
-    alignItems: 'center',
-    backgroundColor: '#E3EBF8',
-    borderRadius: radius.pill,
-    height: 34,
-    justifyContent: 'center',
-    width: 34,
-  },
-  dashboardCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 24,
-    elevation: 3,
-    marginBottom: spacing.md,
-    padding: spacing.md,
-    shadowColor: '#9FB2CF',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-  },
-  summaryBlock: {
+  statCard: {
     flex: 1,
-  },
-  summaryBlockDivider: {
-    borderRightColor: '#E6ECF7',
-    borderRightWidth: 1,
-    marginRight: spacing.md,
-    paddingRight: spacing.md,
+    padding: 10,
   },
   summaryLabelRow: {
     alignItems: 'center',
     flexDirection: 'row',
     gap: 4,
   },
-  summaryLabel: {
-    color: '#586C87',
-    fontSize: fontSizes.sm,
-    fontWeight: fontWeights.semibold,
-  },
-  summaryValue: {
-    color: colors.primary,
-    fontSize: 19,
-    fontWeight: fontWeights.bold,
-    marginTop: spacing.xs,
-  },
-  summaryMeta: {
-    color: colors.textMuted,
-    fontSize: fontSizes.sm,
-    marginTop: 2,
-  },
-  panelDivider: {
-    backgroundColor: '#E8EDF8',
-    height: 1,
-    marginVertical: spacing.md,
-  },
-  shortcutRow: {
-    gap: spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  shortcutItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  shortcutIconBox: {
-    alignItems: 'center',
-    borderRadius: 14,
-    height: 44,
-    justifyContent: 'center',
+  statLabel: {
+    fontSize: 12,
+    color: "#64748B",
     marginBottom: 6,
-    width: 44,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
-  shortcutLabel: {
-    color: '#4B5E79',
-    fontSize: fontSizes.sm,
-    fontWeight: fontWeights.medium,
-    textAlign: 'center',
+  statValue: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#0F172A",
   },
+  statSub: {
+    fontSize: 12,
+    color: "#64748B",
+    marginTop: 4,
+  },
+  section: {
+    marginTop: 6,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  quickRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+    marginTop: 10,
+    marginBottom: 16,
+  },
+  quickCard: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  quickText: {
+    fontSize: 10,
+    marginTop: 4,
+    color: "#0F172A",
+    fontWeight: "600",
+    textAlign: "center",
+  },
+
   filterRow: {
     backgroundColor: '#E8EDF8',
     borderRadius: radius.pill,
@@ -644,52 +628,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     flexDirection: 'row',
     gap: spacing.xs,
-    marginBottom: spacing.lg,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
-  },
-  searchInput: {
-    color: colors.text,
-    flex: 1,
-    fontSize: fontSizes.md,
-    padding: 0,
-  },
-  sectionHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  sectionTitle: {
-    color: '#486288',
-    fontSize: fontSizes.xl,
-    fontWeight: fontWeights.bold,
-  },
-  sectionAction: {
-    color: colors.primary,
-    fontSize: fontSizes.sm,
-    fontWeight: fontWeights.semibold,
-  },
-  errorCard: {
-    backgroundColor: '#FFF2F2',
-    borderRadius: radius.lg,
-    marginBottom: spacing.md,
-    padding: spacing.md,
-  },
-  errorRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-  errorTitle: {
-    color: colors.danger,
-    fontSize: fontSizes.md,
-    fontWeight: fontWeights.semibold,
-  },
-  errorText: {
-    color: colors.text,
-    fontSize: fontSizes.sm,
-    lineHeight: 20,
     marginTop: spacing.xs,
   },
   invoiceList: {
@@ -697,13 +637,13 @@ const styles = StyleSheet.create({
   },
   invoiceCard: {
     backgroundColor: colors.surface,
-    borderRadius: radius.xl,
-    elevation: 2,
-    padding: spacing.md,
+    borderRadius: radius.md,
+    elevation: 1,
+    padding: 10,
     shadowColor: '#B5C2D7',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
   invoiceCardTop: {
     flexDirection: 'row',
@@ -711,36 +651,36 @@ const styles = StyleSheet.create({
   },
   invoiceTextWrap: {
     flex: 1,
-    paddingRight: spacing.sm,
+    paddingRight: spacing.xs,
   },
   invoiceNumber: {
     color: '#354D72',
-    fontSize: fontSizes.xl,
-    fontWeight: fontWeights.bold,
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.semibold,
   },
   invoiceParty: {
     color: '#61748E',
-    fontSize: fontSizes.md,
-    marginTop: 4,
+    fontSize: fontSizes.sm,
+    marginTop: 2,
   },
   invoiceAmountWrap: {
     alignItems: 'flex-end',
   },
   invoiceAmount: {
     color: '#405474',
-    fontSize: fontSizes.xl,
+    fontSize: fontSizes.md,
     fontWeight: fontWeights.bold,
   },
   invoiceDate: {
     color: colors.textMuted,
-    fontSize: fontSizes.sm,
-    marginTop: 4,
+    fontSize: fontSizes.xs,
+    marginTop: 2,
   },
   invoiceCardBottom: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
   },
   invoiceMetaWrap: {
     alignItems: 'center',
@@ -781,27 +721,63 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     textAlign: 'center',
   },
-  bottomDock: {
-    backgroundColor: '#EEF3FB',
+  footer: {
+    position: "absolute",
     bottom: 0,
     left: 0,
-    paddingHorizontal: spacing.md,
-    position: 'absolute',
     right: 0,
-    paddingTop: spacing.xs,
+    backgroundColor: accountingTheme.colors.card,
+    padding: accountingTheme.spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: accountingTheme.colors.border,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
   },
-  createButton: {
+  fabText: {
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.lg,
+  },
+  searchInput: {
+    color: colors.text,
+    flex: 1,
+    fontSize: fontSizes.md,
+    padding: 0,
+  },
+  sectionHeader: {
     alignItems: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  sectionAction: {
+    color: colors.primary,
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.semibold,
+  },
+  errorCard: {
+    backgroundColor: '#FFF2F2',
+    borderRadius: radius.lg,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+  },
+  errorRow: {
+    alignItems: 'center',
     flexDirection: 'row',
     gap: spacing.xs,
-    justifyContent: 'center',
-    paddingVertical: 14,
   },
-  createButtonText: {
-    color: colors.white,
-    fontSize: fontSizes.lg,
+  errorTitle: {
+    color: colors.danger,
+    fontSize: fontSizes.md,
     fontWeight: fontWeights.semibold,
+  },
+  errorText: {
+    color: colors.text,
+    fontSize: fontSizes.sm,
+    lineHeight: 20,
+    marginTop: spacing.xs,
   },
 });

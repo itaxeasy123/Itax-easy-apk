@@ -16,14 +16,20 @@ const STANDARD_DEDUCTION = 75000; // Updated for AY 2026-27 New Regime
 const roundMoney = (value: number) => Math.round(value);
 
 export default function ITRSalaryLessSDPTaxScreen() {
-  const { salary, setSalary } = useITRStore();
+  const { salary, setSalary, form16 } = useITRStore();
   
+  const initField = (salaryVal: string, form16Val?: number | string, defaultFreq: Frequency = "Monthly"): { value: string, frequency: Frequency } => {
+    if (salaryVal) return { value: salaryVal, frequency: defaultFreq };
+    if (form16Val) return { value: String(form16Val), frequency: "Yearly" };
+    return { value: "", frequency: defaultFreq };
+  };
+
   const [fields, setFields] = useState<FieldConfig[]>([
-    { id: "basic-da", label: "Basic + DA (Dearness Allowance)", value: salary.basicDA, frequency: "Monthly" },
-    { id: "hra", label: "HRA (House Rent Allowance)", value: salary.hra, frequency: "Monthly" },
-    { id: "bonus", label: "Bonus Commission", value: salary.bonus, frequency: "Monthly" },
-    { id: "other-allowance", label: "Other Allowance", value: salary.otherAllowance, frequency: "Monthly" },
-    { id: "p-tax", label: "Professional Tax (P-Tax)", value: salary.pTax, frequency: "Yearly" },
+    { id: "basic-da", label: "Basic + DA (Dearness Allowance)", ...initField(salary.basicDA, form16?.basicDA || form16?.grossSalary) },
+    { id: "hra", label: "HRA (House Rent Allowance)", ...initField(salary.hra, form16?.hra) },
+    { id: "bonus", label: "Bonus Commission", ...initField(salary.bonus, form16?.bonus) },
+    { id: "other-allowance", label: "Other Allowance", ...initField(salary.otherAllowance, form16?.otherAllowance) },
+    { id: "p-tax", label: "Professional Tax (P-Tax)", ...initField(salary.pTax, form16?.pTax || form16?.professionalTax16iii, "Yearly") },
   ]);
 
   const updateFieldValue = (id: string, value: string) => {

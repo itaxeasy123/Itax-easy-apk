@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Image } from "react-nati
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { AccountingHeader } from "../components";
+import { accountingTheme } from "../../../theme/accounting";
 
 export default function CapitalAccountPreviewScreen() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function CapitalAccountPreviewScreen() {
         showBackButton
         rightContent={
           <Pressable>
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </Pressable>
         }
       />
@@ -63,9 +64,9 @@ export default function CapitalAccountPreviewScreen() {
             </View>
             
             <View style={[styles.tr, styles.totalRow]}>
-              <Text style={[styles.td, { flex: 2, fontWeight: "700" }]}>Grand Total</Text>
-              <Text style={[styles.td, { flex: 1, textAlign: "right", fontWeight: "700" }]}>2,15,745.86</Text>
-              <Text style={[styles.td, { flex: 1, textAlign: "right", fontWeight: "700" }]}>55,69,018.13</Text>
+              <Text style={[styles.td, { flex: 2, fontWeight: accountingTheme.fontWeights.bold }]}>Grand Total</Text>
+              <Text style={[styles.td, { flex: 1, textAlign: "right", fontWeight: accountingTheme.fontWeights.bold }]}>2,15,745.86</Text>
+              <Text style={[styles.td, { flex: 1, textAlign: "right", fontWeight: accountingTheme.fontWeights.bold }]}>55,69,018.13</Text>
             </View>
           </View>
         </View>
@@ -78,7 +79,7 @@ export default function CapitalAccountPreviewScreen() {
           <Text style={styles.downloadText}>Download</Text>
         </Pressable>
         <Pressable style={styles.shareBtn}>
-          <Ionicons name="share-social-outline" size={18} color="#FFFFFF" />
+          <Ionicons name="share-social-outline" size={18} color={accountingTheme.colors.card} />
           <Text style={styles.shareText}>Share</Text>
         </Pressable>
       </View>
@@ -89,95 +90,95 @@ export default function CapitalAccountPreviewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: accountingTheme.colors.borderLight,
   },
   content: {
-    padding: 16,
+    padding: accountingTheme.spacing.lg,
     paddingBottom: 100,
   },
   paper: {
-    backgroundColor: "#FFFFFF",
-    padding: 24,
+    backgroundColor: accountingTheme.colors.card,
+    padding: accountingTheme.spacing.xxl,
     minHeight: 500,
-    shadowColor: "#000",
+    shadowColor: accountingTheme.colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },
   companyName: {
-    fontSize: 10,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.xs,
+    fontWeight: accountingTheme.fontWeights.bold,
     textAlign: "center",
-    color: "#000",
+    color: accountingTheme.colors.black,
   },
   companySub: {
     fontSize: 8,
     textAlign: "center",
-    color: "#000",
+    color: accountingTheme.colors.black,
   },
   reportTitle: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.bold,
     textAlign: "center",
-    marginTop: 12,
-    color: "#000",
+    marginTop: accountingTheme.spacing.md,
+    color: accountingTheme.colors.black,
   },
   reportSubtitle: {
     fontSize: 9,
     textAlign: "center",
-    color: "#000",
+    color: accountingTheme.colors.black,
   },
   reportDate: {
     fontSize: 8,
     textAlign: "center",
-    color: "#000",
-    marginBottom: 8,
+    color: accountingTheme.colors.black,
+    marginBottom: accountingTheme.spacing.sm,
   },
   pageIndicator: {
     fontSize: 8,
     textAlign: "right",
-    color: "#000",
-    marginBottom: 4,
+    color: accountingTheme.colors.black,
+    marginBottom: accountingTheme.spacing.xs,
   },
   table: {
     borderWidth: 0.5,
-    borderColor: "#000",
+    borderColor: accountingTheme.colors.black,
   },
   tableHeader: {
     flexDirection: "row",
     borderBottomWidth: 0.5,
-    borderBottomColor: "#000",
+    borderBottomColor: accountingTheme.colors.black,
   },
   tableHeader2: {
     flexDirection: "row",
     borderBottomWidth: 0.5,
-    borderBottomColor: "#000",
+    borderBottomColor: accountingTheme.colors.black,
   },
   th: {
-    padding: 4,
+    padding: accountingTheme.spacing.xs,
     borderRightWidth: 0.5,
-    borderRightColor: "#000",
+    borderRightColor: accountingTheme.colors.black,
   },
   thText: {
     fontSize: 8,
-    fontWeight: "700",
+    fontWeight: accountingTheme.fontWeights.bold,
     textAlign: "center",
-    color: "#000",
+    color: accountingTheme.colors.black,
   },
   tr: {
     flexDirection: "row",
   },
   td: {
     fontSize: 8,
-    color: "#000",
-    padding: 4,
+    color: accountingTheme.colors.black,
+    padding: accountingTheme.spacing.xs,
   },
   totalRow: {
     borderTopWidth: 0.5,
-    borderTopColor: "#000",
+    borderTopColor: accountingTheme.colors.black,
     borderBottomWidth: 0.5,
-    borderBottomColor: "#000",
+    borderBottomColor: accountingTheme.colors.black,
   },
   bottomActions: {
     position: "absolute",
@@ -185,27 +186,27 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.md,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
-    gap: 12,
+    borderTopColor: accountingTheme.colors.borderMedium,
+    gap: accountingTheme.spacing.md,
   },
   downloadBtn: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
     borderWidth: 1,
     borderColor: "#3B82F6",
     borderRadius: 8,
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   downloadText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#3B82F6",
   },
   shareBtn: {
@@ -213,14 +214,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
     backgroundColor: "#3B82F6",
     borderRadius: 8,
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   shareText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.card,
   },
 });

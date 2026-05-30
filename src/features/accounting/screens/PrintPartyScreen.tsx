@@ -7,6 +7,7 @@ import { AccountingHeader, Card, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { exportHtmlToPdf, buildA4Html, escapeHtml, formatINR } from "../print/printHelpers";
 import type { Party } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 export default function PrintPartyScreen() {
   const router = useRouter();
@@ -126,7 +127,7 @@ export default function PrintPartyScreen() {
             <View style={styles.previewBox}><Text style={styles.smallLabel}>Email</Text><Text style={styles.smallValue}>{party.email ?? "NA"}</Text></View>
           </View>
           <Pressable style={styles.printBtn} onPress={handlePrint}>
-            <Ionicons name="print-outline" size={18} color="#fff" />
+            <Ionicons name="print-outline" size={18} color={accountingTheme.colors.card} />
             <Text style={styles.printBtnText}>{saving ? "Preparing..." : "Export PDF"}</Text>
           </Pressable>
         </Card>
@@ -136,20 +137,20 @@ export default function PrintPartyScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F9FF" },
-  content: { padding: 16, paddingBottom: 28 },
-  previewCard: { marginTop: 4 },
-  previewHeader: { flexDirection: "row", justifyContent: "space-between", gap: 12 },
-  name: { fontSize: 22, fontWeight: "800", color: "#0F172A" },
-  meta: { fontSize: 13, color: "#64748B", marginTop: 4 },
-  pill: { backgroundColor: "#DBEAFE", borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
-  pillText: { color: "#1D4ED8", fontWeight: "700", fontSize: 11 },
-  previewGrid: { flexDirection: "row", gap: 10, marginTop: 16 },
-  previewBox: { flex: 1, backgroundColor: "#F8FAFC", borderRadius: 14, padding: 12 },
-  smallLabel: { fontSize: 11, color: "#64748B", textTransform: "uppercase" },
-  smallValue: { fontSize: 13, fontWeight: "700", color: "#0F172A", marginTop: 6 },
-  printBtn: { marginTop: 16, backgroundColor: "#2563EB", borderRadius: 14, paddingVertical: 14, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  printBtnText: { color: "#fff", fontWeight: "800" },
-  emptyWrap: { padding: 16 },
-  emptyText: { color: "#DC2626" },
+  container: { flex: 1, backgroundColor: accountingTheme.colors.background },
+  content: { padding: accountingTheme.spacing.lg, paddingBottom: 28 },
+  previewCard: { marginTop: accountingTheme.spacing.xs },
+  previewHeader: { flexDirection: "row", justifyContent: "space-between", gap: accountingTheme.spacing.md },
+  name: { fontSize: 22, fontWeight: accountingTheme.fontWeights.extraBold, color: accountingTheme.colors.text },
+  meta: { fontSize: accountingTheme.fontSizes.md, color: accountingTheme.colors.textSecondary, marginTop: accountingTheme.spacing.xs },
+  pill: { backgroundColor: "#DBEAFE", borderRadius: accountingTheme.radius.full, paddingHorizontal: 10, paddingVertical: 6 },
+  pillText: { color: "#1D4ED8", fontWeight: accountingTheme.fontWeights.bold, fontSize: 11 },
+  previewGrid: { flexDirection: "row", gap: 10, marginTop: accountingTheme.spacing.lg },
+  previewBox: { flex: 1, backgroundColor: "#F8FAFC", borderRadius: accountingTheme.radius.xl, padding: accountingTheme.spacing.md },
+  smallLabel: { fontSize: 11, color: accountingTheme.colors.textSecondary, textTransform: "uppercase" },
+  smallValue: { fontSize: accountingTheme.fontSizes.md, fontWeight: accountingTheme.fontWeights.bold, color: accountingTheme.colors.text, marginTop: 6 },
+  printBtn: { marginTop: accountingTheme.spacing.lg, backgroundColor: accountingTheme.colors.primary, borderRadius: accountingTheme.radius.xl, paddingVertical: 14, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: accountingTheme.spacing.sm },
+  printBtnText: { color: accountingTheme.colors.card, fontWeight: accountingTheme.fontWeights.extraBold },
+  emptyWrap: { padding: accountingTheme.spacing.lg },
+  emptyText: { color: accountingTheme.colors.error },
 });

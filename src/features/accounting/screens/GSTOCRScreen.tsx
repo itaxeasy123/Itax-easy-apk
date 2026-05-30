@@ -22,6 +22,7 @@ import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useRouter } from 'expo-router';
+import { accountingTheme } from "../../../theme/accounting";
 
 import {
   uploadGSTOCR,
@@ -176,7 +177,7 @@ const GSTOCRScreen = () => {
           <Ionicons
             name="arrow-back"
             size={24}
-            color="#fff"
+            color={accountingTheme.colors.card}
           />
         </TouchableOpacity>
 
@@ -337,125 +338,125 @@ const styles =
       flex: 1,
       backgroundColor:
         '#f3f4f6',
-      padding: 16,
+      padding: accountingTheme.spacing.lg,
     },
 
     header: {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor:
-        '#2563eb',
+        accountingTheme.colors.primary,
       padding: 14,
-      borderRadius: 12,
-      marginBottom: 16,
+      borderRadius: accountingTheme.radius.lg,
+      marginBottom: accountingTheme.spacing.lg,
     },
 
     headerTitle: {
-      color: '#fff',
-      fontSize: 18,
-      fontWeight: '700',
-      marginLeft: 12,
+      color: accountingTheme.colors.card,
+      fontSize: accountingTheme.fontSizes.xxl,
+      fontWeight: accountingTheme.fontWeights.bold,
+      marginLeft: accountingTheme.spacing.md,
     },
 
     uploadCard: {
       backgroundColor:
-        '#fff',
+        accountingTheme.colors.card,
       borderRadius: 20,
-      padding: 24,
+      padding: accountingTheme.spacing.xxl,
       alignItems: 'center',
-      marginBottom: 20,
+      marginBottom: accountingTheme.spacing.xl,
     },
 
     title: {
-      fontSize: 24,
-      fontWeight: '700',
-      marginTop: 16,
+      fontSize: accountingTheme.fontSizes.display,
+      fontWeight: accountingTheme.fontWeights.bold,
+      marginTop: accountingTheme.spacing.lg,
       color: '#111827',
     },
 
     subtitle: {
-      fontSize: 14,
+      fontSize: accountingTheme.fontSizes.lg,
       color: '#6b7280',
       textAlign: 'center',
       marginTop: 10,
-      marginBottom: 20,
+      marginBottom: accountingTheme.spacing.xl,
     },
 
     uploadButton: {
       backgroundColor:
         '#3b82f6',
       width: '100%',
-      padding: 16,
-      borderRadius: 14,
-      marginBottom: 12,
+      padding: accountingTheme.spacing.lg,
+      borderRadius: accountingTheme.radius.xl,
+      marginBottom: accountingTheme.spacing.md,
     },
 
     clearButton: {
       backgroundColor:
-        '#ef4444',
+        accountingTheme.colors.danger,
       width: '100%',
-      padding: 16,
-      borderRadius: 14,
+      padding: accountingTheme.spacing.lg,
+      borderRadius: accountingTheme.radius.xl,
     },
 
     buttonText: {
-      color: '#fff',
+      color: accountingTheme.colors.card,
       textAlign: 'center',
-      fontWeight: '700',
+      fontWeight: accountingTheme.fontWeights.bold,
     },
 
     card: {
       backgroundColor:
-        '#fff',
-      padding: 16,
-      borderRadius: 16,
-      marginBottom: 20,
+        accountingTheme.colors.card,
+      padding: accountingTheme.spacing.lg,
+      borderRadius: accountingTheme.radius.xxl,
+      marginBottom: accountingTheme.spacing.xl,
     },
 
     fileName: {
-      fontSize: 16,
-      fontWeight: '700',
+      fontSize: accountingTheme.fontSizes.xl,
+      fontWeight: accountingTheme.fontWeights.bold,
       color: '#111827',
     },
 
     date: {
       color: '#6b7280',
-      marginTop: 4,
-      marginBottom: 12,
+      marginTop: accountingTheme.spacing.xs,
+      marginBottom: accountingTheme.spacing.md,
     },
 
     responseBox: {
       maxHeight: 300,
       backgroundColor:
         '#111827',
-      borderRadius: 12,
-      padding: 12,
+      borderRadius: accountingTheme.radius.lg,
+      padding: accountingTheme.spacing.md,
     },
 
     responseText: {
-      color: '#fff',
-      fontSize: 12,
+      color: accountingTheme.colors.card,
+      fontSize: accountingTheme.fontSizes.sm,
     },
 
     actionRow: {
       flexDirection: 'row',
-      marginTop: 16,
+      marginTop: accountingTheme.spacing.lg,
       gap: 10,
     },
 
     exportButton: {
       flex: 1,
       backgroundColor:
-        '#2563eb',
+        accountingTheme.colors.primary,
       padding: 14,
-      borderRadius: 12,
+      borderRadius: accountingTheme.radius.lg,
     },
 
     deleteButton: {
       flex: 1,
       backgroundColor:
-        '#ef4444',
+        accountingTheme.colors.danger,
       padding: 14,
-      borderRadius: 12,
+      borderRadius: accountingTheme.radius.lg,
     },
   });

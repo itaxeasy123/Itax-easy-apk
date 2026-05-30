@@ -7,6 +7,7 @@ import { AccountingHeader, Card, Loading } from "../components";
 import { exportHtmlToPdf, buildA4Html, escapeHtml, formatINR } from "../print/printHelpers";
 import { invoiceService } from "../../invoice/services/invoiceService";
 import type { Invoice } from "../../invoice/types/invoice.types";
+import { accountingTheme } from "../../../theme/accounting";
 
 const formatDate = (value?: string | null) => {
   if (!value) return "NA";
@@ -128,7 +129,7 @@ export default function PrintInvoiceScreen() {
             </View>
           </View>
           <Pressable style={styles.btn} onPress={handlePrint}>
-            <Ionicons name="print-outline" size={18} color="#fff" />
+            <Ionicons name="print-outline" size={18} color={accountingTheme.colors.card} />
             <Text style={styles.btnText}>{saving ? "Preparing..." : "Export PDF"}</Text>
           </Pressable>
         </Card>
@@ -138,15 +139,15 @@ export default function PrintInvoiceScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F9FF" },
-  content: { padding: 16 },
-  headRow: { flexDirection: "row", justifyContent: "space-between", gap: 12 },
-  title: { fontSize: 22, fontWeight: "800", color: "#0F172A" },
-  meta: { fontSize: 13, color: "#64748B", marginTop: 4 },
-  amountPill: { backgroundColor: "#DBEAFE", borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, alignSelf: "flex-start" },
-  amountText: { fontWeight: "800", color: "#1D4ED8" },
-  btn: { marginTop: 16, backgroundColor: "#2563EB", borderRadius: 14, paddingVertical: 14, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8 },
-  btnText: { color: "#fff", fontWeight: "800" },
-  empty: { padding: 16 },
-  error: { color: "#DC2626" },
+  container: { flex: 1, backgroundColor: accountingTheme.colors.background },
+  content: { padding: accountingTheme.spacing.lg },
+  headRow: { flexDirection: "row", justifyContent: "space-between", gap: accountingTheme.spacing.md },
+  title: { fontSize: 22, fontWeight: accountingTheme.fontWeights.extraBold, color: accountingTheme.colors.text },
+  meta: { fontSize: accountingTheme.fontSizes.md, color: accountingTheme.colors.textSecondary, marginTop: accountingTheme.spacing.xs },
+  amountPill: { backgroundColor: "#DBEAFE", borderRadius: accountingTheme.radius.full, paddingHorizontal: accountingTheme.spacing.md, paddingVertical: accountingTheme.spacing.sm, alignSelf: "flex-start" },
+  amountText: { fontWeight: accountingTheme.fontWeights.extraBold, color: "#1D4ED8" },
+  btn: { marginTop: accountingTheme.spacing.lg, backgroundColor: accountingTheme.colors.primary, borderRadius: accountingTheme.radius.xl, paddingVertical: 14, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: accountingTheme.spacing.sm },
+  btnText: { color: accountingTheme.colors.card, fontWeight: accountingTheme.fontWeights.extraBold },
+  empty: { padding: accountingTheme.spacing.lg },
+  error: { color: accountingTheme.colors.error },
 });

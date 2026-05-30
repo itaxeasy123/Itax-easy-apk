@@ -15,32 +15,34 @@ type FieldConfig = {
 const roundMoney = (value: number) => Math.round(value);
 
 export default function ITROtherSourcesScreen() {
-  const { otherSources, setOtherSources } = useITRStore();
+  const { otherSources, setOtherSources, form16 } = useITRStore();
+
+  const initField = (manualVal: string, form16Val?: number | string, defaultFreq: Frequency = "Yearly"): { value: string, frequency: Frequency } => {
+    if (manualVal) return { value: manualVal, frequency: defaultFreq };
+    if (form16Val) return { value: String(form16Val), frequency: "Yearly" };
+    return { value: "", frequency: defaultFreq };
+  };
 
   const [fields, setFields] = useState<FieldConfig[]>([
     {
       id: "saving-bank",
       label: "Interest from Savings Bank Account",
-      value: otherSources.savingBankInterest,
-      frequency: "Yearly",
+      ...initField(otherSources.savingBankInterest, undefined, "Yearly"),
     },
     {
       id: "fd-interest",
       label: "Interest from Fixed Deposits / Post Office",
-      value: otherSources.fixedDepositInterest,
-      frequency: "Yearly",
+      ...initField(otherSources.fixedDepositInterest, undefined, "Yearly"),
     },
     {
       id: "dividend",
       label: "Dividend Income",
-      value: otherSources.dividendIncome,
-      frequency: "Yearly",
+      ...initField(otherSources.dividendIncome, undefined, "Yearly"),
     },
     {
       id: "any-other",
       label: "Any Other Income",
-      value: otherSources.anyOtherIncome,
-      frequency: "Yearly",
+      ...initField(otherSources.anyOtherIncome, form16?.otherIncome, "Yearly"),
     },
   ]);
 

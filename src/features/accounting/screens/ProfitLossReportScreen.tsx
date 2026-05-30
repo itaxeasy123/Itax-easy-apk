@@ -4,6 +4,7 @@ import { AccountingHeader } from "../components";
 import { Ionicons } from "@expo/vector-icons";
 import { accountingService } from "../services/accountingService";
 import { ProfitAndLossReport } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const format = (value: number | undefined) => {
   if (value === undefined || isNaN(value)) return "₹ 0.00";
@@ -46,7 +47,7 @@ export default function ProfitLossReportScreen() {
         showBackButton
         rightContent={
           <Pressable onPress={() => setShowActionModal(true)}>
-            <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+            <Ionicons name="ellipsis-vertical" size={20} color={accountingTheme.colors.card} />
           </Pressable>
         }
       />
@@ -55,7 +56,7 @@ export default function ProfitLossReportScreen() {
         {/* Financial Year Bar */}
         <View style={styles.periodBar}>
           <View style={styles.periodLeft}>
-            <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
+            <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
             <Text style={styles.periodText}>
               Financial Year <Text style={styles.periodSubText}>(1 Apr 24 to 31 Mar 25)</Text>
             </Text>
@@ -67,7 +68,7 @@ export default function ProfitLossReportScreen() {
 
         {loading ? (
           <View style={styles.loaderWrap}>
-            <ActivityIndicator size="large" color="#3B82F6" />
+            <ActivityIndicator size="large" color={accountingTheme.colors.primary} />
           </View>
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
@@ -169,80 +170,80 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
-    marginBottom: 8,
+    borderBottomColor: accountingTheme.colors.borderMedium,
+    marginBottom: 6,
   },
   periodLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   periodText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#1E293B",
   },
   periodSubText: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#64748B",
+    fontSize: 11,
+    fontWeight: accountingTheme.fontWeights.regular,
+    color: accountingTheme.colors.textSecondary,
   },
   changeText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#3B82F6",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.primary,
   },
   loaderWrap: {
     padding: 40,
     alignItems: "center",
   },
   errorText: {
-    color: "#DC2626",
+    color: accountingTheme.colors.error,
     textAlign: "center",
-    marginTop: 24,
+    marginTop: accountingTheme.spacing.xxl,
   },
   tableCard: {
-    backgroundColor: "#FFFFFF",
-    marginTop: 4,
+    backgroundColor: accountingTheme.colors.card,
+    marginTop: accountingTheme.spacing.xs,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: 14,
+    paddingVertical: accountingTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
   label: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#475569",
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   value: {
-    fontSize: 14,
-    color: "#0F172A",
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   highlightRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: "#3B82F6",
+    paddingHorizontal: 14,
+    paddingVertical: accountingTheme.spacing.md,
+    backgroundColor: accountingTheme.colors.primary,
   },
   highlightLabel: {
-    fontSize: 14,
-    color: "#FFFFFF",
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   highlightValue: {
-    fontSize: 14,
-    color: "#FFFFFF",
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   modalBackdrop: {
     flex: 1,
@@ -253,38 +254,38 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 30,
   },
   sheetHandleWrap: {
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: accountingTheme.colors.borderMedium,
     borderRadius: 2,
   },
   sheetOptions: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: accountingTheme.spacing.lg,
+    paddingHorizontal: accountingTheme.spacing.xxl,
     borderBottomWidth: 1,
     borderBottomColor: "#E5EAF3",
   },
   optionIcon: {
-    marginRight: 12,
+    marginRight: accountingTheme.spacing.md,
   },
   optionText: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.lg,
     color: "#475569",
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
   },
 });

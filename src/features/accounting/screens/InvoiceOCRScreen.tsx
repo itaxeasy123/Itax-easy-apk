@@ -22,6 +22,7 @@ import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useRouter } from 'expo-router';
+import { accountingTheme } from "../../../theme/accounting";
 
 import {
   uploadInvoiceOCR,
@@ -254,7 +255,7 @@ const exportData = async (
           <Ionicons
             name="arrow-back"
             size={24}
-            color="#fff"
+            color={accountingTheme.colors.card}
           />
         </TouchableOpacity>
 
@@ -338,83 +339,83 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor:
       '#f3f4f6',
-    padding: 16,
+    padding: accountingTheme.spacing.lg,
   },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor:
-      '#2563eb',
-    padding: 16,
-    borderRadius: 14,
-    marginBottom: 16,
+      accountingTheme.colors.primary,
+    padding: accountingTheme.spacing.lg,
+    borderRadius: accountingTheme.radius.xl,
+    marginBottom: accountingTheme.spacing.lg,
   },
 
   title: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-    marginLeft: 12,
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.bold,
+    marginLeft: accountingTheme.spacing.md,
   },
 
   uploadCard: {
     backgroundColor:
-      '#fff',
+      accountingTheme.colors.card,
     borderRadius: 20,
-    padding: 24,
+    padding: accountingTheme.spacing.xxl,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: accountingTheme.spacing.xl,
   },
 
   uploadTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginTop: 16,
+    fontSize: accountingTheme.fontSizes.display,
+    fontWeight: accountingTheme.fontWeights.bold,
+    marginTop: accountingTheme.spacing.lg,
   },
 
   uploadSubtitle: {
     textAlign: 'center',
     color: '#6b7280',
     marginTop: 10,
-    marginBottom: 20,
+    marginBottom: accountingTheme.spacing.xl,
   },
 
   uploadButton: {
     backgroundColor:
       '#3b82f6',
     width: '100%',
-    padding: 16,
-    borderRadius: 14,
+    padding: accountingTheme.spacing.lg,
+    borderRadius: accountingTheme.radius.xl,
     alignItems: 'center',
   },
 
   clearButton: {
     backgroundColor:
-      '#ef4444',
+      accountingTheme.colors.danger,
     width: '100%',
-    padding: 16,
-    borderRadius: 14,
+    padding: accountingTheme.spacing.lg,
+    borderRadius: accountingTheme.radius.xl,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: accountingTheme.spacing.md,
   },
 
   buttonText: {
-    color: '#fff',
-    fontWeight: '700',
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 
   card: {
     backgroundColor:
-      '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+      accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.xxl,
+    padding: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.lg,
   },
 
   fileName: {
-    fontWeight: '700',
-    fontSize: 16,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.xl,
   },
 
   date: {
@@ -426,14 +427,14 @@ const styles = StyleSheet.create({
   responseBox: {
     backgroundColor:
       '#111827',
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     maxHeight: 300,
-    padding: 12,
+    padding: accountingTheme.spacing.md,
   },
 
   responseText: {
-    color: '#fff',
-    fontSize: 12,
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.sm,
   },
 
   buttonRow: {
@@ -445,18 +446,18 @@ const styles = StyleSheet.create({
   exportButton: {
     flex: 1,
     backgroundColor:
-      '#2563eb',
+      accountingTheme.colors.primary,
     padding: 14,
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     alignItems: 'center',
   },
 
   deleteButton: {
     flex: 1,
     backgroundColor:
-      '#ef4444',
+      accountingTheme.colors.danger,
     padding: 14,
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     alignItems: 'center',
   },
 });

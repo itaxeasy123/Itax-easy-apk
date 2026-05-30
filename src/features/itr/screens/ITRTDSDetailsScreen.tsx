@@ -21,8 +21,21 @@ const INITIAL_FIELDS: FieldConfig[] = [
 ];
 
 export default function ITRTDSDetailsScreen() {
-  const { taxesPaid, setTaxesPaid } = useITRStore();
-  const [fields, setFields] = useState<FieldConfig[]>(INITIAL_FIELDS);
+  const { taxesPaid, setTaxesPaid, form16 } = useITRStore();
+  
+  const cleanDeductorName = (name?: string) => {
+    if (!name) return "";
+    return name.split("\n")[0].trim();
+  };
+  
+  const initialFields = taxesPaid.tdsEntries.length === 0 && form16 ? [
+    { id: "tan", placeholder: "Enter TAN Number", value: form16.tan || "" },
+    { id: "name", placeholder: "Name of Deductor", value: cleanDeductorName(form16.employerName) },
+    { id: "purchase", placeholder: "Purchases of assets", value: "" },
+    { id: "tax", placeholder: "Total Tax Deducted", value: form16.totalTaxDeducted ? String(form16.totalTaxDeducted) : "" },
+  ] : INITIAL_FIELDS;
+
+  const [fields, setFields] = useState<FieldConfig[]>(initialFields);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const updateFieldValue = (id: string, value: string) => {

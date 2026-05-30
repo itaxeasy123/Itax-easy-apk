@@ -8,6 +8,7 @@ import {
   GestureResponderEvent,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { accountingTheme } from "../../../theme/accounting";
 
 interface ListItemProps {
   title: string;
@@ -69,42 +70,42 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: '#f3f4f6',
-    backgroundColor: '#fff',
+    backgroundColor: accountingTheme.colors.card,
   },
   pressed: {
     backgroundColor: '#f9fafb',
   },
   leftIcon: {
-    marginRight: 12,
+    marginRight: accountingTheme.spacing.md,
   },
   content: {
     flex: 1,
   },
   title: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: '#1f2937',
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: '#9ca3af',
-    marginTop: 4,
+    marginTop: accountingTheme.spacing.xs,
   },
   badge: {
     backgroundColor: '#dbeafe',
     color: '#1e40af',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: accountingTheme.spacing.sm,
+    paddingVertical: accountingTheme.spacing.xs,
     borderRadius: 4,
-    fontSize: 12,
-    fontWeight: '600',
-    marginRight: 12,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    marginRight: accountingTheme.spacing.md,
   },
   rightIcon: {
-    marginLeft: 8,
+    marginLeft: accountingTheme.spacing.sm,
   },
 });

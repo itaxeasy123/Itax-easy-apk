@@ -1,4 +1,5 @@
 import React from 'react';
+import { accountingTheme } from "../../../theme/accounting";
 import {
   Pressable,
   Text,
@@ -48,7 +49,7 @@ export default function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'outline' ? '#2563eb' : '#fff'} size="small" />
+        <ActivityIndicator color={variant === 'outline' ? accountingTheme.colors.primary : accountingTheme.colors.card} size="small" />
       ) : (
         <>
           {icon && icon}
@@ -64,37 +65,37 @@ export default function Button({
 const styles = StyleSheet.create({
   button: {
     borderRadius: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   primaryButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: accountingTheme.colors.primary,
   },
   secondaryButton: {
-    backgroundColor: '#e5e7eb',
+    backgroundColor: accountingTheme.colors.border,
   },
   outlineButton: {
-    backgroundColor: '#fff',
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: '#2563eb',
+    borderColor: accountingTheme.colors.primary,
   },
   dangerButton: {
-    backgroundColor: '#ef4444',
+    backgroundColor: accountingTheme.colors.danger,
   },
   smallButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: accountingTheme.spacing.sm,
+    paddingHorizontal: accountingTheme.spacing.md,
   },
   mediumButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: accountingTheme.spacing.md,
+    paddingHorizontal: accountingTheme.spacing.lg,
   },
   largeButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: accountingTheme.spacing.lg,
+    paddingHorizontal: accountingTheme.spacing.xxl,
   },
   fullWidth: {
     alignSelf: 'stretch',
@@ -106,19 +107,19 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   text: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   primaryText: {
-    color: '#fff',
+    color: accountingTheme.colors.card,
   },
   secondaryText: {
     color: '#1f2937',
   },
   outlineText: {
-    color: '#2563eb',
+    color: accountingTheme.colors.primary,
   },
   dangerText: {
-    color: '#fff',
+    color: accountingTheme.colors.card,
   },
 });

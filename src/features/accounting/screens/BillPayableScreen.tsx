@@ -11,6 +11,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { AccountingHeader, BottomNav, EmptyState } from "../components";
 import { accountingService } from "../services/accountingService";
 import { BillPayable } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const formatCurrency = (value: number) =>
   `₹ ${value.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
@@ -85,9 +86,9 @@ export default function BillPayableScreen() {
         showBackButton
         rightContent={
           <View style={styles.headerRightIcons}>
-            <Ionicons name="search" size={20} color="#fff" />
-            <Ionicons name="filter" size={20} color="#fff" />
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="search" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="filter" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </View>
         }
         headerContent={
@@ -120,66 +121,66 @@ const styles = StyleSheet.create({
   headerRightIcons: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: accountingTheme.spacing.lg,
   },
   headerBlock: {
     alignItems: "center",
     marginTop: 10,
-    marginBottom: 20,
+    marginBottom: accountingTheme.spacing.xl,
   },
   headerAmount: {
     fontSize: 28,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   headerMeta: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: accountingTheme.spacing.xs,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#EAFDFC",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   mainContainer: {
     flex: 1,
     marginTop: -8,
   },
   topWhiteSection: {
-    backgroundColor: "#FFFFFF",
-    paddingTop: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    backgroundColor: accountingTheme.colors.card,
+    paddingTop: accountingTheme.spacing.lg,
+    borderTopLeftRadius: accountingTheme.radius.xxl,
+    borderTopRightRadius: accountingTheme.radius.xxl,
   },
   listContent: {
     paddingBottom: 110,
   },
   listContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     minHeight: 400,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   firstRow: {
     borderTopWidth: 0,
   },
   rowTitle: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#334155",
   },
   rowSubtitle: {
     fontSize: 11,
-    color: "#64748B",
-    marginTop: 4,
+    color: accountingTheme.colors.textSecondary,
+    marginTop: accountingTheme.spacing.xs,
   },
   rowAmount: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
 });

@@ -16,6 +16,12 @@ export const accountingTheme = {
     purple: '#8B5CF6',
     white: '#FFFFFF',
     black: '#000000',
+    borderLight: '#F1F5F9',
+    borderMedium: '#E2E8F0',
+    surfaceLight: '#EEF2F7',
+    successLight: '#DCFCE7',
+    warningLight: '#FEF3C7',
+    dangerLight: '#FEF2F2',
   },
   spacing: {
     xs: 4,
@@ -59,5 +65,22 @@ export const accountingTheme = {
       fontSize: 10,
       fontWeight: '600' as const,
     },
+  },
+  fontSizes: {
+    xs: 10,
+    sm: 12,
+    md: 13,
+    lg: 14,
+    xl: 16,
+    xxl: 18,
+    xxxl: 20,
+    display: 24,
+  },
+  fontWeights: {
+    regular: "400" as const,
+    medium: "500" as const,
+    semiBold: "600" as const,
+    bold: "700" as const,
+    extraBold: "800" as const,
   }
 };

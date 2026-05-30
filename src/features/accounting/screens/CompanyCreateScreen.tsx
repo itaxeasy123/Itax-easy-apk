@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";`nimport { Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { AccountingHeader } from "../components";
 
@@ -118,7 +118,7 @@ export default function CompanyCreateScreen() {
 
       {/* Sticky Bottom Save Button */}
       <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
-        <Pressable style={styles.saveBtn} onPress={() => router.back()}>
+        <Pressable style={styles.saveBtn} onPress={() => { if (Platform.OS === "web" && document.activeElement instanceof HTMLElement) { document.activeElement.blur(); } router.back(); }}>
           <Text style={styles.saveBtnText}>Save</Text>
         </Pressable>
       </View>
@@ -218,3 +218,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
+

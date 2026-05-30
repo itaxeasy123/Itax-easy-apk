@@ -296,11 +296,18 @@ function SectionCard({
   children: ReactNode;
   subtitle?: string;
 }) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <View style={styles.sectionCard}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {subtitle ? <Text style={styles.sectionSubtitle}>{subtitle}</Text> : null}
-      <View style={styles.sectionBody}>{children}</View>
+      <Pressable onPress={() => setExpanded(!expanded)} style={styles.sectionHeaderRow}>
+        <View style={{ flex: 1, paddingRight: 10 }}>
+          <Text style={styles.sectionTitle}>{title}</Text>
+          {subtitle ? <Text style={styles.sectionSubtitle}>{subtitle}</Text> : null}
+        </View>
+        <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={22} color="#64748B" />
+      </Pressable>
+      {expanded ? <View style={styles.sectionBody}>{children}</View> : null}
     </View>
   );
 }
@@ -1285,7 +1292,7 @@ export default function ITRReturnFormScreen() {
           </Pressable>
         ) : null}
 
-        <SectionCard title="PART A GENERAL INFORMATION" subtitle="Filing section and identity details as shown in the workbook.">
+        <SectionCard title="GENERAL INFORMATION" subtitle="Filing section and identity details as shown in the workbook.">
           <FieldRow label="FORM" value={form.filingInfo.returnType} onChangeText={(value) => updateFilingInfo("returnType", value)} />
           <FieldRow label="Assessment Year" value={form.personalInfo.assessmentYear} onChangeText={(value) => updatePersonalInfo("assessmentYear", value)} />
           <FieldRow label="Acknowledgement Number" value={form.filingInfo.acknowledgmentNo} onChangeText={(value) => updateFilingInfo("acknowledgmentNo", value)} />
@@ -1587,7 +1594,7 @@ export default function ITRReturnFormScreen() {
         </SectionCard>
 
 
-        <SectionCard title="Part C - Deductions and Taxable Total Income" subtitle="Chapter VI-A amounts from the workbook.">
+        <SectionCard title="DEDUCTIONS AND TAXABLE TOTAL INCOME" subtitle="Chapter VI-A amounts from the workbook.">
           <FieldRow label="a 80C - Life insurance premium, deferred annuity, contributions to provident fund, subscription to certain equity shares or debentures, etc." value={form.deductions.section80C} onChangeText={(value) => updateDeductions("section80C", value)} keyboardType="numeric" />
           <FieldRow label="b 80CCC - Payment in respect Pension Fund, etc." value={form.deductions.section80CCC} onChangeText={(value) => updateDeductions("section80CCC", value)} keyboardType="numeric" />
           <FieldRow label="c 80CCD(1) - Contribution to pension scheme of Central Government" value={form.deductions.section80CCD1} onChangeText={(value) => updateDeductions("section80CCD1", value)} keyboardType="numeric" />
@@ -1671,7 +1678,7 @@ export default function ITRReturnFormScreen() {
         </View>
 
         <View style={{ gap: 10, marginTop: 10, marginBottom: 10 }}>
-          <ITRSaveButton title="Preview PDF" onPress={handleGeneratePdf} />
+          <ITRSaveButton title="Preview PDF" onPress={handleGeneratePdf} disableSuccessState={true} />
           <ITRSaveButton title="Download PDF" onPress={handleDownloadPdf} />
           <ITRSaveButton title="Download JSON" onPress={handleExport} />
         </View>
@@ -1736,6 +1743,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 16,
     ...itrShadows.card,
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   sectionTitle: {
     color: "#1E293B",
@@ -1889,7 +1901,8 @@ const styles = StyleSheet.create({
   pillsRow: {
     flexDirection: "row",
     gap: 10,
-    marginTop: 4,
+    paddingVertical: 10,
+    flexWrap: "wrap",
   },
   pill: {
     backgroundColor: "#F8FAFC",

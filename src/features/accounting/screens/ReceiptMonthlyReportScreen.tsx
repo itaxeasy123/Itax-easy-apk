@@ -13,6 +13,7 @@ import { AccountingHeader, BottomNav, Card, EmptyState, Loading, SalesReportSwit
 import { accountingService } from "../services/accountingService";
 import { voucherService } from "../services/voucherService";
 import { DayBook, VoucherEntry } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 import {
   buildMonthlyReceiptSeriesFromDayBook,
   buildMonthlyReceiptSeriesFromVouchers,
@@ -73,7 +74,7 @@ export default function ReceiptMonthlyReportScreen() {
         title="Receipt"
         subtitle="Monthly receipts overview"
         showBackButton
-        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color="#fff" />}
+        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />}
         headerContent={(
           <View style={styles.headerBlock}>
             <Text style={styles.headerAmount}>{formatCurrency(totalReceipt)}</Text>
@@ -93,7 +94,7 @@ export default function ReceiptMonthlyReportScreen() {
 
         <View style={styles.yearRow}>
           <View style={styles.yearLeft}>
-            <Ionicons name="calendar-outline" size={16} color="#2563EB" />
+            <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
             <Text style={styles.yearText}>
               Financial Year ({String(year - 1).slice(-2)} Apr to {String(year).slice(-2)} Mar)
             </Text>
@@ -143,18 +144,18 @@ export default function ReceiptMonthlyReportScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   content: {
     paddingHorizontal: 14,
-    paddingTop: 12,
+    paddingTop: accountingTheme.spacing.md,
     paddingBottom: 110,
   },
   switcherWrap: {
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
   },
   yearRow: {
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.sm,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -162,80 +163,80 @@ const styles = StyleSheet.create({
   yearLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: accountingTheme.spacing.xs,
     flex: 1,
   },
   yearText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#334155",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
     flex: 1,
   },
   changeText: {
-    fontSize: 12,
-    color: "#2563EB",
-    fontWeight: "700",
+    fontSize: 11,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   headerBlock: {
     alignItems: "center",
-    marginTop: 2,
+    marginTop: 0,
   },
   headerAmount: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   headerMeta: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: 2,
+    fontSize: 11,
     color: "#EAFDFC",
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   sectionMeta: {
-    fontSize: 11,
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.textSecondary,
   },
   listCard: {
     padding: 0,
     overflow: "hidden",
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
   },
   listHeaderWrap: {
     paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: accountingTheme.spacing.md,
+    paddingBottom: accountingTheme.spacing.sm,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   rowTitle: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.medium,
     color: "#1F2937",
   },
   rowAmount: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#111827",
   },
   errorText: {
-    color: "#DC2626",
-    marginBottom: 12,
+    color: accountingTheme.colors.error,
+    marginBottom: accountingTheme.spacing.md,
   },
 });

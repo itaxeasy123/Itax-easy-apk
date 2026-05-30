@@ -15,6 +15,7 @@ import { AccountingHeader, BottomNav, Card, EmptyState, Loading } from "../compo
 import { accountingService } from "../services/accountingService";
 import { DayBook, Ledger } from "../types/accountingTypes";
 import { buildBankCashTransactions, formatCurrency, titleCase } from "../utils/bankCashReport";
+import { accountingTheme } from "../../../theme/accounting";
 
 const formatDate = (value: string) => {
   const date = new Date(value);
@@ -111,7 +112,7 @@ export default function BankCashDetailScreen() {
         title={title}
         subtitle={ledgerType ? `${titleCase(ledgerType)} Ledger` : "Ledger details"}
         showBackButton
-        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color="#fff" />}
+        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />}
         headerContent={(
           <View style={styles.headerBlock}>
             <Text style={styles.headerAmount}>{formatCurrency(balance)}</Text>
@@ -123,7 +124,7 @@ export default function BankCashDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.yearRow}>
           <View style={styles.yearLeft}>
-            <Ionicons name="calendar-outline" size={16} color="#2563EB" />
+            <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
             <Text style={styles.yearText}>Financial Year ({financialYear})</Text>
           </View>
           <Text style={styles.changeText}>Change</Text>
@@ -181,7 +182,7 @@ export default function BankCashDetailScreen() {
       </ScrollView>
 
       <Pressable style={styles.fab} onPress={handleAddReduceMoney}>
-        <Ionicons name="wallet-outline" size={18} color="#fff" />
+        <Ionicons name="wallet-outline" size={18} color={accountingTheme.colors.card} />
         <Text style={styles.fabText}>Add / Reduce Money</Text>
       </Pressable>
 
@@ -203,7 +204,7 @@ export default function BankCashDetailScreen() {
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Add/Reduce Money</Text>
               <Pressable onPress={() => setShowAddReduceModal(false)} style={styles.closeBtn}>
-                <Ionicons name="close" size={20} color="#94A3B8" />
+                <Ionicons name="close" size={20} color={accountingTheme.colors.textMuted} />
               </Pressable>
             </View>
 
@@ -225,12 +226,12 @@ export default function BankCashDetailScreen() {
 
               <Pressable style={styles.dropdownWrap}>
                 <Text style={styles.dropdownText}>{selectedAccount || "Select Account"}</Text>
-                <Ionicons name="chevron-down" size={18} color="#64748B" />
+                <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
               </Pressable>
 
               <Pressable style={styles.dropdownWrap}>
                 <Text style={styles.dropdownText}>{payFor || "Pay for"}</Text>
-                <Ionicons name="chevron-down" size={18} color="#64748B" />
+                <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
               </Pressable>
 
               <View style={styles.rowInputs}>
@@ -248,7 +249,7 @@ export default function BankCashDetailScreen() {
                     <Text style={styles.dateLabel}>Select Date</Text>
                     <Pressable style={styles.dateBox}>
                       <Text style={styles.dateText}>{date}</Text>
-                      <Ionicons name="calendar-outline" size={18} color="#64748B" />
+                      <Ionicons name="calendar-outline" size={18} color={accountingTheme.colors.textSecondary} />
                     </Pressable>
                   </View>
                 </View>
@@ -275,32 +276,32 @@ export default function BankCashDetailScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   content: {
     paddingHorizontal: 14,
-    paddingTop: 12,
+    paddingTop: accountingTheme.spacing.md,
     paddingBottom: 112,
   },
   headerBlock: {
     alignItems: "center",
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
     paddingBottom: 2,
   },
   headerAmount: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.xxxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
     letterSpacing: 0.2,
   },
   headerMeta: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: accountingTheme.spacing.xs,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#EAFDFC",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   yearRow: {
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -312,15 +313,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   yearText: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#334155",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
     flex: 1,
   },
   changeText: {
-    fontSize: 12,
-    color: "#2563EB",
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   listCard: {
     padding: 0,
@@ -336,13 +337,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   listTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   listMeta: {
     fontSize: 11,
-    color: "#64748B",
+    color: accountingTheme.colors.textSecondary,
   },
   row: {
     flexDirection: "row",
@@ -351,7 +352,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   rowLeft: {
     flex: 1,
@@ -360,49 +361,49 @@ const styles = StyleSheet.create({
   rowTopLine: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
     marginBottom: 6,
     flexWrap: "wrap",
   },
   rowTitle: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#1F2937",
   },
   statusPill: {
-    paddingHorizontal: 8,
+    paddingHorizontal: accountingTheme.spacing.sm,
     paddingVertical: 3,
-    borderRadius: 999,
-    backgroundColor: "#EEF2F7",
+    borderRadius: accountingTheme.radius.full,
+    backgroundColor: accountingTheme.colors.surfaceLight,
   },
   statusText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.xs,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.textSecondary,
   },
   rowDate: {
-    fontSize: 12,
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.textSecondary,
   },
   rowSub: {
-    marginTop: 4,
+    marginTop: accountingTheme.spacing.xs,
     fontSize: 11,
-    color: "#94A3B8",
+    color: accountingTheme.colors.textMuted,
   },
   rowAmount: {
-    fontSize: 14,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     textAlign: "right",
   },
   positiveAmount: {
     color: "#059669",
   },
   negativeAmount: {
-    color: "#DC2626",
+    color: accountingTheme.colors.error,
   },
   errorText: {
-    color: "#DC2626",
-    marginBottom: 12,
+    color: accountingTheme.colors.error,
+    marginBottom: accountingTheme.spacing.md,
   },
   bottomSpacer: {
     height: 10,
@@ -411,18 +412,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 16,
     bottom: 84,
-    backgroundColor: "#2563EB",
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: accountingTheme.colors.primary,
+    borderRadius: accountingTheme.radius.full,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.md,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
     elevation: 5,
   },
   fabText: {
-    color: "#fff",
-    fontWeight: "800",
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
   modalBackdrop: {
     flex: 1,
@@ -433,100 +434,100 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 30,
     elevation: 20,
-    shadowColor: "#000",
+    shadowColor: accountingTheme.colors.black,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
   },
   sheetHandleWrap: {
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: accountingTheme.colors.borderMedium,
     borderRadius: 2,
   },
   sheetHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginBottom: 16,
+    paddingHorizontal: accountingTheme.spacing.xl,
+    marginBottom: accountingTheme.spacing.lg,
   },
   sheetTitle: {
-    fontSize: 16,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#1E293B",
   },
   closeBtn: {
-    backgroundColor: "#F1F5F9",
-    padding: 4,
-    borderRadius: 16,
+    backgroundColor: accountingTheme.colors.borderLight,
+    padding: accountingTheme.spacing.xs,
+    borderRadius: accountingTheme.radius.xxl,
   },
   sheetBody: {
-    paddingHorizontal: 20,
+    paddingHorizontal: accountingTheme.spacing.xl,
   },
   radioGroup: {
     flexDirection: "row",
-    gap: 20,
-    marginBottom: 16,
+    gap: accountingTheme.spacing.xl,
+    marginBottom: accountingTheme.spacing.lg,
   },
   radioItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   radioOuter: {
     width: 18,
     height: 18,
     borderRadius: 9,
     borderWidth: 1.5,
-    borderColor: "#64748B",
+    borderColor: accountingTheme.colors.textSecondary,
     justifyContent: "center",
     alignItems: "center",
   },
   radioOuterActive: {
-    borderColor: "#2563EB",
+    borderColor: accountingTheme.colors.primary,
   },
   radioInner: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#2563EB",
+    backgroundColor: accountingTheme.colors.primary,
   },
   radioLabel: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#334155",
   },
   dropdownWrap: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     borderRadius: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: accountingTheme.spacing.md,
     height: 48,
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.lg,
   },
   dropdownText: {
-    fontSize: 14,
-    color: "#0F172A",
-    fontWeight: "500",
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   rowInputs: {
     flexDirection: "row",
-    gap: 12,
-    marginBottom: 16,
+    gap: accountingTheme.spacing.md,
+    marginBottom: accountingTheme.spacing.lg,
   },
   halfInput: {
     flex: 1,
@@ -538,49 +539,49 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -8,
     left: 10,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 4,
-    fontSize: 10,
-    color: "#64748B",
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.xs,
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.textSecondary,
     zIndex: 1,
   },
   dateBox: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     borderRadius: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: accountingTheme.spacing.md,
     height: 48,
   },
   dateText: {
-    fontSize: 14,
-    color: "#0F172A",
-    fontWeight: "500",
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   sheetInput: {
     height: 48,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     borderRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 14,
-    color: "#0F172A",
-    marginBottom: 16,
+    paddingHorizontal: accountingTheme.spacing.md,
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
+    marginBottom: accountingTheme.spacing.lg,
   },
   saveBtn: {
     backgroundColor: "#3B82F6",
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: "center",
-    marginTop: 4,
+    marginTop: accountingTheme.spacing.xs,
   },
   saveBtnText: {
-    color: "#FFFFFF",
+    color: accountingTheme.colors.card,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 });

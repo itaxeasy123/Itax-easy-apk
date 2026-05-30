@@ -1,4 +1,5 @@
 import React from 'react';
+import { accountingTheme } from "../../../theme/accounting";
 import {
   View,
   ActivityIndicator,
@@ -17,7 +18,7 @@ interface LoadingProps {
 
 export default function Loading({
   size = 'large',
-  color = '#2563eb',
+  color = accountingTheme.colors.primary,
   text,
   style,
   fullScreen = false,
@@ -49,12 +50,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: accountingTheme.colors.card,
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: 14,
+    marginTop: accountingTheme.spacing.md,
+    fontSize: accountingTheme.fontSizes.lg,
     color: '#6b7280',
-    fontWeight: '500',
+    fontWeight: accountingTheme.fontWeights.medium,
   },
 });

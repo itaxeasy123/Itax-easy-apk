@@ -10,6 +10,7 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { accountingService } from "../services/accountingService";
+import { accountingTheme } from "../../../theme/accounting";
 
 type BankLookupResult = Record<string, string | number | boolean | null | undefined>;
 
@@ -86,7 +87,7 @@ export default function BankTransactionsScreen() {
           onChangeText={setIfsc}
           placeholder="Enter IFSC"
           style={styles.input}
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={accountingTheme.colors.textMuted}
         />
         <Pressable style={styles.button} onPress={handleLookup} disabled={loadingLookup}>
           <Text style={styles.buttonText}>
@@ -110,21 +111,21 @@ export default function BankTransactionsScreen() {
           onChangeText={setAccountNumber}
           placeholder="Account Number"
           style={styles.input}
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={accountingTheme.colors.textMuted}
         />
         <TextInput
           value={accountName}
           onChangeText={setAccountName}
           placeholder="Account Holder Name"
           style={styles.input}
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={accountingTheme.colors.textMuted}
         />
         <TextInput
           value={mobile}
           onChangeText={setMobile}
           placeholder="Mobile Number"
           style={styles.input}
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={accountingTheme.colors.textMuted}
         />
         <Pressable style={styles.button} onPress={handleVerify} disabled={loadingVerify}>
           <Text style={styles.buttonText}>
@@ -158,86 +159,86 @@ export default function BankTransactionsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   content: {
-    padding: 16,
+    padding: accountingTheme.spacing.lg,
     paddingBottom: 32,
   },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
   },
   backButton: {
-    marginRight: 12,
+    marginRight: accountingTheme.spacing.md,
   },
   headline: {
     fontSize: 26,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#60708A",
     marginBottom: 18,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderRadius: 18,
     padding: 18,
     marginBottom: 14,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#24406D",
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
   },
   input: {
     backgroundColor: "#F8FAFC",
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1,
     borderColor: "#E5EAF3",
     padding: 14,
-    fontSize: 14,
-    color: "#0F172A",
-    marginBottom: 12,
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
+    marginBottom: accountingTheme.spacing.md,
   },
   button: {
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     backgroundColor: "#347BE5",
     alignItems: "center",
   },
   buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   resultBox: {
     marginTop: 14,
     backgroundColor: "#F8FAFC",
     padding: 14,
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
   },
   resultText: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#475569",
     lineHeight: 20,
   },
   errorText: {
     color: "#D64A4A",
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.lg,
   },
   secondaryButton: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     backgroundColor: "#E5EAF3",
     alignItems: "center",
   },
   secondaryButtonText: {
     color: "#347BE5",
-    fontWeight: "700",
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 });

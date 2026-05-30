@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, BottomNav } from "../components";
 import { accountingService } from "../services/accountingService";
 import { DayBook, VoucherType } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 type DayBookFilter = "all" | VoucherType;
 
@@ -82,7 +83,7 @@ export default function DaybookScreen() {
       <AccountingHeader
         title="Day Book"
         showBackButton
-        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color="#fff" />}
+        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />}
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -111,7 +112,7 @@ export default function DaybookScreen() {
 
         <View style={styles.periodRow}>
           <View style={styles.periodLeft}>
-            <Ionicons name="calendar-outline" size={16} color="#2563EB" />
+            <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
             <Text style={styles.periodText}>
               {activeFilterLabel} - {visibleEntries.length} entries
             </Text>
@@ -165,7 +166,7 @@ export default function DaybookScreen() {
             </View>
           ) : (
             <View style={styles.emptyCard}>
-              <Ionicons name="document-text-outline" size={28} color="#94A3B8" />
+              <Ionicons name="document-text-outline" size={28} color={accountingTheme.colors.textMuted} />
               <Text style={styles.emptyTitle}>No entries found</Text>
               <Text style={styles.emptyText}>
                 Create vouchers for sales, purchase, receipt, or payment to populate day book.
@@ -183,48 +184,48 @@ export default function DaybookScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   content: {
-    paddingBottom: 24,
+    paddingBottom: accountingTheme.spacing.xxl,
   },
   filterWrap: {
-    marginTop: 12,
-    paddingHorizontal: 12,
+    marginTop: accountingTheme.spacing.md,
+    paddingHorizontal: accountingTheme.spacing.md,
   },
   filterRow: {
-    paddingHorizontal: 4,
+    paddingHorizontal: accountingTheme.spacing.xs,
     gap: 10,
   },
   filterChip: {
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     paddingVertical: 10,
-    borderRadius: 999,
+    borderRadius: accountingTheme.radius.full,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#FFFFFF",
+    borderColor: accountingTheme.colors.borderMedium,
+    backgroundColor: accountingTheme.colors.card,
   },
   filterChipActive: {
-    borderColor: "#2563EB",
+    borderColor: accountingTheme.colors.primary,
     backgroundColor: "#EFF6FF",
   },
   filterText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.textSecondary,
   },
   filterTextActive: {
-    color: "#2563EB",
+    color: accountingTheme.colors.primary,
   },
   periodRow: {
-    marginTop: 12,
-    marginHorizontal: 12,
-    paddingHorizontal: 12,
+    marginTop: accountingTheme.spacing.md,
+    marginHorizontal: accountingTheme.spacing.md,
+    paddingHorizontal: accountingTheme.spacing.md,
     paddingVertical: 10,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: accountingTheme.colors.border,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -232,61 +233,61 @@ const styles = StyleSheet.create({
   periodLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
     flex: 1,
   },
   periodText: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#334155",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
     flex: 1,
   },
   changeText: {
-    fontSize: 12,
-    color: "#2563EB",
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   tableCard: {
-    marginTop: 12,
-    marginHorizontal: 12,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+    marginTop: accountingTheme.spacing.md,
+    marginHorizontal: accountingTheme.spacing.md,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.xl,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: accountingTheme.colors.border,
     overflow: "hidden",
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#2563EB",
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    backgroundColor: accountingTheme.colors.primary,
+    paddingVertical: accountingTheme.spacing.md,
+    paddingHorizontal: accountingTheme.spacing.md,
   },
   headerCell: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "800",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
   row: {
     flexDirection: "row",
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    paddingVertical: accountingTheme.spacing.md,
+    paddingHorizontal: accountingTheme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: "#EEF2FF",
     alignItems: "flex-start",
   },
   cell: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#1E293B",
   },
   titleText: {
-    fontSize: 13,
-    color: "#0F172A",
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   metaText: {
-    marginTop: 4,
-    fontSize: 10,
-    color: "#64748B",
+    marginTop: accountingTheme.spacing.xs,
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.textSecondary,
   },
   dateCol: {
     width: "24%",
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
   },
   descCol: {
     width: "49%",
-    paddingRight: 8,
+    paddingRight: accountingTheme.spacing.sm,
   },
   amountColWrap: {
     width: "27%",
@@ -302,52 +303,52 @@ const styles = StyleSheet.create({
   },
   amountCol: {
     textAlign: "right",
-    fontWeight: "800",
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#111827",
   },
   badge: {
     marginTop: 6,
-    paddingHorizontal: 8,
+    paddingHorizontal: accountingTheme.spacing.sm,
     paddingVertical: 3,
-    borderRadius: 999,
-    backgroundColor: "#F1F5F9",
+    borderRadius: accountingTheme.radius.full,
+    backgroundColor: accountingTheme.colors.borderLight,
   },
   badgeText: {
-    fontSize: 10,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.xs,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#475569",
   },
   emptyCard: {
-    marginTop: 12,
-    marginHorizontal: 12,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+    marginTop: accountingTheme.spacing.md,
+    marginHorizontal: accountingTheme.spacing.md,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.xl,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    padding: 20,
+    borderColor: accountingTheme.colors.border,
+    padding: accountingTheme.spacing.xl,
     alignItems: "center",
   },
   emptyTitle: {
     marginTop: 10,
     fontSize: 15,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   emptyText: {
     marginTop: 6,
-    fontSize: 12,
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 18,
   },
   stateText: {
-    marginTop: 16,
-    marginHorizontal: 16,
-    color: "#64748B",
+    marginTop: accountingTheme.spacing.lg,
+    marginHorizontal: accountingTheme.spacing.lg,
+    color: accountingTheme.colors.textSecondary,
   },
   errorText: {
-    marginTop: 16,
-    marginHorizontal: 16,
-    color: "#DC2626",
+    marginTop: accountingTheme.spacing.lg,
+    marginHorizontal: accountingTheme.spacing.lg,
+    color: accountingTheme.colors.error,
   },
 });

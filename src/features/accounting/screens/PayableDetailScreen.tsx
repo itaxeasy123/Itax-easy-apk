@@ -11,6 +11,7 @@ import { useLocalSearchParams, useFocusEffect } from "expo-router";
 import { AccountingHeader, BottomNav, EmptyState } from "../components";
 import { accountingService } from "../services/accountingService";
 import { BillPayable } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const formatCurrency = (value: number) =>
   `₹ ${value.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
@@ -71,7 +72,7 @@ export default function PayableDetailScreen() {
           <Text style={styles.billAmount}>{formatCurrency(Number(item.billAmount))}</Text>
           <View style={styles.billIcons}>
             <Ionicons name="logo-whatsapp" size={16} color="#25D366" />
-            <Ionicons name="document-text" size={16} color="#DC2626" />
+            <Ionicons name="document-text" size={16} color={accountingTheme.colors.error} />
           </View>
         </View>
       </View>
@@ -85,8 +86,8 @@ export default function PayableDetailScreen() {
         showBackButton
         rightContent={
           <View style={styles.headerRightIcons}>
-            <Ionicons name="search" size={20} color="#fff" />
-            <Ionicons name="filter" size={20} color="#fff" />
+            <Ionicons name="search" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="filter" size={20} color={accountingTheme.colors.card} />
           </View>
         }
         headerContent={
@@ -103,19 +104,19 @@ export default function PayableDetailScreen() {
       >
         <View style={styles.actionBar}>
           <Pressable style={styles.actionItem}>
-            <Ionicons name="logo-whatsapp" size={20} color="#fff" />
+            <Ionicons name="logo-whatsapp" size={20} color={accountingTheme.colors.card} />
             <Text style={styles.actionText}>WhatsApp</Text>
           </Pressable>
           <Pressable style={styles.actionItem}>
-            <Ionicons name="call-outline" size={20} color="#fff" />
+            <Ionicons name="call-outline" size={20} color={accountingTheme.colors.card} />
             <Text style={styles.actionText}>Call</Text>
           </Pressable>
           <Pressable style={styles.actionItem}>
-            <Ionicons name="mail-outline" size={20} color="#fff" />
+            <Ionicons name="mail-outline" size={20} color={accountingTheme.colors.card} />
             <Text style={styles.actionText}>Email</Text>
           </Pressable>
           <Pressable style={styles.actionItem}>
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
             <Text style={styles.actionText}>More</Text>
           </Pressable>
         </View>
@@ -137,52 +138,52 @@ export default function PayableDetailScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
   },
   headerRightIcons: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: accountingTheme.spacing.lg,
   },
   profileBlock: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: accountingTheme.spacing.md,
     marginTop: 10,
-    marginBottom: 20,
-    paddingHorizontal: 8,
+    marginBottom: accountingTheme.spacing.xl,
+    paddingHorizontal: accountingTheme.spacing.sm,
   },
   avatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.xxxl,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.text,
   },
   profileInfo: {
     flex: 1,
   },
   profileName: {
-    fontSize: 16,
-    color: "#FFFFFF",
-    fontWeight: "500",
+    fontSize: accountingTheme.fontSizes.xl,
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   profileAmount: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.xxxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
     marginTop: 2,
   },
   actionBar: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 8,
+    paddingHorizontal: accountingTheme.spacing.sm,
     marginTop: 10,
     paddingBottom: 10,
   },
@@ -191,9 +192,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   actionText: {
-    color: "#FFFFFF",
+    color: accountingTheme.colors.card,
     fontSize: 11,
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   mainContainer: {
     flex: 1,
@@ -202,17 +203,17 @@ const styles = StyleSheet.create({
     paddingBottom: 110,
   },
   listContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     minHeight: 400,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   firstRow: {
     borderTopWidth: 0,
@@ -221,27 +222,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   billNumber: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#334155",
   },
   billDate: {
     fontSize: 11,
-    color: "#64748B",
-    marginTop: 4,
+    color: accountingTheme.colors.textSecondary,
+    marginTop: accountingTheme.spacing.xs,
   },
   billRight: {
     alignItems: "flex-end",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   billAmount: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   billIcons: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: accountingTheme.spacing.md,
   },
 });

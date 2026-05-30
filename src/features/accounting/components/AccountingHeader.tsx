@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { calculatorTheme } from "../../../theme";
+import { accountingTheme } from "../../../theme/accounting";
 
 type AccountingHeaderProps = {
   title: string;
@@ -85,7 +86,7 @@ export default function AccountingHeader({
           <View style={styles.leftGroup}>
             {showBackButton ? (
               <Pressable onPress={handleBackPress} style={styles.backButton}>
-                <Ionicons name="chevron-back" size={18} color="#fff" />
+                <Ionicons name="chevron-back" size={18} color={accountingTheme.colors.card} />
               </Pressable>
             ) : null}
 
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
   backButton: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: accountingTheme.radius.xxl,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255,255,255,0.14)",
@@ -146,9 +147,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "800",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
   subtitle: {
     color: "#EAFDFC",
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   body: {
-    marginTop: 8,
-    paddingBottom: 4,
+    marginTop: accountingTheme.spacing.sm,
+    paddingBottom: accountingTheme.spacing.xs,
   },
 });

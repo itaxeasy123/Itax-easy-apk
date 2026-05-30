@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader } from "../components";
 import { accountingService } from "../services/accountingService";
 import { LedgerType } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 function getErrorMessage(err: unknown, fallback: string) {
   if (typeof err === "object" && err !== null && "response" in err) {
@@ -26,18 +27,18 @@ function getErrorMessage(err: unknown, fallback: string) {
 
 const ledgerTypeOptions: { type: LedgerType; label: string; icon: string; color: string }[] = [
   { type: "bank",               label: "Bank",               icon: "business",         color: "#3B82F6" },
-  { type: "cash",               label: "Cash",               icon: "cash",             color: "#10B981" },
-  { type: "sales",              label: "Sales",              icon: "trending-up",      color: "#8B5CF6" },
-  { type: "purchase",           label: "Purchase",           icon: "cart",             color: "#F59E0B" },
-  { type: "directExpense",      label: "Direct Expense",     icon: "remove-circle",    color: "#EF4444" },
+  { type: "cash",               label: "Cash",               icon: "cash",             color: accountingTheme.colors.success },
+  { type: "sales",              label: "Sales",              icon: "trending-up",      color: accountingTheme.colors.purple },
+  { type: "purchase",           label: "Purchase",           icon: "cart",             color: accountingTheme.colors.warning },
+  { type: "directExpense",      label: "Direct Expense",     icon: "remove-circle",    color: accountingTheme.colors.danger },
   { type: "indirectExpense",    label: "Indirect Expense",   icon: "alert-circle",     color: "#F97316" },
   { type: "directIncome",       label: "Direct Income",      icon: "add-circle",       color: "#06B6D4" },
   { type: "indirectIncome",     label: "Indirect Income",    icon: "checkmark-circle", color: "#6366F1" },
   { type: "fixedAssets",        label: "Fixed Assets",       icon: "cube",             color: "#84CC16" },
   { type: "currentAssets",      label: "Current Assets",     icon: "layers",           color: "#14B8A6" },
   { type: "loansAndLiabilitieslw", label: "Loans",           icon: "link",             color: "#E879F9" },
-  { type: "accountsReceivable", label: "Receivable",         icon: "arrow-down-circle",color: "#2563EB" },
-  { type: "accountsPayable",    label: "Payable",            icon: "arrow-up-circle",  color: "#DC2626" },
+  { type: "accountsReceivable", label: "Receivable",         icon: "arrow-down-circle",color: accountingTheme.colors.primary },
+  { type: "accountsPayable",    label: "Payable",            icon: "arrow-up-circle",  color: accountingTheme.colors.error },
 ];
 
 export default function LedgerCreateScreen() {
@@ -90,7 +91,7 @@ export default function LedgerCreateScreen() {
         showBackButton
         rightContent={
           loading ? (
-            <ActivityIndicator size="small" color="#fff" />
+            <ActivityIndicator size="small" color={accountingTheme.colors.card} />
           ) : (
             <Pressable onPress={handleSave}>
               <Text style={styles.headerSave}>Save</Text>
@@ -105,12 +106,12 @@ export default function LedgerCreateScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Ledger Name</Text>
           <View style={styles.inputWrap}>
-            <Ionicons name="document-text-outline" size={18} color="#94A3B8" style={styles.inputIcon} />
+            <Ionicons name="document-text-outline" size={18} color={accountingTheme.colors.textMuted} style={styles.inputIcon} />
             <TextInput
               value={ledgerName}
               onChangeText={setLedgerName}
               placeholder="e.g. Cash Account"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={accountingTheme.colors.textMuted}
               style={styles.input}
             />
           </View>
@@ -126,8 +127,8 @@ export default function LedgerCreateScreen() {
               onChangeText={(text) => setOpeningBalance(text.replace(/[^0-9.]/g, ""))}
               keyboardType="numeric"
               placeholder="0"
-              placeholderTextColor="#94A3B8"
-              style={[styles.input, { marginLeft: 8 }]}
+              placeholderTextColor={accountingTheme.colors.textMuted}
+              style={[styles.input, { marginLeft: accountingTheme.spacing.sm }]}
             />
           </View>
         </View>
@@ -159,7 +160,7 @@ export default function LedgerCreateScreen() {
                 <Text
                   style={[
                     styles.typeLabel,
-                    ledgerType === opt.type && { color: opt.color, fontWeight: "700" },
+                    ledgerType === opt.type && { color: opt.color, fontWeight: accountingTheme.fontWeights.bold },
                   ]}
                   numberOfLines={2}
                 >
@@ -178,14 +179,14 @@ export default function LedgerCreateScreen() {
           <View style={[styles.summaryCard, { borderColor: selectedOption.color }]}>
             <Ionicons name={selectedOption.icon as any} size={20} color={selectedOption.color} />
             <Text style={[styles.summaryText, { color: selectedOption.color }]}>
-              Creating <Text style={{ fontWeight: "800" }}>{selectedOption.label}</Text> ledger
+              Creating <Text style={{ fontWeight: accountingTheme.fontWeights.extraBold }}>{selectedOption.label}</Text> ledger
             </Text>
           </View>
         )}
 
         {error ? (
           <View style={styles.errorBox}>
-            <Ionicons name="alert-circle" size={16} color="#DC2626" />
+            <Ionicons name="alert-circle" size={16} color={accountingTheme.colors.error} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
         ) : null}
@@ -199,10 +200,10 @@ export default function LedgerCreateScreen() {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={accountingTheme.colors.card} />
           ) : (
             <>
-              <Ionicons name="checkmark" size={18} color="#FFFFFF" />
+              <Ionicons name="checkmark" size={18} color={accountingTheme.colors.card} />
               <Text style={styles.saveBtnText}>Save Ledger</Text>
             </>
           )}
@@ -214,13 +215,13 @@ export default function LedgerCreateScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F8FAFC" },
-  headerSave: { color: "#FFFFFF", fontWeight: "700", fontSize: 14 },
-  content: { padding: 16, paddingBottom: 100 },
-  section: { marginBottom: 20 },
+  headerSave: { color: accountingTheme.colors.card, fontWeight: accountingTheme.fontWeights.bold, fontSize: accountingTheme.fontSizes.lg },
+  content: { padding: accountingTheme.spacing.lg, paddingBottom: 100 },
+  section: { marginBottom: accountingTheme.spacing.xl },
   sectionLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.textSecondary,
     textTransform: "uppercase",
     letterSpacing: 0.6,
     marginBottom: 10,
@@ -228,21 +229,21 @@ const styles = StyleSheet.create({
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.xl,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     paddingHorizontal: 14,
     height: 50,
-    shadowColor: "#000",
+    shadowColor: accountingTheme.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
   },
   inputIcon: { marginRight: 10 },
-  currencySign: { fontSize: 16, color: "#475569", fontWeight: "600" },
-  input: { flex: 1, fontSize: 15, color: "#0F172A" },
+  currencySign: { fontSize: accountingTheme.fontSizes.xl, color: "#475569", fontWeight: accountingTheme.fontWeights.semiBold },
+  input: { flex: 1, fontSize: 15, color: accountingTheme.colors.text },
   typeGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -251,10 +252,10 @@ const styles = StyleSheet.create({
   typeCard: {
     width: "30%",
     minWidth: 90,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.xl,
     borderWidth: 1.5,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     padding: 10,
     alignItems: "center",
     position: "relative",
@@ -262,15 +263,15 @@ const styles = StyleSheet.create({
   typeIconWrap: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: accountingTheme.radius.md,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 6,
   },
   typeLabel: {
-    fontSize: 10,
+    fontSize: accountingTheme.fontSizes.xs,
     color: "#475569",
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
     textAlign: "center",
     lineHeight: 14,
   },
@@ -283,42 +284,42 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1.5,
     padding: 14,
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.lg,
   },
-  summaryText: { fontSize: 14 },
+  summaryText: { fontSize: accountingTheme.fontSizes.lg },
   errorBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: "#FEF2F2",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
+    gap: accountingTheme.spacing.sm,
+    backgroundColor: accountingTheme.colors.dangerLight,
+    borderRadius: accountingTheme.radius.md,
+    padding: accountingTheme.spacing.md,
+    marginBottom: accountingTheme.spacing.lg,
   },
-  errorText: { color: "#DC2626", fontSize: 13, flex: 1 },
+  errorText: { color: accountingTheme.colors.error, fontSize: accountingTheme.fontSizes.md, flex: 1 },
   bottomBar: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#FFFFFF",
-    padding: 16,
+    backgroundColor: accountingTheme.colors.card,
+    padding: accountingTheme.spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    borderTopColor: accountingTheme.colors.borderMedium,
   },
   saveBtn: {
     backgroundColor: "#3B82F6",
-    borderRadius: 14,
+    borderRadius: accountingTheme.radius.xl,
     height: 50,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { color: "#FFFFFF", fontSize: 15, fontWeight: "700" },
+  saveBtnText: { color: accountingTheme.colors.card, fontSize: 15, fontWeight: accountingTheme.fontWeights.bold },
 });

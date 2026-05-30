@@ -1,7 +1,9 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import { LogBox, Platform } from 'react-native';
 import { useAuthStore } from '../src/store/authStore';
+
+// ... existing ignore warnings ...
 if (Platform.OS === 'web') {
   const originalWarn = console.warn;
   console.warn = (...args) => {
@@ -42,11 +44,29 @@ LogBox.ignoreLogs([
 export default function RootLayout() {
   const loadAuth = useAuthStore((state) => state.loadAuth);
   const isHydrated = useAuthStore((state) => state.isHydrated);
+  const token = useAuthStore((state) => state.token);
+  const router = useRouter();
+  const segments = useSegments();
 
   // App start hote hi pehle auth data load karo
   useEffect(() => {
     loadAuth();
   }, [loadAuth]);
+
+  // Global Auth Guard
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const segment = segments[0] as string | undefined;
+    const inAuthGroup = segment === 'login' || segment === 'signup' || segment === 'verify-otp';
+
+    if (!token && !inAuthGroup && segments[0] !== undefined) {
+      // We use a small timeout to let navigation mount fully
+      setTimeout(() => {
+        router.replace('/login');
+      }, 0);
+    }
+  }, [token, isHydrated, segments]);
 
   // Jab tak storage se data load nahi hota, kuch mat dikhao (blank ya splash)
   if (!isHydrated) {

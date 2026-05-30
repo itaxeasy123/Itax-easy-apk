@@ -15,24 +15,25 @@ import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, BottomNav, EmptyState } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Ledger } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const formatCurrency = (value: number) =>
   `₹ ${Math.abs(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
 const LEDGER_TYPE_COLORS: Record<string, string> = {
   bank: "#3B82F6",
-  cash: "#10B981",
-  sales: "#8B5CF6",
-  purchase: "#F59E0B",
-  directExpense: "#EF4444",
+  cash: accountingTheme.colors.success,
+  sales: accountingTheme.colors.purple,
+  purchase: accountingTheme.colors.warning,
+  directExpense: accountingTheme.colors.danger,
   indirectExpense: "#F97316",
   directIncome: "#06B6D4",
   indirectIncome: "#6366F1",
   fixedAssets: "#84CC16",
   currentAssets: "#14B8A6",
   loansAndLiabilitieslw: "#E879F9",
-  accountsReceivable: "#2563EB",
-  accountsPayable: "#DC2626",
+  accountsReceivable: accountingTheme.colors.primary,
+  accountsPayable: accountingTheme.colors.error,
 };
 
 const LEDGER_TYPE_ICONS: Record<string, any> = {
@@ -119,7 +120,7 @@ export default function LedgerListScreen() {
     );
   };
 
-  const typeColor = (type: string) => LEDGER_TYPE_COLORS[type] ?? "#64748B";
+  const typeColor = (type: string) => LEDGER_TYPE_COLORS[type] ?? accountingTheme.colors.textSecondary;
   const typeIcon = (type: string) => LEDGER_TYPE_ICONS[type] ?? "document";
 
   return (
@@ -129,7 +130,7 @@ export default function LedgerListScreen() {
         showBackButton
         rightContent={
           <Pressable onPress={() => router.navigate("/accounting/ledgers/create")}>
-            <Ionicons name="add" size={22} color="#fff" />
+            <Ionicons name="add" size={22} color={accountingTheme.colors.card} />
           </Pressable>
         }
         headerContent={
@@ -150,17 +151,17 @@ export default function LedgerListScreen() {
             {/* Search + Filter */}
             <View style={styles.searchRow}>
               <View style={styles.searchInputWrap}>
-                <Ionicons name="search" size={16} color="#94A3B8" style={{ marginRight: 8 }} />
+                <Ionicons name="search" size={16} color={accountingTheme.colors.textMuted} style={{ marginRight: accountingTheme.spacing.sm }} />
                 <TextInput
                   style={styles.searchInput}
                   placeholder="Search ledgers..."
                   value={search}
                   onChangeText={setSearch}
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor={accountingTheme.colors.textMuted}
                 />
               </View>
               <Pressable style={styles.filterBtn} onPress={() => setShowSortModal(true)}>
-                <Ionicons name="filter" size={18} color="#64748B" />
+                <Ionicons name="filter" size={18} color={accountingTheme.colors.textSecondary} />
               </Pressable>
             </View>
           </View>
@@ -219,7 +220,7 @@ export default function LedgerListScreen() {
                   style={styles.deleteIconBtn}
                   onPress={() => handleDeleteLedger(ledger.id, ledger.ledgerName)}
                 >
-                  <Ionicons name="trash-outline" size={14} color="#EF4444" />
+                  <Ionicons name="trash-outline" size={14} color={accountingTheme.colors.danger} />
                 </Pressable>
               </View>
             </Pressable>
@@ -229,7 +230,7 @@ export default function LedgerListScreen() {
 
       {/* FAB */}
       <Pressable style={styles.fab} onPress={() => router.navigate("/accounting/ledgers/create")}>
-        <Ionicons name="add" size={20} color="#FFFFFF" />
+        <Ionicons name="add" size={20} color={accountingTheme.colors.card} />
         <Text style={styles.fabText}>New Ledger</Text>
       </Pressable>
 
@@ -272,50 +273,50 @@ export default function LedgerListScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F8FAFC" },
-  headerContent: { paddingBottom: 12 },
+  headerContent: { paddingBottom: accountingTheme.spacing.md },
   statsRow: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    borderRadius: accountingTheme.radius.xl,
+    paddingVertical: accountingTheme.spacing.md,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.md,
   },
   statCard: { flex: 1, alignItems: "center" },
   statDivider: { width: 1, height: 32, backgroundColor: "rgba(255,255,255,0.3)" },
-  statValue: { fontSize: 16, fontWeight: "800", color: "#FFFFFF" },
-  statLabel: { fontSize: 10, color: "rgba(255,255,255,0.8)", marginTop: 2 },
+  statValue: { fontSize: accountingTheme.fontSizes.xl, fontWeight: accountingTheme.fontWeights.extraBold, color: accountingTheme.colors.card },
+  statLabel: { fontSize: accountingTheme.fontSizes.xs, color: "rgba(255,255,255,0.8)", marginTop: 2 },
   searchRow: { flexDirection: "row", gap: 10 },
   searchInputWrap: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.md,
+    paddingHorizontal: accountingTheme.spacing.md,
     height: 40,
   },
-  searchInput: { flex: 1, fontSize: 14, color: "#0F172A" },
+  searchInput: { flex: 1, fontSize: accountingTheme.fontSizes.lg, color: accountingTheme.colors.text },
   filterBtn: {
     width: 40,
     height: 40,
-    borderRadius: 10,
-    backgroundColor: "#FFFFFF",
+    borderRadius: accountingTheme.radius.md,
+    backgroundColor: accountingTheme.colors.card,
     alignItems: "center",
     justifyContent: "center",
   },
-  content: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 100 },
+  content: { paddingHorizontal: accountingTheme.spacing.lg, paddingTop: accountingTheme.spacing.md, paddingBottom: 100 },
   loaderWrap: { padding: 40, alignItems: "center" },
-  errorWrap: { marginTop: 24 },
+  errorWrap: { marginTop: accountingTheme.spacing.xxl },
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.xxl,
     padding: 14,
     marginBottom: 10,
-    shadowColor: "#000",
+    shadowColor: accountingTheme.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
@@ -325,27 +326,27 @@ const styles = StyleSheet.create({
   cardIcon: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 14,
   },
   cardInfo: { flex: 1 },
-  cardTitle: { fontSize: 14, fontWeight: "700", color: "#0F172A", marginBottom: 6 },
+  cardTitle: { fontSize: accountingTheme.fontSizes.lg, fontWeight: accountingTheme.fontWeights.bold, color: accountingTheme.colors.text, marginBottom: 6 },
   typePill: {
     alignSelf: "flex-start",
-    borderRadius: 6,
-    paddingHorizontal: 8,
+    borderRadius: accountingTheme.radius.sm,
+    paddingHorizontal: accountingTheme.spacing.sm,
     paddingVertical: 3,
   },
-  typePillText: { fontSize: 10, fontWeight: "700" },
-  cardRight: { alignItems: "flex-end", gap: 8 },
-  cardBalance: { fontSize: 14, fontWeight: "800", color: "#0F172A" },
+  typePillText: { fontSize: accountingTheme.fontSizes.xs, fontWeight: accountingTheme.fontWeights.bold },
+  cardRight: { alignItems: "flex-end", gap: accountingTheme.spacing.sm },
+  cardBalance: { fontSize: accountingTheme.fontSizes.lg, fontWeight: accountingTheme.fontWeights.extraBold, color: accountingTheme.colors.text },
   deleteIconBtn: {
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: accountingTheme.colors.dangerLight,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -356,8 +357,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#3B82F6",
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.md,
     borderRadius: 24,
     elevation: 4,
     shadowColor: "#3B82F6",
@@ -366,33 +367,33 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     gap: 6,
   },
-  fabText: { color: "#FFFFFF", fontSize: 14, fontWeight: "600" },
+  fabText: { color: accountingTheme.colors.card, fontSize: accountingTheme.fontSizes.lg, fontWeight: accountingTheme.fontWeights.semiBold },
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
   modalDismiss: { flex: 1 },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 30,
   },
-  sheetHandleWrap: { alignItems: "center", paddingVertical: 12 },
-  sheetHandle: { width: 40, height: 4, backgroundColor: "#E2E8F0", borderRadius: 2 },
+  sheetHandleWrap: { alignItems: "center", paddingVertical: accountingTheme.spacing.md },
+  sheetHandle: { width: 40, height: 4, backgroundColor: accountingTheme.colors.borderMedium, borderRadius: 2 },
   sheetHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 24,
-    paddingBottom: 8,
+    paddingHorizontal: accountingTheme.spacing.xxl,
+    paddingBottom: accountingTheme.spacing.sm,
   },
-  sheetTitle: { fontSize: 16, fontWeight: "700", color: "#1E293B" },
-  resetText: { fontSize: 14, fontWeight: "600", color: "#3B82F6" },
+  sheetTitle: { fontSize: accountingTheme.fontSizes.xl, fontWeight: accountingTheme.fontWeights.bold, color: "#1E293B" },
+  resetText: { fontSize: accountingTheme.fontSizes.lg, fontWeight: accountingTheme.fontWeights.semiBold, color: "#3B82F6" },
   sheetOption: {
     paddingVertical: 14,
-    paddingHorizontal: 24,
+    paddingHorizontal: accountingTheme.spacing.xxl,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
-  sheetOptionActive: { backgroundColor: "#F1F5F9" },
-  sheetOptionText: { fontSize: 14, color: "#475569" },
-  sheetOptionTextActive: { color: "#0F172A", fontWeight: "600" },
+  sheetOptionActive: { backgroundColor: accountingTheme.colors.borderLight },
+  sheetOptionText: { fontSize: accountingTheme.fontSizes.lg, color: "#475569" },
+  sheetOptionTextActive: { color: accountingTheme.colors.text, fontWeight: accountingTheme.fontWeights.semiBold },
 });

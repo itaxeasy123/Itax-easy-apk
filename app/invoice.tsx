@@ -1,4 +1,4 @@
-import InvoiceHomeScreen from '../src/features/invoice/screens/InvoiceHomeScreen';
+import InvoicesScreen from '../src/features/accounting/screens/InvoicesScreen';
 // import { Redirect } from 'expo-router';
 // import { useAuthStore } from '../src/store/authStore';
 
@@ -8,5 +8,5 @@ export default function Invoice() {
   // if (!token) {
   //   return <Redirect href="/login" />;
   // }
-  return <InvoiceHomeScreen />;
+  return <InvoicesScreen />;
 }

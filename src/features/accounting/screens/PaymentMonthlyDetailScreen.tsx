@@ -11,6 +11,7 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { AccountingHeader, BottomNav, EmptyState } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Payment } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const formatCurrency = (value: number) =>
   `₹ ${value.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
@@ -100,9 +101,9 @@ export default function PaymentMonthlyDetailScreen() {
         showBackButton
         rightContent={
           <View style={styles.headerRightIcons}>
-            <Ionicons name="search" size={20} color="#fff" />
-            <Ionicons name="filter" size={20} color="#fff" />
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="search" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="filter" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </View>
         }
         headerContent={
@@ -117,7 +118,7 @@ export default function PaymentMonthlyDetailScreen() {
         <View style={styles.topWhiteSection}>
           <View style={styles.yearRow}>
             <View style={styles.yearLeft}>
-              <Ionicons name="calendar-outline" size={16} color="#2563EB" />
+              <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
               <Text style={styles.yearText}>
                 Financial Year <Text style={styles.yearTextLight}>(1 Apr 24 to 31 Mar 25)</Text>
               </Text>
@@ -148,42 +149,42 @@ const styles = StyleSheet.create({
   headerRightIcons: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: accountingTheme.spacing.lg,
   },
   headerBlock: {
     alignItems: "center",
     marginTop: 10,
-    marginBottom: 20,
+    marginBottom: accountingTheme.spacing.xl,
   },
   headerAmount: {
     fontSize: 28,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   headerMeta: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: accountingTheme.spacing.xs,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#EAFDFC",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   mainContainer: {
     flex: 1,
     marginTop: -8,
   },
   topWhiteSection: {
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.lg,
+    borderTopLeftRadius: accountingTheme.radius.xxl,
+    borderTopRightRadius: accountingTheme.radius.xxl,
   },
   yearRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingBottom: 16,
+    paddingBottom: accountingTheme.spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: "#EEF2F7",
+    borderBottomColor: accountingTheme.colors.surfaceLight,
   },
   yearLeft: {
     flexDirection: "row",
@@ -192,73 +193,73 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   yearText: {
-    fontSize: 13,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#334155",
-    fontWeight: "700",
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   yearTextLight: {
-    fontWeight: "400",
-    color: "#64748B",
+    fontWeight: accountingTheme.fontWeights.regular,
+    color: accountingTheme.colors.textSecondary,
   },
   changeText: {
-    fontSize: 13,
-    color: "#2563EB",
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   listContent: {
     paddingBottom: 110,
   },
   listContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     minHeight: 400,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   firstRow: {
     borderTopWidth: 0,
   },
   paymentInfo: {
     flex: 1,
-    gap: 4,
+    gap: accountingTheme.spacing.xs,
   },
   paymentHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   paymentNumber: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#334155",
   },
   badge: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: accountingTheme.colors.borderLight,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
   badgeText: {
-    fontSize: 10,
-    fontWeight: "500",
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.xs,
+    fontWeight: accountingTheme.fontWeights.medium,
+    color: accountingTheme.colors.textSecondary,
   },
   paymentDate: {
-    fontSize: 12,
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.textSecondary,
   },
   paymentRight: {
     alignItems: "flex-end",
   },
   paymentAmount: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
 });

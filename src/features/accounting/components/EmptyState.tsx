@@ -6,6 +6,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { accountingTheme } from "../../../theme/accounting";
 
 interface EmptyStateProps {
   icon?: React.ComponentProps<typeof Ionicons>['name'];
@@ -45,26 +46,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 48,
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: '#1f2937',
-    marginTop: 16,
+    marginTop: accountingTheme.spacing.lg,
     textAlign: 'center',
   },
   description: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.lg,
     color: '#6b7280',
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
     textAlign: 'center',
     maxWidth: 300,
   },
   actionText: {
-    fontSize: 14,
-    color: '#2563eb',
-    marginTop: 16,
-    fontWeight: '600',
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.primary,
+    marginTop: accountingTheme.spacing.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
 });

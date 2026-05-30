@@ -16,6 +16,12 @@ import {
   DayBook,
   Transaction,
   VoucherType,
+  GetInvoicesParams,
+  Invoice,
+  Pagination,
+  CreateInvoicePayload,
+  CreateItemPayload,
+  Item
 } from '../types/accountingTypes';
 import { voucherService } from './voucherService';
 
@@ -704,5 +710,44 @@ export const accountingService = {
       data: response.data?.item ?? response.data?.data,
       message: response.data?.message,
     };
+  },
+
+  getInvoices: async (params: GetInvoicesParams = {}) => {
+    const response = await apiClient.get(endpoints.invoice.invoices, { params });
+    return response.data as {
+      success: boolean;
+      invoices: Invoice[];
+      pagination: Pagination;
+    };
+  },
+
+  getInvoiceById: async (id: string) => {
+    const response = await apiClient.get(endpoints.invoice.invoiceById(id));
+    return response.data as Invoice;
+  },
+
+  createInvoice: async (payload: CreateInvoicePayload) => {
+    const response = await apiClient.post(endpoints.invoice.invoices, payload);
+    return response.data as Invoice;
+  },
+
+  updateInvoice: async (id: string, payload: CreateInvoicePayload) => {
+    const response = await apiClient.put(endpoints.invoice.invoiceById(id), payload);
+    return response.data;
+  },
+
+  deleteInvoice: async (id: string) => {
+    const response = await apiClient.delete(endpoints.invoice.invoiceById(id));
+    return response.data;
+  },
+
+  updateItem: async (id: string, payload: Partial<CreateItemPayload>) => {
+    const response = await apiClient.put(endpoints.invoice.itemById(id), payload);
+    return response.data;
+  },
+
+  deleteItem: async (id: string) => {
+    const response = await apiClient.delete(endpoints.invoice.itemById(id));
+    return response.data;
   },
 };

@@ -350,61 +350,76 @@ bottomTextActive: {
     color: '#75849C',
   },
 
-  moreMenu: {
-    width: 152,
+  moreContainer: {
+    flex: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#DDE5EF',
-    padding: 10,
-    elevation: 6,
-    boxShadow: '0px 6px 16px rgba(154, 169, 199, 0.08)',
   },
-
-  moreSection: {
-    marginTop: 12,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#DDE5EF',
-    padding: 16,
-    elevation: 4,
-    boxShadow: '0px 6px 16px rgba(154, 169, 199, 0.08)',
+  moreHeader: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1E293B',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-
-  moreMenuName: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#24406D',
-    marginBottom: 6,
+  moreProfileCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-
-  moreSectionSub: {
-    color: '#75849C',
-    fontSize: 12,
-    marginBottom: 8,
-  },
-
-  moreMenuButton: {
+  moreProfileAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#EAF2FF',
-    borderRadius: 10,
-    paddingVertical: 9,
-    marginTop: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-
-  moreMenuButtonText: {
-    textAlign: 'center',
+  moreProfileInfo: {
+    flex: 1,
+  },
+  moreProfileName: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#1E293B',
+  },
+  moreProfileEmail: {
     fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  moreThickDivider: {
+    height: 8,
+    backgroundColor: '#F3F4F6',
+    marginVertical: 4,
+  },
+  moreThinDivider: {
+    height: 1,
+    backgroundColor: '#E5E7EB',
+    marginLeft: 52,
+  },
+  moreSectionHeader: {
+    fontSize: 13,
     fontWeight: '600',
-    color: '#347BE5',
+    color: '#64748B',
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 6,
   },
-
-  moreMenuLogout: {
-    backgroundColor: '#FEF2F2',
+  moreListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-
-  moreMenuLogoutText: {
-    color: '#DC2626',
+  moreListItemIcon: {
+    marginRight: 16,
+  },
+  moreListItemText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#1E293B',
   },
 
   listSection: {
@@ -523,30 +538,25 @@ bottomTextActive: {
   calculatorSmallCard: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     borderRadius: 12,
-    padding: 6,
     alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
     borderWidth: 1,
-    borderColor: '#f8fafc',
+    borderColor: '#E5E7EB',
   },
   calcIconContainer: {
-    backgroundColor: '#eff6ff',
-    padding: 5,
-    borderRadius: 10,
-    marginBottom: 4,
+    backgroundColor: 'transparent',
+    padding: 0,
+    borderRadius: 0,
+    marginBottom: 0,
   },
   calculatorSmallText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#1e293b',
+    fontSize: 10,
+    marginTop: 4,
+    color: '#0F172A',
+    fontWeight: '600',
     textAlign: 'center',
-    marginTop: 2,
   },
   calculatorSmallSub: {
     display: 'none',

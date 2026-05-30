@@ -12,6 +12,7 @@ import {
 import { AccountingHeader, BottomNav, Card, EmptyState, Loading } from "../components";
 import { voucherService } from "../services/voucherService";
 import type { VoucherEntry } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 import {
   buildReceiptEntriesForCustomer,
   formatCurrency,
@@ -81,9 +82,9 @@ export default function ReceiptCustomerDetailScreen() {
         showBackButton
         rightContent={
           <View style={styles.headerActions}>
-            <Ionicons name="search" size={18} color="#fff" />
-            <Ionicons name="filter-outline" size={18} color="#fff" />
-            <Ionicons name="ellipsis-horizontal" size={18} color="#fff" />
+            <Ionicons name="search" size={18} color={accountingTheme.colors.card} />
+            <Ionicons name="filter-outline" size={18} color={accountingTheme.colors.card} />
+            <Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />
           </View>
         }
         headerContent={(
@@ -97,7 +98,7 @@ export default function ReceiptCustomerDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.yearRow}>
           <View style={styles.yearLeft}>
-            <Ionicons name="calendar-outline" size={16} color="#2563EB" />
+            <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
             <Text style={styles.yearText}>
               Financial Year ({String(new Date().getFullYear() - 1).slice(-2)} Apr to {String(new Date().getFullYear()).slice(-2)} Mar)
             </Text>
@@ -152,11 +153,11 @@ export default function ReceiptCustomerDetailScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   content: {
     paddingHorizontal: 14,
-    paddingTop: 12,
+    paddingTop: accountingTheme.spacing.md,
     paddingBottom: 110,
   },
   headerActions: {
@@ -166,23 +167,23 @@ const styles = StyleSheet.create({
   },
   headerBlock: {
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 2,
     paddingBottom: 2,
   },
   headerAmount: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
     letterSpacing: 0.2,
   },
   headerMeta: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: 2,
+    fontSize: 11,
     color: "#EAFDFC",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   yearRow: {
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.sm,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -190,23 +191,23 @@ const styles = StyleSheet.create({
   yearLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: accountingTheme.spacing.xs,
     flex: 1,
   },
   yearText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#334155",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
     flex: 1,
   },
   changeText: {
-    fontSize: 12,
-    color: "#2563EB",
-    fontWeight: "700",
+    fontSize: 11,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   errorText: {
-    color: "#DC2626",
-    marginBottom: 12,
+    color: accountingTheme.colors.error,
+    marginBottom: accountingTheme.spacing.md,
   },
   listCard: {
     padding: 0,
@@ -222,22 +223,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   sectionMeta: {
-    fontSize: 11,
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.textSecondary,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
     paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   rowLeft: {
     flex: 1,
@@ -246,32 +247,32 @@ const styles = StyleSheet.create({
   rowTopLine: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 6,
+    gap: 6,
+    marginBottom: accountingTheme.spacing.xs,
   },
   receiptNumber: {
-    fontSize: 15,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#1F2937",
   },
   statusPill: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 999,
-    backgroundColor: "#EEF2F7",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: accountingTheme.radius.full,
+    backgroundColor: accountingTheme.colors.surfaceLight,
   },
   statusText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "#64748B",
+    fontSize: 9,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.textSecondary,
   },
   rowDate: {
-    fontSize: 12,
-    color: "#64748B",
+    fontSize: 11,
+    color: accountingTheme.colors.textSecondary,
   },
   rowAmount: {
-    fontSize: 15,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#111827",
     textAlign: "right",
   },

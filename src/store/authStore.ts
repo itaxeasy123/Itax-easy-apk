@@ -1,6 +1,8 @@
 
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+import axios from "axios";
 
 export type AuthUser = {
   email: string;
@@ -43,10 +45,39 @@ export const useAuthStore = create<AuthState>((set) => ({
   // ✅ LOAD TOKEN ON APP START
   loadAuth: async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      let token = await AsyncStorage.getItem("token");
       const userStr = await AsyncStorage.getItem("user");
 
-      const user = userStr ? JSON.parse(userStr) : null;
+      let user = userStr ? JSON.parse(userStr) : null;
+      let isValidToken = !!token;
+
+      if (token) {
+        try {
+          const API_URL = Constants?.expoConfig?.extra?.API_URL || "https://api.itaxeasy.com/api";
+          
+          await axios.get(`${API_URL}/user/profile`, {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 5000,
+          });
+          isValidToken = true;
+        } catch (error: any) {
+          if (error.response && error.response.status === 401) {
+            console.log("Token invalid on startup (401)");
+            isValidToken = false;
+          } else {
+            console.log("Token verification failed (network/timeout), assuming valid for now");
+            isValidToken = true;
+          }
+        }
+      }
+
+      if (token && !isValidToken) {
+        await AsyncStorage.removeItem("token");
+        await AsyncStorage.removeItem("user");
+        await AsyncStorage.removeItem("refreshToken");
+        token = null;
+        user = null;
+      }
 
       set({
         token,

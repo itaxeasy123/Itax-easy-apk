@@ -1,7 +1,8 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
-import { Alert, Platform } from "react-native";
+import { Alert, Platform, Linking } from "react-native";
+import * as IntentLauncher from "expo-intent-launcher";
 
 type PdfSummary = Record<string, any>;
 
@@ -355,7 +356,50 @@ export const previewITRPdf = async (input: BuildPdfInput) => {
       return;
     }
 
-    await Print.printAsync({ html });
+    const result = await Print.printToFileAsync({ html });
+    const fileUri = result.uri;
+
+    let opened = false;
+    try {
+      if (Platform.OS === 'android') {
+        let targetUri = fileUri;
+        if (targetUri.startsWith('file://')) {
+          targetUri = await FileSystem.getContentUriAsync(targetUri);
+        }
+        try {
+          await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+            data: targetUri,
+            flags: 1,
+            type: 'application/pdf',
+          });
+          opened = true;
+        } catch (intentErr) {
+          const supported = await Linking.canOpenURL(targetUri);
+          if (supported) {
+            await Linking.openURL(targetUri);
+            opened = true;
+          } else {
+            throw intentErr;
+          }
+        }
+      } else {
+        const supported = await Linking.canOpenURL(fileUri);
+        if (supported) {
+          await Linking.openURL(fileUri);
+          opened = true;
+        }
+      }
+    } catch (e: any) {
+      console.warn("Direct view failed, falling back to Share:", e);
+    }
+
+    if (!opened) {
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri, { dialogTitle: "View ITR PDF" });
+      } else {
+        await Print.printAsync({ html });
+      }
+    }
   } catch (error) {
     console.error("Error previewing PDF:", error);
     Alert.alert("Error", "Failed to open PDF preview. Please try again.");

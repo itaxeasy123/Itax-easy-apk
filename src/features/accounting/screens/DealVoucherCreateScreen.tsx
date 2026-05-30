@@ -17,6 +17,7 @@ import { accountingService } from "../services/accountingService";
 import { voucherService } from "../services/voucherService";
 import { useAccountingSessionStore } from "../../../store/accountingSessionStore";
 import { Ledger, Party, VoucherLine } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 import {
   addDaysInputValue,
   findLedgerByType,
@@ -446,7 +447,7 @@ export default function DealVoucherCreateScreen({
             <Text style={selectedParty ? styles.partyFieldText : styles.partyPlaceholder}>
               {selectedParty?.partyName || "Select Party"}
             </Text>
-            <Ionicons name="chevron-down" size={18} color="#64748B" />
+            <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
           </Pressable>
 
           {selectedParty ? (
@@ -474,7 +475,7 @@ export default function DealVoucherCreateScreen({
                       <Ionicons
                         name="remove-circle-outline"
                         size={20}
-                        color={lineItems.length <= 1 ? "#CBD5E1" : "#EF4444"}
+                        color={lineItems.length <= 1 ? "#CBD5E1" : accountingTheme.colors.danger}
                       />
                     </Pressable>
                   </View>
@@ -539,7 +540,7 @@ export default function DealVoucherCreateScreen({
               ))}
 
               <Pressable onPress={addLine} style={styles.inlineAddRow}>
-                <Ionicons name="add-circle-outline" size={16} color="#2563EB" />
+                <Ionicons name="add-circle-outline" size={16} color={accountingTheme.colors.primary} />
                 <Text style={styles.inlineAddText}>Add Item</Text>
               </Pressable>
             </>
@@ -559,7 +560,7 @@ export default function DealVoucherCreateScreen({
                 <Text style={styles.fieldLabel}>Select GST</Text>
                 <Pressable style={styles.selectBox} onPress={() => setShowGstSheet(true)}>
                   <Text style={styles.selectBoxText}>{selectedGstOption || "Select GST"}</Text>
-                  <Ionicons name="chevron-down" size={18} color="#64748B" />
+                  <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
                 </Pressable>
               </View>
               <View style={styles.gridField}>
@@ -614,7 +615,7 @@ export default function DealVoucherCreateScreen({
 
         {error ? (
           <View style={styles.errorBox}>
-            <Ionicons name="alert-circle" size={18} color="#DC2626" />
+            <Ionicons name="alert-circle" size={18} color={accountingTheme.colors.error} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
         ) : null}
@@ -629,12 +630,12 @@ export default function DealVoucherCreateScreen({
             <View style={styles.sheetHandle} />
             <Text style={styles.sheetTitle}>Select GST & Taxes</Text>
             <View style={styles.sheetSearchRow}>
-              <Ionicons name="search" size={18} color="#64748B" />
+              <Ionicons name="search" size={18} color={accountingTheme.colors.textSecondary} />
               <TextInput
                 value={gstSearch}
                 onChangeText={setGstSearch}
                 placeholder="Search GST"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={accountingTheme.colors.textMuted}
                 style={styles.sheetSearchInput}
               />
             </View>
@@ -651,7 +652,7 @@ export default function DealVoucherCreateScreen({
                     }}
                   >
                     <Text style={styles.sheetRowTitle}>{option}</Text>
-                    {active ? <Ionicons name="checkmark" size={18} color="#2563EB" /> : null}
+                    {active ? <Ionicons name="checkmark" size={18} color={accountingTheme.colors.primary} /> : null}
                   </Pressable>
                 );
               })}
@@ -800,7 +801,7 @@ export default function DealVoucherCreateScreen({
               <Text style={styles.fieldLabel}>Party</Text>
               <View style={styles.selectBox}>
                 <Text style={styles.selectBoxText}>{selectedParty?.partyName || "Select Party"}</Text>
-                <Ionicons name="chevron-down" size={16} color="#64748B" />
+                <Ionicons name="chevron-down" size={16} color={accountingTheme.colors.textSecondary} />
               </View>
             </View>
             <View style={styles.sheetField}>
@@ -826,56 +827,56 @@ export default function DealVoucherCreateScreen({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   scroll: {
     flex: 1,
   },
   content: {
     paddingHorizontal: 14,
-    paddingTop: 8,
+    paddingTop: accountingTheme.spacing.sm,
     paddingBottom: 132,
   },
   cardBlock: {
-    marginBottom: 8,
+    marginBottom: accountingTheme.spacing.sm,
   },
   rowBetween: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   invoiceTitle: {
     fontSize: 15,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   invoiceMeta: {
     fontSize: 11,
-    color: "#64748B",
-    marginTop: 4,
+    color: accountingTheme.colors.textSecondary,
+    marginTop: accountingTheme.spacing.xs,
   },
   linkText: {
-    color: "#2563EB",
-    fontWeight: "700",
-    fontSize: 12,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.sm,
   },
   sectionTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: accountingTheme.spacing.sm,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   partyField: {
     borderWidth: 1,
     borderColor: "#CBD5E1",
-    backgroundColor: "#fff",
-    borderRadius: 14,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.xl,
     paddingHorizontal: 14,
     paddingVertical: 11,
     flexDirection: "row",
@@ -883,30 +884,30 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   partyFieldText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.text,
     flex: 1,
-    paddingRight: 8,
+    paddingRight: accountingTheme.spacing.sm,
   },
   partyPlaceholder: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#94A3B8",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.textMuted,
     flex: 1,
-    paddingRight: 8,
+    paddingRight: accountingTheme.spacing.sm,
   },
   balanceText: {
     marginTop: 10,
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#334155",
-    fontWeight: "700",
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   itemBlock: {
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
-    paddingTop: 12,
-    marginTop: 12,
+    borderTopColor: accountingTheme.colors.surfaceLight,
+    paddingTop: accountingTheme.spacing.md,
+    marginTop: accountingTheme.spacing.md,
   },
   inlineAddRow: {
     flexDirection: "row",
@@ -914,36 +915,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
     paddingVertical: 10,
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   inlineAddText: {
-    color: "#2563EB",
-    fontWeight: "800",
-    fontSize: 12,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    fontSize: accountingTheme.fontSizes.sm,
   },
   itemTitle: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   selectItemField: {
-    marginTop: 12,
+    marginTop: accountingTheme.spacing.md,
     borderWidth: 1,
     borderColor: "#CBD5E1",
-    borderRadius: 14,
-    backgroundColor: "#fff",
+    borderRadius: accountingTheme.radius.xl,
+    backgroundColor: accountingTheme.colors.card,
     paddingHorizontal: 14,
     paddingVertical: 14,
   },
   selectItemText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.text,
   },
   selectItemMeta: {
     fontSize: 11,
-    color: "#64748B",
-    marginTop: 4,
+    color: accountingTheme.colors.textSecondary,
+    marginTop: accountingTheme.spacing.xs,
   },
   gridRow: {
     flexDirection: "row",
@@ -955,39 +956,39 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 11,
-    color: "#64748B",
-    fontWeight: "700",
+    color: accountingTheme.colors.textSecondary,
+    fontWeight: accountingTheme.fontWeights.bold,
     marginBottom: 6,
     textTransform: "uppercase",
     letterSpacing: 0.4,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: accountingTheme.colors.border,
     paddingHorizontal: 10,
     paddingVertical: 10,
-    color: "#0F172A",
+    color: accountingTheme.colors.text,
   },
   selectBox: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
+    borderColor: accountingTheme.colors.border,
+    borderRadius: accountingTheme.radius.lg,
     backgroundColor: "#F8FAFC",
-    paddingHorizontal: 12,
+    paddingHorizontal: accountingTheme.spacing.md,
     paddingVertical: 10,
-    color: "#0F172A",
+    color: accountingTheme.colors.text,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   selectBoxText: {
-    color: "#0F172A",
-    fontSize: 14,
-    fontWeight: "700",
+    color: accountingTheme.colors.text,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
     flex: 1,
-    marginRight: 8,
+    marginRight: accountingTheme.spacing.sm,
   },
   notesInput: {
     minHeight: 60,
@@ -996,34 +997,34 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 12,
+    gap: accountingTheme.spacing.md,
   },
   summaryLabel: {
     fontSize: 11,
-    color: "#64748B",
-    fontWeight: "700",
+    color: accountingTheme.colors.textSecondary,
+    fontWeight: accountingTheme.fontWeights.bold,
     textTransform: "uppercase",
   },
   summaryValue: {
-    fontSize: 18,
-    color: "#0F172A",
-    fontWeight: "800",
-    marginTop: 4,
+    fontSize: accountingTheme.fontSizes.xxl,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    marginTop: accountingTheme.spacing.xs,
   },
   errorBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: "#FEF2F2",
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 12,
+    gap: accountingTheme.spacing.sm,
+    backgroundColor: accountingTheme.colors.dangerLight,
+    borderRadius: accountingTheme.radius.lg,
+    padding: accountingTheme.spacing.md,
+    marginTop: accountingTheme.spacing.md,
   },
   errorText: {
     flex: 1,
-    color: "#DC2626",
-    fontSize: 12,
-    fontWeight: "600",
+    color: accountingTheme.colors.error,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   bottomSpacer: {
     height: 12,
@@ -1033,27 +1034,27 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: accountingTheme.colors.border,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 12,
+    gap: accountingTheme.spacing.md,
   },
   footerLabel: {
     fontSize: 11,
-    color: "#64748B",
-    fontWeight: "700",
+    color: accountingTheme.colors.textSecondary,
+    fontWeight: accountingTheme.fontWeights.bold,
     textTransform: "uppercase",
   },
   footerAmount: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginTop: 4,
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
+    marginTop: accountingTheme.spacing.xs,
   },
   footerButton: {
     minWidth: 132,
@@ -1064,10 +1065,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(15, 23, 42, 0.28)",
   },
   sheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     paddingTop: 10,
     paddingBottom: 22,
     maxHeight: "78%",
@@ -1075,62 +1076,62 @@ const styles = StyleSheet.create({
   sheetHandle: {
     width: 54,
     height: 5,
-    borderRadius: 999,
+    borderRadius: accountingTheme.radius.full,
     backgroundColor: "#CBD5E1",
     alignSelf: "center",
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
   },
   sheetTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginBottom: 12,
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
+    marginBottom: accountingTheme.spacing.md,
   },
   sheetSearch: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 14,
+    borderColor: accountingTheme.colors.border,
+    borderRadius: accountingTheme.radius.xl,
     backgroundColor: "#F8FAFC",
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 12,
+    paddingVertical: accountingTheme.spacing.md,
+    marginBottom: accountingTheme.spacing.md,
   },
   sheetSearchRow: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 14,
+    borderColor: accountingTheme.colors.border,
+    borderRadius: accountingTheme.radius.xl,
     backgroundColor: "#F8FAFC",
-    paddingHorizontal: 12,
+    paddingHorizontal: accountingTheme.spacing.md,
     minHeight: 48,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 12,
+    gap: accountingTheme.spacing.sm,
+    marginBottom: accountingTheme.spacing.md,
   },
   sheetSearchInput: {
     flex: 1,
-    color: "#0F172A",
+    color: accountingTheme.colors.text,
     paddingVertical: 10,
   },
   sheetList: {
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.lg,
   },
   fieldRow: {
     flexDirection: "row",
     gap: 10,
   },
   sheetField: {
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
     flex: 1,
   },
   sheetInput: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
+    borderColor: accountingTheme.colors.border,
+    borderRadius: accountingTheme.radius.lg,
     backgroundColor: "#F8FAFC",
-    paddingHorizontal: 12,
+    paddingHorizontal: accountingTheme.spacing.md,
     paddingVertical: 10,
-    color: "#0F172A",
+    color: accountingTheme.colors.text,
   },
   sheetMultiline: {
     minHeight: 72,
@@ -1138,30 +1139,30 @@ const styles = StyleSheet.create({
   },
   sheetRow: {
     minHeight: 52,
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#EEF2F7",
+    borderBottomColor: accountingTheme.colors.surfaceLight,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 12,
+    gap: accountingTheme.spacing.md,
   },
   sheetRowActive: {
     backgroundColor: "#EFF6FF",
   },
   sheetRowTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.text,
   },
   sheetRowMeta: {
     fontSize: 11,
-    color: "#64748B",
+    color: accountingTheme.colors.textSecondary,
     marginTop: 3,
   },
   sheetButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 14,
+    backgroundColor: accountingTheme.colors.primary,
+    borderRadius: accountingTheme.radius.xl,
     alignItems: "center",
     paddingVertical: 14,
   },
@@ -1172,7 +1173,7 @@ const styles = StyleSheet.create({
     maxHeight: 280,
   },
   sheetButtonText: {
-    color: "#fff",
-    fontWeight: "800",
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
 });

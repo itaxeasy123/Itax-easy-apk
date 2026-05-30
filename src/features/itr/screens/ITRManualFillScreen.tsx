@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useITRStore } from "../../../store/itrStore";
 import {
@@ -40,23 +40,14 @@ export default function ITRManualFillScreen() {
   const { 
     salary, houseProperty, otherSources, 
     businessProfession, capitalGains, deductions, 
-    taxesPaid, interests, regime, setRegime, form16 
+    taxesPaid, interests, regime, setRegime, form16,
+    assessmentYear, setAssessmentYear, resetITR
   } = useITRStore();
-
-  const currentAY = useMemo(() => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth(); 
-    if (month >= 3) {
-      return `${year}-${(year + 1).toString().slice(-2)}`;
-    } else {
-      return `${year - 1}-${year.toString().slice(-2)}`;
-    }
-  }, []);
 
   const [showRegimeModal, setShowRegimeModal] = useState(false);
   const [showYearModal, setShowYearModal] = useState(false);
-  const [selectedYearLabel, setSelectedYearLabel] = useState(currentAY);
+  
+  const displayYear = assessmentYear || "Select Year";
 
   const taxResults = useMemo(() => {
     const commonInputs = {
@@ -91,7 +82,7 @@ export default function ITRManualFillScreen() {
 
   const handleDownload = async () => {
     const fullData = {
-      assessmentYear: selectedYearLabel,
+      assessmentYear: displayYear,
       salary, houseProperty, otherSources, businessProfession, capitalGains, deductions, taxesPaid, interests, regime,
       timestamp: new Date().toISOString(),
     };
@@ -102,7 +93,7 @@ export default function ITRManualFillScreen() {
     <View style={styles.screen}>
       <ITRHeader
         title="Manually Fill ITR"
-        rightContent={<Text style={styles.headerYear}>{`(${selectedYearLabel})`}</Text>}
+        rightContent={<Text style={styles.headerYear}>{`(${displayYear})`}</Text>}
       />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -110,7 +101,7 @@ export default function ITRManualFillScreen() {
           <View style={styles.controlsRow}>
             <Pressable style={styles.pickerBtn} onPress={() => setShowYearModal(true)}>
               <Ionicons name="calendar-outline" size={14} color={itrColors.primary} />
-              <Text style={styles.pickerBtnText}>{selectedYearLabel}</Text>
+              <Text style={styles.pickerBtnText}>{displayYear}</Text>
               <Ionicons name="chevron-down" size={12} color="#64748B" />
             </Pressable>
 
@@ -127,6 +118,16 @@ export default function ITRManualFillScreen() {
           <Text style={styles.profileBtnText}>Profile Section</Text>
           <Ionicons name="person-circle-outline" size={18} color="#64748B" />
         </Pressable>
+
+        {assessmentYear && assessmentYear !== "2025-26" && (
+          <View style={styles.warningBanner}>
+            <Ionicons name="warning" size={18} color="#B45309" />
+            <Text style={styles.warningText}>
+              <Text style={{ fontWeight: "800" }}>Assessment Year Mismatch: </Text>
+              You have selected AY {assessmentYear}, but this system is currently optimized for AY 2025-26. Generating the ITR JSON for a different year may result in validation failures.
+            </Text>
+          </View>
+        )}
 
         {form16 ? (
           <Pressable style={styles.form16Banner} onPress={() => router.navigate("/itr/form-16")}>
@@ -151,10 +152,6 @@ export default function ITRManualFillScreen() {
         <SectionCard title="Other Source" amount={`₹ ${otherSources.totalOtherIncome.toLocaleString()}`} onPress={() => router.navigate("/itr/other-sources")} />
         <SectionCard title="Business & Profession" amount={`₹ ${businessProfession.totalIncome.toLocaleString()}`} onPress={() => router.navigate("/itr/business-profession")} />
         <SectionCard title="Exemption & Deduction" amount={`₹ ${deductions.totalDeductions.toLocaleString()}`} onPress={() => router.navigate("/itr/exemptions-deductions")} />
-        
-        <Text style={styles.sectionTitle}>Regime Comparison</Text>
-        <SectionCard title="Old Tax Regime Liability" amount={`₹ ${taxResults.comparison.old.toLocaleString()}`} amountStyle={{color: '#64748B'}} />
-        <SectionCard title="New Tax Regime Liability" amount={`₹ ${taxResults.comparison.new.toLocaleString()}`} amountStyle={{color: '#64748B'}} />
 
         <Text style={styles.sectionTitle}>Final Tax Computation</Text>
         <View style={styles.calcContainer}>
@@ -201,9 +198,28 @@ export default function ITRManualFillScreen() {
         <View style={styles.modalSheet}>
           <Text style={styles.modalTitle}>Select Assessment Year</Text>
           {["2025-26", "2024-25"].map((opt) => (
-            <Pressable key={opt} onPress={() => { setSelectedYearLabel(opt); setShowYearModal(false); }} style={[styles.modalOption, selectedYearLabel === opt && styles.modalOptionActive]}>
-              <Text style={[styles.modalOptionText, selectedYearLabel === opt && styles.modalOptionTextActive]}>{opt}</Text>
-              {selectedYearLabel === opt && <Ionicons name="checkmark-circle" size={20} color={itrColors.primary} />}
+            <Pressable key={opt} onPress={() => { 
+              if (opt !== assessmentYear && assessmentYear) {
+                Alert.alert(
+                  "Change Assessment Year?",
+                  "Changing the Assessment Year will clear all your imported Form-16 and manually filled data. Are you sure you want to proceed?",
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Yes, Reset Data", style: "destructive", onPress: () => {
+                        resetITR();
+                        setAssessmentYear(opt);
+                        setShowYearModal(false);
+                      }
+                    }
+                  ]
+                );
+              } else {
+                setAssessmentYear(opt);
+                setShowYearModal(false);
+              }
+            }} style={[styles.modalOption, assessmentYear === opt && styles.modalOptionActive]}>
+              <Text style={[styles.modalOptionText, assessmentYear === opt && styles.modalOptionTextActive]}>{opt}</Text>
+              {assessmentYear === opt && <Ionicons name="checkmark-circle" size={20} color={itrColors.primary} />}
             </Pressable>
           ))}
         </View>
@@ -214,6 +230,26 @@ export default function ITRManualFillScreen() {
         <Pressable style={styles.modalBackdrop} onPress={() => setShowRegimeModal(false)} />
         <View style={styles.modalSheet}>
           <Text style={styles.modalTitle}>Select Tax Regime</Text>
+          
+          <View style={styles.regimeComparisonBox}>
+             <Text style={styles.regimeComparisonTitle}>Estimated Tax Liability</Text>
+             <View style={styles.regimeComparisonRow}>
+                 <Text style={styles.regimeComparisonLabel}>Old Regime</Text>
+                 <Text style={styles.regimeComparisonValue}>₹ {taxResults.comparison.old.toLocaleString("en-IN")}</Text>
+             </View>
+             <View style={styles.regimeComparisonRow}>
+                 <Text style={styles.regimeComparisonLabel}>New Regime</Text>
+                 <Text style={styles.regimeComparisonValue}>₹ {taxResults.comparison.new.toLocaleString("en-IN")}</Text>
+             </View>
+             <View style={styles.regimeRecommendationBox}>
+                <Ionicons name="information-circle" size={16} color="#0284C7" />
+                <Text style={styles.regimeRecommendation}>
+                    {taxResults.comparison.new < taxResults.comparison.old ? "New Regime is recommended for you." : 
+                    taxResults.comparison.old < taxResults.comparison.new ? "Old Regime is recommended for you." : "Both regimes have equal liability."}
+                </Text>
+             </View>
+          </View>
+
           {[{ label: "New Regime", value: "new" }, { label: "Old Regime", value: "old" }].map((opt) => (
             <Pressable key={opt.value} onPress={() => { setRegime(opt.value as "old" | "new"); setShowRegimeModal(false); }} style={[styles.modalOption, regime === opt.value && styles.modalOptionActive]}>
               <Text style={[styles.modalOptionText, regime === opt.value && styles.modalOptionTextActive]}>{opt.label}</Text>
@@ -238,6 +274,8 @@ const styles = StyleSheet.create({
   pickerBtnText: { color: "#475569", fontSize: 13, fontWeight: "700" },
   profileBtnFull: { width: '100%', backgroundColor: "#fff", borderColor: "#E2E8F0", borderRadius: 10, borderWidth: 1, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, height: 46, ...itrShadows.card },
   profileBtnText: { color: "#334155", fontSize: 14, fontWeight: "600" },
+  warningBanner: { width: '100%', backgroundColor: "#FEF3C7", borderColor: "#FCD34D", borderRadius: 10, borderWidth: 1, padding: 12, flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  warningText: { color: "#92400E", fontSize: 13, fontWeight: "600", flex: 1, lineHeight: 18 },
   form16Banner: {
     width: "100%",
     backgroundColor: "#F8FBFF",
@@ -302,5 +340,51 @@ const styles = StyleSheet.create({
   modalOption: { borderColor: "#F1F5F9", borderRadius: 16, borderWidth: 1, marginBottom: 12, padding: 16, backgroundColor: "#F8FAFC", flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   modalOptionActive: { backgroundColor: "#EEF2FF", borderColor: itrColors.primary },
   modalOptionText: { color: "#475569", fontSize: 15, fontWeight: "700" },
-  modalOptionTextActive: { color: itrColors.primary },
+  modalOptionTextActive: { color: itrColors.primary, fontWeight: "700" },
+  regimeComparisonBox: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    padding: 16,
+    marginBottom: 20,
+    width: "100%",
+  },
+  regimeComparisonTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#64748B",
+    textTransform: "uppercase",
+    marginBottom: 12,
+  },
+  regimeComparisonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  regimeComparisonLabel: {
+    fontSize: 14,
+    color: "#334155",
+    fontWeight: "600",
+  },
+  regimeComparisonValue: {
+    fontSize: 14,
+    color: "#0F172A",
+    fontWeight: "700",
+  },
+  regimeRecommendationBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F9FF",
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+    gap: 6,
+  },
+  regimeRecommendation: {
+    fontSize: 12,
+    color: "#0369A1",
+    fontWeight: "600",
+    flex: 1,
+  }
 });

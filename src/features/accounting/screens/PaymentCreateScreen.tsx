@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 import { AccountingHeader } from "../components";
+import { accountingTheme } from "../../../theme/accounting";
 
 export default function PaymentCreateScreen() {
     const insets = useSafeAreaInsets();
@@ -33,9 +34,9 @@ export default function PaymentCreateScreen() {
         showBackButton
         rightContent={
           <View style={styles.headerRight}>
-            <Ionicons name="search" size={20} color="#fff" />
-            <Ionicons name="filter" size={20} color="#fff" />
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="search" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="filter" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </View>
         }
       />
@@ -58,7 +59,7 @@ export default function PaymentCreateScreen() {
           <Text style={styles.label}>Payment Mode</Text>
           <Pressable style={styles.dropdownWrap}>
             <Text style={styles.dropdownText}>{paymentMode}</Text>
-            <Ionicons name="chevron-down" size={18} color="#64748B" />
+            <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -66,7 +67,7 @@ export default function PaymentCreateScreen() {
           <Text style={styles.label}>Select Date</Text>
           <Pressable style={styles.dropdownWrap}>
             <Text style={styles.dropdownText}>{date}</Text>
-            <Ionicons name="calendar-outline" size={18} color="#64748B" />
+            <Ionicons name="calendar-outline" size={18} color={accountingTheme.colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -106,103 +107,103 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: accountingTheme.spacing.lg,
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: accountingTheme.spacing.lg,
     marginTop: -16, // to overlap the rounded corner if needed, but not necessary here
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: accountingTheme.spacing.xl,
   },
   label: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#334155",
-    marginBottom: 8,
+    marginBottom: accountingTheme.spacing.sm,
   },
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     borderRadius: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: accountingTheme.spacing.md,
   },
   currencyPrefix: {
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#334155",
-    marginRight: 4,
+    marginRight: accountingTheme.spacing.xs,
   },
   input: {
     flex: 1,
     height: 48,
     fontSize: 15,
-    color: "#0F172A",
-    fontWeight: "500",
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   dropdownWrap: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     borderRadius: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: accountingTheme.spacing.md,
     height: 48,
   },
   dropdownText: {
     fontSize: 15,
-    color: "#0F172A",
-    fontWeight: "500",
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   rowGroup: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 16,
+    paddingVertical: accountingTheme.spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
+    borderBottomColor: accountingTheme.colors.borderMedium,
   },
   addLink: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#3B82F6",
   },
   footer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    borderTopColor: accountingTheme.colors.borderMedium,
   },
   footerLabel: {
-    fontSize: 12,
-    color: "#64748B",
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.textSecondary,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   footerAmount: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
     marginTop: 2,
   },
   payButton: {
     backgroundColor: "#3B82F6",
     borderRadius: 8,
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
     paddingHorizontal: 32,
   },
   payButtonText: {
-    color: "#FFFFFF",
+    color: accountingTheme.colors.card,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 });

@@ -149,6 +149,7 @@ export type TaxesPaidData = {
 
 export type Form16ImportData = {
   fileName: string;
+  fileUri?: string;
   source: "pdf" | "image";
   rawText: string;
   employeeName?: string;
@@ -413,6 +414,8 @@ type ITRState = {
   setForm16: (data: Form16ImportData | null) => void;
   setReturnFormDraft: (data: ReturnFormDraft | null) => void;
   setRegime: (regime: "old" | "new") => void;
+  assessmentYear: string;
+  setAssessmentYear: (year: string) => void;
   resetITR: () => void;
 };
 
@@ -544,6 +547,7 @@ export const useITRStore = create<ITRState>()(
       form16: null,
       returnFormDraft: null,
       regime: "new",
+      assessmentYear: "",
 
       // Action Setters
       setSalary: (data) =>
@@ -591,6 +595,8 @@ export const useITRStore = create<ITRState>()(
       setReturnFormDraft: (data) => set({ returnFormDraft: data }),
 
       setRegime: (regime) => set({ regime }),
+      
+      setAssessmentYear: (year) => set({ assessmentYear: year }),
 
       resetITR: () =>
         set({

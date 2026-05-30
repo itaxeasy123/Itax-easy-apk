@@ -18,7 +18,6 @@ type ITRBottomNavProps = {
 const navItems: NavItem[] = [
   { label: "Home", icon: "home", route: "/itr" },
   { label: "Tools", icon: "construct", route: "/itr/tools" },
-  { label: "Blogs", icon: "document-text", route: "/itr/blogs" },
   { label: "More", icon: "grid", route: "/itr/more" },
 ];
 
@@ -33,15 +32,27 @@ export default function ITRBottomNav({ activeRoute = "/itr" }: ITRBottomNavProps
           return (
             <Pressable
               key={item.label}
-              style={[styles.navItem, isActive && styles.navItemActive]}
+              style={styles.bottomItem}
               onPress={() => router.replace(item.route)}
             >
-              <Ionicons
-                name={item.icon}
-                size={22}
-                color={isActive ? itrColors.primary : itrColors.textMuted}
-              />
-              <Text style={[styles.label, isActive && styles.labelActive]}>
+              <View
+                style={[
+                  styles.bottomIconWrap,
+                  isActive && styles.bottomIconWrapActive,
+                ]}
+              >
+                <Ionicons
+                  name={item.icon}
+                  size={20}
+                  color={isActive ? "#347BE5" : "#94A3B8"}
+                />
+              </View>
+              <Text
+                style={[
+                  styles.bottomText,
+                  isActive && styles.bottomTextActive,
+                ]}
+              >
                 {item.label}
               </Text>
             </Pressable>
@@ -54,36 +65,42 @@ export default function ITRBottomNav({ activeRoute = "/itr" }: ITRBottomNavProps
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
-    borderTopColor: itrColors.border,
+    backgroundColor: '#fff',
     borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
   },
   navBar: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingBottom: itrSpacing.sm,
-    paddingHorizontal: itrSpacing.xl,
-    paddingTop: itrSpacing.sm,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingTop: 6,
+    paddingBottom: 6,
   },
-  navItem: {
-    alignItems: "center",
-    borderRadius: itrRadius.md,
+  bottomItem: {
     flex: 1,
-    gap: 4,
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 6,
   },
-  navItemActive: {
-    backgroundColor: itrColors.primarySoft,
+  bottomIconWrap: {
+    width: 34,
+    height: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  label: {
-    color: itrColors.textMuted,
-    fontSize: 11,
-    fontWeight: "500",
+  bottomIconWrapActive: {
+    backgroundColor: '#f0f9ff',
   },
-  labelActive: {
-    color: itrColors.primary,
-    fontWeight: "700",
+  bottomText: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  bottomTextActive: {
+    color: '#2563eb',
+    fontWeight: '600',
   },
 });

@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { accountingService } from "../services/accountingService";
 import { Ledger, LedgerType } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const ledgerTypeOptions: LedgerType[] = [
   "bank",
@@ -256,21 +257,21 @@ export default function LedgerEditScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   content: {
-    padding: 16,
+    padding: accountingTheme.spacing.lg,
     paddingBottom: 32,
   },
   fullScreenCenter: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
-    backgroundColor: "#F5F9FF",
+    padding: accountingTheme.spacing.lg,
+    backgroundColor: accountingTheme.colors.background,
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: accountingTheme.fontSizes.xl,
     color: "#60708A",
   },
   headerRow: {
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   backButton: {
-    marginRight: 12,
+    marginRight: accountingTheme.spacing.md,
   },
   backIcon: {
     fontSize: 22,
@@ -287,21 +288,21 @@ const styles = StyleSheet.create({
   },
   headline: {
     fontSize: 26,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#60708A",
-    marginTop: 4,
-    marginBottom: 24,
+    marginTop: accountingTheme.spacing.xs,
+    marginBottom: accountingTheme.spacing.xxl,
   },
   field: {
     marginBottom: 18,
   },
   metaCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1,
     borderColor: "#E5EAF3",
     padding: 14,
@@ -312,29 +313,29 @@ const styles = StyleSheet.create({
     color: "#60708A",
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   metaValue: {
-    fontSize: 13,
-    color: "#0F172A",
-    fontWeight: "600",
-    marginTop: 4,
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    marginTop: accountingTheme.spacing.xs,
   },
   label: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#60708A",
-    marginBottom: 8,
+    marginBottom: accountingTheme.spacing.sm,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1,
     borderColor: "#E5EAF3",
     padding: 14,
-    fontSize: 14,
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
   },
   typeRow: {
     flexDirection: "row",
@@ -343,30 +344,30 @@ const styles = StyleSheet.create({
   typeButton: {
     borderWidth: 1,
     borderColor: "#D1E3FF",
-    borderRadius: 10,
+    borderRadius: accountingTheme.radius.md,
     paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginRight: 8,
-    marginBottom: 8,
+    paddingHorizontal: accountingTheme.spacing.md,
+    marginRight: accountingTheme.spacing.sm,
+    marginBottom: accountingTheme.spacing.sm,
   },
   typeButtonActive: {
     backgroundColor: "#347BE5",
     borderColor: "#347BE5",
   },
   typeButtonText: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#3B4A65",
   },
   typeButtonTextActive: {
-    fontSize: 12,
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.card,
   },
   errorText: {
     color: "#D64A4A",
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
   },
   primaryButton: {
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     backgroundColor: "#347BE5",
     paddingVertical: 14,
     alignItems: "center",
@@ -375,20 +376,20 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   primaryButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 14,
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.lg,
   },
   secondaryButton: {
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     backgroundColor: "#FEE2E2",
     paddingVertical: 14,
     alignItems: "center",
-    marginTop: 12,
+    marginTop: accountingTheme.spacing.md,
   },
   secondaryButtonText: {
     color: "#B91C1C",
-    fontWeight: "700",
-    fontSize: 14,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.lg,
   },
 });

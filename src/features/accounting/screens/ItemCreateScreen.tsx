@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, Button, Card } from "../components";
 import { accountingService } from "../services/accountingService";
 import { useAccountingSessionStore } from "../../../store/accountingSessionStore";
+import { accountingTheme } from "../../../theme/accounting";
 
 const ITEM_UNITS = [
   "PIECE - PCS",
@@ -103,13 +104,13 @@ export default function ItemCreateScreen() {
         showBackButton
         rightContent={
           <Pressable style={styles.importBtn}>
-            <Ionicons name="arrow-down-circle-outline" size={16} color="#fff" />
+            <Ionicons name="arrow-down-circle-outline" size={16} color={accountingTheme.colors.card} />
             <Text style={styles.importText}>Import</Text>
           </Pressable>
         }
       />
 
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 40 + Math.max(insets.bottom, 0) }]} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 100 }]} showsVerticalScrollIndicator={false}>
         <View style={styles.formArea}>
           
           {/* Item Details Section */}
@@ -133,7 +134,7 @@ export default function ItemCreateScreen() {
             <Text style={[styles.pickerText, !unit && styles.placeholderText]}>
               {unit || "Item Unit"}
             </Text>
-            <Ionicons name="chevron-down" size={20} color="#94A3B8" />
+            <Ionicons name="chevron-down" size={20} color={accountingTheme.colors.textMuted} />
           </Pressable>
 
           <View style={styles.radioGroup}>
@@ -143,7 +144,7 @@ export default function ItemCreateScreen() {
                 <Ionicons 
                   name={itemType === "item" ? "radio-button-on" : "radio-button-off"} 
                   size={20} 
-                  color={itemType === "item" ? "#3B82F6" : "#94A3B8"} 
+                  color={itemType === "item" ? "#3B82F6" : accountingTheme.colors.textMuted} 
                 />
                 <Text style={styles.radioText}>Item</Text>
               </Pressable>
@@ -151,7 +152,7 @@ export default function ItemCreateScreen() {
                 <Ionicons 
                   name={itemType === "service" ? "radio-button-on" : "radio-button-off"} 
                   size={20} 
-                  color={itemType === "service" ? "#3B82F6" : "#94A3B8"} 
+                  color={itemType === "service" ? "#3B82F6" : accountingTheme.colors.textMuted} 
                 />
                 <Text style={styles.radioText}>Service</Text>
               </Pressable>
@@ -202,15 +203,13 @@ export default function ItemCreateScreen() {
 
       {/* Fixed Save Button */}
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
-        <Pressable 
-          style={({ pressed }) => [styles.saveButton, pressed && styles.saveButtonPressed]} 
+        <Button
+          title={loading ? "Saving..." : "Save"}
           onPress={handleSave}
-          disabled={loading}
-        >
-          <Text style={styles.saveButtonText}>
-            {loading ? "Saving..." : "Save"}
-          </Text>
-        </Pressable>
+          loading={loading}
+          size="large"
+          fullWidth
+        />
       </View>
 
       {/* Unit Filter Popup */}
@@ -256,126 +255,123 @@ const styles = StyleSheet.create({
   importBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: accountingTheme.spacing.xs,
   },
   importText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   content: {
     paddingBottom: 40,
   },
   formArea: {
-    backgroundColor: "#FFFFFF",
-    marginTop: 12,
+    backgroundColor: accountingTheme.colors.card,
+    marginTop: accountingTheme.spacing.md,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#334155",
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 12,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: "#1E293B",
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: 14,
+    paddingBottom: 10,
   },
   input: {
-    height: 48,
+    height: 42,
     borderWidth: 1,
     borderColor: "#CBD5E1",
     borderRadius: 8,
-    paddingHorizontal: 14,
-    fontSize: 14,
+    paddingHorizontal: 10,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#1E293B",
-    marginHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: "#FFFFFF",
+    marginHorizontal: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.md,
+    backgroundColor: accountingTheme.colors.card,
   },
   pickerInput: {
-    height: 48,
+    height: 42,
     borderWidth: 1,
     borderColor: "#CBD5E1",
     borderRadius: 8,
-    paddingHorizontal: 14,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 10,
+    marginHorizontal: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.md,
+    backgroundColor: accountingTheme.colors.card,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   pickerText: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#1E293B",
   },
   placeholderText: {
-    color: "#94A3B8",
+    color: accountingTheme.colors.textMuted,
   },
   radioGroup: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    marginBottom: 20,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.lg,
   },
   radioLabel: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#334155",
   },
   radioOptions: {
     flexDirection: "row",
-    gap: 16,
+    gap: accountingTheme.spacing.lg,
   },
   radioOption: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: accountingTheme.spacing.xs,
   },
   radioText: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#1E293B",
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   divider: {
     height: 4,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: accountingTheme.colors.borderLight,
   },
   otherInfoBtn: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    gap: 8,
+    padding: accountingTheme.spacing.md,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    gap: 6,
   },
   otherInfoText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#334155",
   },
   errorText: {
-    color: "#DC2626",
-    fontSize: 13,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    color: accountingTheme.colors.error,
+    fontSize: accountingTheme.fontSizes.md,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingBottom: accountingTheme.spacing.lg,
   },
   footer: {
-    padding: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
-  },
-  saveButton: {
-    backgroundColor: "#3B82F6",
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  saveButtonPressed: {
-    opacity: 0.8,
-  },
-  saveButtonText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "700",
+    borderTopColor: "#E5EAF3",
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.lg,
+    elevation: 8,
+    shadowColor: accountingTheme.colors.black,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   modalBackdrop: {
     flex: 1,
@@ -386,31 +382,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: "70%",
   },
   sheetHandleWrap: {
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: accountingTheme.colors.borderMedium,
     borderRadius: 2,
   },
   sheetOptions: {
-    paddingHorizontal: 24,
+    paddingHorizontal: accountingTheme.spacing.xxl,
     paddingBottom: 30,
   },
   optionRow: {
-    paddingVertical: 16,
+    paddingVertical: accountingTheme.spacing.lg,
   },
   optionText: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.lg,
     color: "#475569",
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
   },
 });

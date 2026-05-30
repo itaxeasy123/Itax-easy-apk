@@ -6,6 +6,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { accountingTheme } from "../../../theme/accounting";
 import {
   BottomNav,
   Header,
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9fafb',
   },
   menuContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.lg,
   },
 });

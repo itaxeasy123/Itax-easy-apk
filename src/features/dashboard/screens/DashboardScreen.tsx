@@ -143,25 +143,6 @@ function MarqueeBanner({ onNavigate }: { onNavigate: (route: string) => void }) 
 
 const ALL_SERVICES: ServiceItem[] = [
   {
-    title: "Accounting",
-    icon: "reader",
-    hasBottomSheet: true,
-    calculators: [{ title: "Accounting Dashboard", route: "/accounting" }],
-  },
-  {
-    title: "ITR",
-    icon: "document-text",
-    hasBottomSheet: true,
-    calculators: [{ title: "ITR Dashboard", route: "/itr" }],
-  },
-  {
-    title: "GST",
-    icon: "document-text",
-    hasBottomSheet: true,
-    calculators: [{ title: "GST Dashboard", route: "/gst" }],
-  },
-  
-  {
     title: "Bank",
     icon: "business",
     hasBottomSheet: true,
@@ -311,9 +292,7 @@ export default function DashboardScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      setActiveTab("home");
       setSelectedService(null);
-      setSearchQuery("");
     }, []),
   );
 
@@ -363,8 +342,7 @@ export default function DashboardScreen() {
       .join("") || "U";
 
   const toolsItems: ServiceItem[] = [
-    PDF_TOOL, // 👈 yaha add karo
-    ALL_SERVICES.find((s) => s.title === "GST")!,
+    PDF_TOOL,
     ALL_SERVICES.find((s) => s.title === "Business Loan")!,
     ALL_SERVICES.find((s) => s.title === "Income Tax")!,
     ALL_SERVICES.find((s) => s.title === "EMI")!,
@@ -403,15 +381,15 @@ export default function DashboardScreen() {
 
   const quickActionsItems = [
     { title: 'ITR Filing', colors: ['#3b82f6', '#1d4ed8'], icon: 'document-text', route: '/itr' },
-    { title: 'GST Return', colors: ['#2dd4bf', '#0f766e'], icon: 'file-tray', route: '' },
-    { title: 'Create Invoice', colors: ['#a855f7', '#6b21a8'], icon: 'receipt', route: '/accounting' }
+    { title: 'GST Return', colors: ['#2dd4bf', '#0f766e'], icon: 'file-tray', route: '/gst' },
+    { title: 'Bill Shill', colors: ['#a855f7', '#6b21a8'], icon: 'receipt', route: '/accounting' }
   ];
 
   const allServicesItems = [
     { title: 'ITR Filing', icon: 'document-text', color: '#3b82f6', route: '/itr' },
-    { title: 'GST Return', icon: 'file-tray', color: '#2dd4bf', route: '' },
-    { title: 'E-Invoice', icon: 'flash', color: '#f59e0b', route: '/accounting' },
-    { title: 'Invoice', icon: 'receipt', color: '#a855f7', route: '/accounting' },
+    { title: 'GST Return', icon: 'file-tray', color: '#2dd4bf', route: '/gst' },
+    { title: 'E-Invoice (Upcoming)', icon: 'flash', color: '#f59e0b', route: '' },
+    { title: 'Invoice', icon: 'receipt', color: '#a855f7', route: '/invoice' },
     { title: 'Converter', icon: 'sync', color: '#2dd4bf', isTool: PDF_TOOL },
     { title: 'OCR', icon: 'scan', color: '#3b82f6', isTool: OCR_TOOL },
   ];
@@ -419,7 +397,7 @@ export default function DashboardScreen() {
   const calculatorToolsItems = [
     { title: 'Bank Calculator', searchTitle: 'Bank', icon: 'business', sub: 'Quick financial calculations' },
     { title: 'Income Tax', searchTitle: 'Income Tax', icon: 'pie-chart', sub: 'Quick financial calculations' },
-    { title: 'GST Calculator', searchTitle: 'GST', icon: 'calculator', sub: 'Quick financial calculations' },
+    { title: 'GST Calculator', route: '/gst-calculator', icon: 'calculator', sub: 'Quick financial calculations' },
   ];
 
   const isMatch = (title: string, searchTitle?: string) => !normalizedQuery || title.toLowerCase().includes(normalizedQuery) || (searchTitle && searchTitle.toLowerCase().includes(normalizedQuery));
@@ -514,8 +492,13 @@ export default function DashboardScreen() {
                   <View style={styles.calculatorsRow}>
                     {filteredCT.map((item, idx) => (
                       <Pressable key={idx} style={styles.calculatorSmallCard} onPress={() => {
-                        const tool = ALL_SERVICES.find(s => s.title === item.searchTitle);
-                        if (tool) openCalculatorSheet(tool);
+                        if ((item as any).route) {
+                          blurActiveElement();
+                          globalThis.requestAnimationFrame(() => router.navigate((item as any).route));
+                        } else {
+                          const tool = ALL_SERVICES.find(s => s.title === item.searchTitle);
+                          if (tool) openCalculatorSheet(tool);
+                        }
                       }}>
                         <View style={styles.calcIconContainer}>
                           <Ionicons name={item.icon as any} size={22} color="#3b82f6" />
@@ -564,7 +547,14 @@ export default function DashboardScreen() {
                       key={item.title}
                       onPress={() => {
                         if (item.hasBottomSheet) {
-                          openCalculatorSheet(item);
+                          if (item.calculators && item.calculators.length === 1 && item.calculators[0].route) {
+                            blurActiveElement();
+                            globalThis.requestAnimationFrame(() => {
+                              router.navigate(item.calculators[0].route as never);
+                            });
+                          } else {
+                            openCalculatorSheet(item);
+                          }
                         }
                       }}
                       style={[
@@ -609,75 +599,81 @@ export default function DashboardScreen() {
           ) : null}
 
           {activeTab === "more" ? (
-            <>
-              <Text style={styles.sectionTitle}>More Options</Text>
-              <View style={styles.moreSection}>
-                {!normalizedQuery && (
-                  <>
-                    <Text style={styles.moreMenuName}>{fullName}</Text>
-                    <Text style={styles.moreSectionSub}>
-                      Manage your profile and session settings from here.
-                    </Text>
-                  </>
-                )}
+            <View style={styles.moreContainer}>
+              <Text style={styles.moreHeader}>Settings and activity</Text>
 
-                {[
-                  { title: "Help & Support", route: "/help-support" as any },
-                  { title: "Privacy Policy", route: "/privacy-policy" as any },
-                  { title: "About", route: "/about" as any },
-                  { title: "PAN OCR Scan", route: "/pan-scan" as any },
-                  { title: "Aadhaar OCR Scan", route: "/adhaar-scan" as any },
-                  { title: "Export Excel", route: "/excel" as any },
-                  { title: "Export CSV", route: "/csv" as any },
-                  { title: "Profile", route: "/profile" as any },
-                  { title: "Logout", action: () => { logout(); router.replace("/login"); } }
-                ]
-                  .filter(item => !normalizedQuery || item.title.toLowerCase().includes(normalizedQuery))
-                  .map((item, index) => (
-                    <Pressable
-                      key={index}
-                      onPress={() => {
-                        blurActiveElement();
-                        if (item.action) {
-                          item.action();
-                        } else if (item.route) {
-                          router.navigate(item.route);
-                        }
-                      }}
-                      style={[
-                        styles.moreMenuButton,
-                        item.title === "Logout" ? styles.moreMenuLogout : null
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.moreMenuButtonText,
-                          item.title === "Logout" ? styles.moreMenuLogoutText : null
-                        ]}
-                      >
-                        {item.title}
-                      </Text>
-                    </Pressable>
-                  ))}
+              {!normalizedQuery && (
+                <Pressable style={styles.moreProfileCard} onPress={() => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.navigate('/profile')); }}>
+                  <View style={styles.moreProfileAvatar}>
+                    <Ionicons name="person" size={24} color="#347BE5" />
+                  </View>
+                  <View style={styles.moreProfileInfo}>
+                    <Text style={styles.moreProfileName}>{fullName}</Text>
+                    <Text style={styles.moreProfileEmail}>Manage your profile</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#94A3B8" />
+                </Pressable>
+              )}
 
-                  {normalizedQuery && [
-                    { title: "Help & Support", route: "/help-support" as any },
-                    { title: "Privacy Policy", route: "/privacy-policy" as any },
-                    { title: "About", route: "/about" as any },
-                    { title: "PAN OCR Scan", route: "/pan-scan" as any },
-                    { title: "Aadhaar OCR Scan", route: "/adhaar-scan" as any },
-                    { title: "Export Excel", route: "/excel" as any },
-                    { title: "Export CSV", route: "/csv" as any },
-                    { title: "Profile", route: "/profile" as any },
-                    { title: "Logout", action: () => { logout(); router.replace("/login"); } }
-                  ].filter(item => item.title.toLowerCase().includes(normalizedQuery)).length === 0 && (
-                    <View style={styles.emptyState}>
-                      <Text style={styles.emptyStateTitle}>No results found</Text>
-                      <Text style={styles.emptyStateSub}>No options match your search.</Text>
-                    </View>
-                  )}
-              </View>
-            </>
+              {!normalizedQuery && <View style={styles.moreThickDivider} />}
+
+              {!normalizedQuery && <Text style={styles.moreSectionHeader}>Account and security</Text>}
+
+              {[
+                { title: "Profile", route: "/profile", icon: "person-outline" },
+                { title: "Help & Support", route: "/help-support", icon: "help-circle-outline" },
+                { title: "Privacy Policy", route: "/privacy-policy", icon: "shield-checkmark-outline" },
+                { title: "About", route: "/about", icon: "information-circle-outline" }
+              ]
+                .filter(item => !normalizedQuery || item.title.toLowerCase().includes(normalizedQuery))
+                .map((item, index) => (
+                  <Pressable key={`acc-${index}`} style={styles.moreListItem} onPress={() => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.navigate(item.route as any)); }}>
+                    <Ionicons name={item.icon as any} size={22} color="#1E293B" style={styles.moreListItemIcon} />
+                    <Text style={styles.moreListItemText}>{item.title}</Text>
+                    <Ionicons name="chevron-forward" size={20} color="#94A3B8" />
+                  </Pressable>
+                ))}
+
+              {!normalizedQuery && <View style={styles.moreThickDivider} />}
+
+              {!normalizedQuery && <Text style={styles.moreSectionHeader}>Tools</Text>}
+              
+              {[
+                { title: "PAN OCR Scan", route: "/pan-scan", icon: "scan-outline" },
+                { title: "Aadhaar OCR Scan", route: "/adhaar-scan", icon: "qr-code-outline" },
+                { title: "Export Excel", route: "/excel", icon: "document-text-outline" },
+                { title: "Export CSV", route: "/csv", icon: "document-outline" }
+              ]
+                .filter(item => !normalizedQuery || item.title.toLowerCase().includes(normalizedQuery))
+                .map((item, index) => (
+                  <Pressable key={`tools-${index}`} style={styles.moreListItem} onPress={() => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.navigate(item.route as any)); }}>
+                    <Ionicons name={item.icon as any} size={22} color="#1E293B" style={styles.moreListItemIcon} />
+                    <Text style={styles.moreListItemText}>{item.title}</Text>
+                    <Ionicons name="chevron-forward" size={20} color="#94A3B8" />
+                  </Pressable>
+                ))}
+
+              {!normalizedQuery && <View style={styles.moreThinDivider} />}
+
+              {(!normalizedQuery || "logout".includes(normalizedQuery.toLowerCase())) && (
+                <Pressable style={styles.moreListItem} onPress={() => { blurActiveElement(); logout(); router.replace("/login"); }}>
+                  <Ionicons name="log-out-outline" size={22} color="#EF4444" style={styles.moreListItemIcon} />
+                  <Text style={[styles.moreListItemText, { color: "#EF4444" }]}>Logout</Text>
+                </Pressable>
+              )}
+
+              {normalizedQuery && [
+                "PAN OCR Scan", "Aadhaar OCR Scan", "Export Excel", "Export CSV",
+                "Profile", "Help & Support", "Privacy Policy", "About", "Logout"
+              ].filter(t => t.toLowerCase().includes(normalizedQuery)).length === 0 && (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateTitle}>No results found</Text>
+                  <Text style={styles.emptyStateSub}>No options match your search.</Text>
+                </View>
+              )}
+              
+              <View style={{ height: 40 }} />
+            </View>
           ) : null}
         </ScrollView>
 

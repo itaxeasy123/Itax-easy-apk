@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { accountingTheme } from "../../../theme/accounting";
 import {
   View,
   Text,
@@ -71,30 +72,30 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   label: {
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
     marginBottom: 6,
   },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: accountingTheme.colors.card,
     padding: 10,
-    borderRadius: 10,
+    borderRadius: accountingTheme.radius.md,
     borderWidth: 1,
     borderColor: "#eee",
   },
   dropdown: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginTop: 8,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
+    marginTop: accountingTheme.spacing.sm,
     maxHeight: 220,
     elevation: 3,
   },
   item: {
-    padding: 12,
+    padding: accountingTheme.spacing.md,
     borderBottomWidth: 0.5,
     borderColor: "#eee",
   },
   selected: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
     color: "green",
   },
 });

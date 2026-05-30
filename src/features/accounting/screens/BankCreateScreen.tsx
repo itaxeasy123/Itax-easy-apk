@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { AccountingHeader } from "../components";
+import { accountingTheme } from "../../../theme/accounting";
 
 export default function BankCreateScreen() {
   const insets = useSafeAreaInsets();
@@ -146,7 +147,7 @@ export default function BankCreateScreen() {
             <Ionicons 
               name={showOtherDetails ? "remove-circle" : "add-circle"} 
               size={20} 
-              color="#0F172A" 
+              color={accountingTheme.colors.text} 
             />
             <Text style={styles.otherDetailsText}>Other Details(Optional)</Text>
           </Pressable>
@@ -171,7 +172,7 @@ export default function BankCreateScreen() {
           
           {error ? (
             <View style={styles.errorContainer}>
-              <Ionicons name="alert-circle" size={20} color="#DC2626" />
+              <Ionicons name="alert-circle" size={20} color={accountingTheme.colors.error} />
               <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : null}
@@ -194,100 +195,100 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: accountingTheme.spacing.lg,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: accountingTheme.spacing.xxl,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0F172A",
-    marginBottom: 16,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.text,
+    marginBottom: accountingTheme.spacing.lg,
   },
   ifscRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginBottom: 16,
+    gap: accountingTheme.spacing.md,
+    marginBottom: accountingTheme.spacing.lg,
   },
   ifscInput: {
     flex: 1,
     height: 48,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     borderRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 14,
-    color: "#0F172A",
+    paddingHorizontal: accountingTheme.spacing.md,
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
   },
   fetchButton: {
     backgroundColor: "#EFF6FF",
     borderWidth: 1,
     borderColor: "#3B82F6",
     height: 48,
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
   },
   fetchButtonText: {
     color: "#3B82F6",
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   input: {
     height: 48,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     borderRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 14,
-    color: "#0F172A",
-    marginBottom: 16,
+    paddingHorizontal: accountingTheme.spacing.md,
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
+    marginBottom: accountingTheme.spacing.lg,
   },
   otherDetailsToggle: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingVertical: 12,
+    gap: accountingTheme.spacing.sm,
+    paddingVertical: accountingTheme.spacing.md,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
-    marginTop: 8,
+    borderTopColor: accountingTheme.colors.borderMedium,
+    marginTop: accountingTheme.spacing.sm,
   },
   otherDetailsText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.text,
   },
   otherDetailsContainer: {
-    paddingTop: 16,
+    paddingTop: accountingTheme.spacing.lg,
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF2F2',
-    padding: 12,
+    backgroundColor: accountingTheme.colors.dangerLight,
+    padding: accountingTheme.spacing.md,
     borderRadius: 8,
-    marginTop: 16,
+    marginTop: accountingTheme.spacing.lg,
     borderWidth: 1,
     borderColor: '#FECACA',
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   errorText: {
-    color: '#DC2626',
-    fontSize: 13,
-    fontWeight: '500',
+    color: accountingTheme.colors.error,
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.medium,
     flex: 1,
   },
   footer: {
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    borderTopColor: accountingTheme.colors.borderMedium,
   },
   saveButton: {
     backgroundColor: "#3B82F6",
@@ -296,8 +297,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   saveButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "700",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 });

@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useAuthStore, type AuthUser } from "../../../store/authStore";
+import { useITRStore } from "../../../store/itrStore";
 import { itrColors, itrRadius, itrShadows, itrSpacing } from "../../../theme/itr";
 import { ITRBottomNav, ITRHeader } from "../components";
 
@@ -28,15 +29,18 @@ const FINANCIAL_YEAR_OPTIONS: YearOption[] = [
 type YearFieldProps = {
   label: string;
   value: string;
-  onPress: () => void;
+  onPress?: () => void;
 };
 
 function YearField({ label, value, onPress }: YearFieldProps) {
   return (
-    <Pressable style={styles.yearField} onPress={onPress}>
-      <Text style={styles.yearFieldText}>{value || label}</Text>
-      <Ionicons name="chevron-down" size={18} color="#64748B" />
-    </Pressable>
+    <View style={{ gap: 6 }}>
+      <Text style={styles.dropdownLabel}>{label}</Text>
+      <Pressable style={[styles.yearField, !onPress && styles.yearFieldDisabled]} onPress={onPress}>
+        <Text style={styles.yearFieldText}>{value || "Select Year"}</Text>
+        {onPress && <Ionicons name="chevron-down" size={18} color="#64748B" />}
+      </Pressable>
+    </View>
   );
 }
 
@@ -48,24 +52,23 @@ function getFullName(user: AuthUser | null) {
   return fallbackName || "User";
 }
 
-function getAssessmentYearLabel(date = new Date()) {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const startYear = month >= 4 ? year : year - 1;
-  const endYear = startYear + 1;
-  return `${String(startYear).slice(-2)}-${String(endYear).slice(-2)}`;
-}
-
 function getFinancialYearLabel(assessmentYear: string) {
-  const startYear = Number.parseInt(`20${assessmentYear.slice(0, 2)}`, 10);
-  if (!Number.isFinite(startYear)) {
-    return assessmentYear;
+  if (!assessmentYear || assessmentYear === "Select Year") return "";
+  const parts = assessmentYear.split("-");
+  if (parts.length === 2) {
+    const start = parseInt(parts[0], 10);
+    const end = parseInt(parts[1], 10);
+    if (!isNaN(start) && !isNaN(end)) {
+      return `${start - 1}-${end - 1}`;
+    }
   }
   return assessmentYear;
 }
 
 export default function ITRProfileScreen() {
   const user = useAuthStore((state) => state.user);
+  const { assessmentYear: selectedAssessmentYear, setAssessmentYear: setSelectedAssessmentYear, resetITR } = useITRStore();
+  
   const fullName = useMemo(() => getFullName(user), [user]);
   const initials =
     fullName
@@ -75,14 +78,7 @@ export default function ITRProfileScreen() {
       .map((part) => part[0]?.toUpperCase())
       .join("") || "U";
 
-  const defaultAssessmentYear = useMemo(() => getAssessmentYearLabel(), []);
-  const defaultFinancialYear = useMemo(
-    () => (defaultAssessmentYear ? defaultAssessmentYear : "2026-27"),
-    [defaultAssessmentYear],
-  );
-
-  const [selectedAssessmentYear, setSelectedAssessmentYear] = useState(defaultAssessmentYear);
-  const [selectedFinancialYear, setSelectedFinancialYear] = useState(defaultFinancialYear);
+  const selectedFinancialYear = useMemo(() => getFinancialYearLabel(selectedAssessmentYear), [selectedAssessmentYear]);
   const [activePicker, setActivePicker] = useState<YearKey | null>(null);
 
   const activeOptions =
@@ -101,14 +97,28 @@ export default function ITRProfileScreen() {
 
   const chooseYear = (year: string) => {
     if (activePicker === "assessment") {
-      setSelectedAssessmentYear(year);
-      if (year !== selectedFinancialYear) {
-        setSelectedFinancialYear(year);
+      if (year !== selectedAssessmentYear && selectedAssessmentYear) {
+        Alert.alert(
+          "Change Assessment Year?",
+          "Changing the Assessment Year will clear all your imported Form-16 and manually filled data. Are you sure you want to proceed?",
+          [
+            { text: "Cancel", style: "cancel", onPress: () => setActivePicker(null) },
+            { 
+              text: "Yes, Reset Data", 
+              style: "destructive", 
+              onPress: () => {
+                resetITR();
+                setSelectedAssessmentYear(year);
+                setActivePicker(null);
+              }
+            }
+          ]
+        );
+        return;
+      } else {
+        setSelectedAssessmentYear(year);
       }
-    } else if (activePicker === "financial") {
-      setSelectedFinancialYear(year);
     }
-
     setActivePicker(null);
   };
 
@@ -151,7 +161,7 @@ export default function ITRProfileScreen() {
           <YearField
             label="Financial Year"
             value={selectedFinancialYear}
-            onPress={() => setActivePicker("financial")}
+            onPress={undefined}
           />
         </View>
       </ScrollView>
@@ -262,6 +272,12 @@ const styles = StyleSheet.create({
   dropdownGroup: {
     gap: itrSpacing.md,
   },
+  dropdownLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#475569",
+    marginLeft: 4,
+  },
   yearField: {
     alignItems: "center",
     backgroundColor: "#fff",
@@ -273,6 +289,10 @@ const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: itrSpacing.md,
     ...itrShadows.card,
+  },
+  yearFieldDisabled: {
+    backgroundColor: "#F1F5F9",
+    borderColor: "#E2E8F0",
   },
   yearFieldText: {
     color: "#64748B",

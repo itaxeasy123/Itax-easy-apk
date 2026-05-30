@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, Card } from "../components";
 import { accountingService } from "../services/accountingService";
 import { buildA4Html, escapeHtml, exportHtmlToPdf, formatINR } from "../print/printHelpers";
+import { accountingTheme } from "../../../theme/accounting";
 
 export default function PrintReceiptScreen() {
   const params = useLocalSearchParams<{
@@ -84,7 +85,7 @@ export default function PrintReceiptScreen() {
           <View style={styles.field}><Text style={styles.label}>Receipt Date</Text><TextInput value={receiptDate} onChangeText={setReceiptDate} style={styles.input} /></View>
           <View style={styles.field}><Text style={styles.label}>Address (optional)</Text><TextInput value={address} onChangeText={setAddress} style={styles.input} multiline /></View>
           <Pressable style={[styles.btn, !canPrint && styles.btnDisabled]} onPress={handlePrint} disabled={!canPrint}>
-            <Ionicons name="print-outline" size={18} color="#fff" />
+            <Ionicons name="print-outline" size={18} color={accountingTheme.colors.card} />
             <Text style={styles.btnText}>{saving ? "Preparing..." : "Export PDF"}</Text>
           </Pressable>
         </Card>
@@ -94,12 +95,12 @@ export default function PrintReceiptScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F9FF" },
-  content: { padding: 16 },
+  container: { flex: 1, backgroundColor: accountingTheme.colors.background },
+  content: { padding: accountingTheme.spacing.lg },
   field: { marginBottom: 14 },
-  label: { fontSize: 12, color: "#60708A", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 },
-  input: { backgroundColor: "#FFFFFF", borderRadius: 12, borderWidth: 1, borderColor: "#E5EAF3", padding: 14, fontSize: 14, color: "#0F172A" },
-  btn: { marginTop: 6, backgroundColor: "#2563EB", borderRadius: 14, paddingVertical: 14, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8 },
+  label: { fontSize: accountingTheme.fontSizes.sm, color: "#60708A", marginBottom: accountingTheme.spacing.sm, textTransform: "uppercase", letterSpacing: 0.5 },
+  input: { backgroundColor: accountingTheme.colors.card, borderRadius: accountingTheme.radius.lg, borderWidth: 1, borderColor: "#E5EAF3", padding: 14, fontSize: accountingTheme.fontSizes.lg, color: accountingTheme.colors.text },
+  btn: { marginTop: 6, backgroundColor: accountingTheme.colors.primary, borderRadius: accountingTheme.radius.xl, paddingVertical: 14, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: accountingTheme.spacing.sm },
   btnDisabled: { opacity: 0.6 },
-  btnText: { color: "#fff", fontWeight: "800" },
+  btnText: { color: accountingTheme.colors.card, fontWeight: accountingTheme.fontWeights.extraBold },
 });

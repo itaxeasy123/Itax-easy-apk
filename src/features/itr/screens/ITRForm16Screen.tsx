@@ -5,12 +5,17 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import * as Sharing from "expo-sharing";
+import * as IntentLauncher from "expo-intent-launcher";
+import * as FileSystem from "expo-file-system/legacy";
 
 import { useITRStore } from "../../../store/itrStore";
 import { itrColors, itrRadius, itrShadows, itrSpacing, itrTypography } from "../../../theme/itr";
@@ -63,10 +68,15 @@ export default function ITRForm16Screen() {
     setDeductions,
     setTaxesPaid,
     resetITR,
+    setAssessmentYear,
   } = useITRStore();
 
   useEffect(() => {
-    if (!form16) return;
+    if (!form16) {
+      setParseResult(null);
+      setSelectedFileName(null);
+      return;
+    }
 
     setParseResult({
       fileName: form16.fileName,
@@ -147,11 +157,13 @@ export default function ITRForm16Screen() {
   const importParsedResult = (
     parsed: Awaited<ReturnType<typeof extractForm16FromAsset>>,
     fileName?: string,
+    fileUri?: string,
   ) => {
     setParseResult(parsed);
 
     setForm16({
       fileName: fileName ?? parsed.fileName,
+      fileUri: fileUri,
       source: parsed.source,
       rawText: parsed.rawText,
       employeeName: parsed.employeeName,
@@ -210,6 +222,10 @@ export default function ITRForm16Screen() {
     setTaxesPaid({
       tdsSalary: parsed.totalTaxDeducted || 0,
     });
+
+    if (parsed.assessmentYear) {
+      setAssessmentYear(parsed.assessmentYear);
+    }
   };
 
   const pickFile = async () => {
@@ -247,13 +263,21 @@ export default function ITRForm16Screen() {
         mimeType: asset.mimeType,
       });
 
-      importParsedResult(parsed, asset.name ?? undefined);
-    } catch (error) {
-      console.error("FORM16 IMPORT ERROR:", error);
+      if (parsed.assessmentYear && parsed.assessmentYear !== "2025-26") {
+        Alert.alert(
+          "Assessment Year Mismatch",
+          `This Form 16 appears to be for AY ${parsed.assessmentYear}. The JSON generated will be strictly validated against AY 2025-26 format. Proceed with caution.`,
+          [{ text: "OK" }],
+        );
+      }
+
+      importParsedResult(parsed, asset.name, asset.uri);
+    } catch (err: any) {
+      console.error("FORM16 IMPORT ERROR:", err);
       Alert.alert(
         "Import failed",
-        error instanceof Error
-          ? error.message
+        err instanceof Error
+          ? err.message
           : "Unable to read this file. Please upload the official Form 16 PDF.",
       );
     } finally {
@@ -333,117 +357,75 @@ export default function ITRForm16Screen() {
 
         {parseResult ? (
           <View style={styles.resultCard}>
-            <Text style={styles.sectionTitle}>Form 16 Summary - Auto-Populated Data</Text>
+            <Text style={styles.sectionTitle}>Form 16 Extracted</Text>
+            
+            <Pressable 
+              style={styles.pdfPreviewCard} 
+              onPress={async () => {
+                try {
+                  if (form16?.fileUri) {
+                    let opened = false;
+                    try {
+                      if (Platform.OS === 'android') {
+                        let targetUri = form16.fileUri;
+                        if (targetUri.startsWith('file://')) {
+                          targetUri = await FileSystem.getContentUriAsync(targetUri);
+                        }
+                        try {
+                          await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+                            data: targetUri,
+                            flags: 1,
+                            type: 'application/pdf',
+                          });
+                          opened = true;
+                        } catch (intentErr) {
+                          // Try Linking as fallback for contentUri
+                          const supported = await Linking.canOpenURL(targetUri);
+                          if (supported) {
+                            await Linking.openURL(targetUri);
+                            opened = true;
+                          } else {
+                            throw intentErr;
+                          }
+                        }
+                      } else {
+                        // iOS / Web
+                        const supported = await Linking.canOpenURL(form16.fileUri);
+                        if (supported) {
+                          await Linking.openURL(form16.fileUri);
+                          opened = true;
+                        }
+                      }
+                    } catch (e: any) {
+                      Alert.alert("View Failed", `Could not view directly: ${e?.message || String(e)}. Falling back to Share.`);
+                    }
 
-            <View style={styles.summaryMetaRow}>
-              <View style={styles.summaryMetaChip}>
-                <Text style={styles.summaryMetaLabel}>PAN of Employee</Text>
-                <Text style={styles.summaryMetaValue}>{parsedSummary?.pan}</Text>
-              </View>
-              <View style={styles.summaryMetaChip}>
-                <Text style={styles.summaryMetaLabel}>Assessment Year</Text>
-                <Text style={styles.summaryMetaValue}>{parsedSummary?.ay}</Text>
-              </View>
-            </View>
-
-            <View style={styles.sectionBlock}>
-              <Text style={styles.subSectionTitle}>Employee & Employer Information</Text>
-              <ResultRow label="Employee Name" value={parsedSummary?.employeeName} />
-              <ResultRow label="Employee PAN" value={parsedSummary?.pan} />
-              <ResultRow label="Employer" value={parsedSummary?.employer} />
-              <ResultRow label="Employer PAN" value={parsedSummary?.employerPan} />
-              <ResultRow label="TAN" value={parsedSummary?.tan} />
-              <ResultRow label="Assessment Year" value={parsedSummary?.ay} />
-            </View>
-
-            <View style={styles.sectionBlock}>
-              <Text style={styles.subSectionTitle}>Income Details</Text>
-              <ResultRow label="Salary as per Section 17(1)" value={formatCurrency(parsedSummary?.grossSalary)} />
-              <ResultRow
-                label="Other Income (House Property + Other Sources)"
-                value={formatCurrency(parsedSummary?.otherIncome)}
-              />
-              <ResultRow label="Gross Total Income" value={formatCurrency(parsedSummary?.grossTotalIncome)} />
-              <ResultRow
-                label="Income Chargeable Under Salary"
-                value={formatCurrency(parsedSummary?.chargeableSalary)}
-              />
-            </View>
-
-            <View style={styles.sectionBlock}>
-              <Text style={styles.subSectionTitle}>Deductions</Text>
-              <ResultRow
-                label="Standard Deduction (Section 16)"
-                value={formatCurrency(parsedSummary?.standardDeduction)}
-              />
-              <ResultRow label="Section 80C" value={formatCurrency(parsedSummary?.section80C)} />
-              <ResultRow label="Section 80D" value={formatCurrency(parsedSummary?.section80D)} />
-              <ResultRow
-                label="Section 80CCD(1B)"
-                value={formatCurrency(parsedSummary?.section80CCD1B)}
-              />
-              <ResultRow
-                label="Total Deductions (Chapter VI-A)"
-                value={formatCurrency(parsedSummary?.chapterVIDeductionTotal)}
-              />
-            </View>
-
-            <View style={styles.sectionBlock}>
-              <Text style={styles.subSectionTitle}>Tax Computation</Text>
-              <ResultRow label="Taxable Income" value={formatCurrency(parsedSummary?.taxableIncome)} />
-              <ResultRow
-                label="Tax on Total Income"
-                value={formatCurrency(parsedSummary?.taxOnTotalIncome)}
-              />
-              <ResultRow
-                label="Rebate under Section 87A"
-                value={formatCurrency(parsedSummary?.rebateUnderSection87A)}
-              />
-              <ResultRow label="Surcharge" value={formatCurrency(parsedSummary?.surcharge)} />
-              <ResultRow
-                label="Health & Education Cess"
-                value={formatCurrency(parsedSummary?.healthAndEducationCess)}
-              />
-              <ResultRow label="Tax Payable" value={formatCurrency(parsedSummary?.taxPayable)} />
-              <ResultRow label="Net Tax Payable" value={formatCurrency(parsedSummary?.netTaxPayable)} />
-              <ResultRow label="Tax Regime" value={parsedSummary?.taxRegime} />
-            </View>
-
-            <View style={styles.sectionBlock}>
-              <Text style={styles.subSectionTitle}>TDS Summary</Text>
-              <ResultRow
-                label="Total Amount Paid/Credited"
-                value={formatCurrency(parsedSummary?.totalAmountPaid)}
-              />
-              <ResultRow
-                label="Total Tax Deducted (TDS)"
-                value={formatCurrency(parsedSummary?.totalTaxDeducted)}
-              />
-            </View>
-
-            <View style={styles.finalCard}>
-              <Text
-                style={[
-                  styles.finalValue,
-                  (parsedSummary?.totalTaxDeducted || 0) - (parsedSummary?.netTaxPayable || 0) >= 0
-                    ? styles.finalValuePositive
-                    : styles.finalValueNegative,
-                ]}
-              >
-                {(() => {
-                  const difference = (parsedSummary?.totalTaxDeducted || 0) - (parsedSummary?.netTaxPayable || 0);
-
-                  if (difference > 0) {
-                    return `Refund Due: ₹${difference.toLocaleString("en-IN")}`;
+                    if (!opened) {
+                      // Fallback: If unable to view directly, use share dialog
+                      const isAvailable = await Sharing.isAvailableAsync();
+                      if (isAvailable) {
+                        await Sharing.shareAsync(form16.fileUri, { dialogTitle: "Open PDF with..." });
+                      } else {
+                        Alert.alert("Error", "No PDF viewer or sharing option is available on this device.");
+                      }
+                    }
+                  } else {
+                    Alert.alert("File not found", "Could not locate the PDF file to open.");
                   }
-
-                  if (difference < 0) {
-                    return `Tax Payable: ₹${Math.abs(difference).toLocaleString("en-IN")}`;
-                  }
-
-                  return "No Tax Payable / Refund";
-                })()}
-              </Text>
+                } catch (e) {
+                  Alert.alert("Error", "Failed to open PDF file.");
+                }
+              }}
+            >
+              <View style={styles.pdfIconWrapper}>
+                <Ionicons name="document-text" size={32} color="#EF4444" />
+              </View>
+              <View style={styles.pdfPreviewInfo}>
+                <Text style={styles.pdfPreviewName} numberOfLines={1}>{form16?.fileName}</Text>
+                <Text style={styles.pdfPreviewSub}>Tap to view PDF</Text>
+              </View>
+              <Ionicons name="open-outline" size={22} color="#64748B" />
+            </Pressable>
 
               <View style={styles.actionRow}>
                 <Pressable style={styles.secondaryActionButton} onPress={handleDownloadJson}>
@@ -453,7 +435,7 @@ export default function ITRForm16Screen() {
                   <Text style={styles.resetActionText}>Reset</Text>
                 </Pressable>
               </View>
-            </View>
+
 
             {parseResult.warnings.length ? (
               <View style={styles.warningBox}>
@@ -572,6 +554,44 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     marginBottom: itrSpacing.sm,
   },
+  subSectionTitle: {
+    color: itrColors.text,
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: itrSpacing.sm,
+  },
+  pdfPreviewCard: {
+    backgroundColor: "#F8FAFC",
+    borderColor: "#E2E8F0",
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    marginTop: 6,
+  },
+  pdfIconWrapper: {
+    backgroundColor: "#FEE2E2",
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 14,
+  },
+  pdfPreviewInfo: {
+    flex: 1,
+    marginRight: 10,
+  },
+  pdfPreviewName: {
+    color: "#1E293B",
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  pdfPreviewSub: {
+    color: "#64748B",
+    fontSize: 13,
+    fontWeight: "500",
+  },
   summaryMetaRow: {
     flexDirection: "row",
     gap: itrSpacing.sm,
@@ -606,12 +626,7 @@ const styles = StyleSheet.create({
     marginTop: itrSpacing.md,
     padding: itrSpacing.md,
   },
-  subSectionTitle: {
-    color: itrColors.text,
-    fontSize: 14,
-    fontWeight: "800",
-    marginBottom: 8,
-  },
+
   finalCard: {
     alignItems: "center",
     backgroundColor: "#F8FAFC",

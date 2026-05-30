@@ -15,6 +15,7 @@ import { invoiceService } from "../../invoice/services/invoiceService";
 import type { Invoice } from "../../invoice/types/invoice.types";
 import { Party } from "../types/accountingTypes";
 import { formatCurrency } from "../utils/salesReport";
+import { accountingTheme } from "../../../theme/accounting";
 
 
 const formatDate = (value?: string | null) => {
@@ -33,9 +34,9 @@ const getStatusStyles = (status?: string | null) => {
     return { backgroundColor: "#EAF7EE", color: "#16A34A" };
   }
   if (status === "overdue") {
-    return { backgroundColor: "#FEECEC", color: "#DC2626" };
+    return { backgroundColor: "#FEECEC", color: accountingTheme.colors.error };
   }
-  return { backgroundColor: "#EEF2F7", color: "#64748B" };
+  return { backgroundColor: accountingTheme.colors.surfaceLight, color: accountingTheme.colors.textSecondary };
 };
 
 export default function SalesCustomerDetailScreen() {
@@ -122,9 +123,9 @@ export default function SalesCustomerDetailScreen() {
         showBackButton
         rightContent={
           <View style={styles.headerActions}>
-            <Ionicons name="search" size={18} color="#fff" />
-            <Ionicons name="filter-outline" size={18} color="#fff" />
-            <Ionicons name="ellipsis-horizontal" size={18} color="#fff" />
+            <Ionicons name="search" size={18} color={accountingTheme.colors.card} />
+            <Ionicons name="filter-outline" size={18} color={accountingTheme.colors.card} />
+            <Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />
           </View>
         }
         headerContent={(
@@ -138,7 +139,7 @@ export default function SalesCustomerDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.yearRow}>
           <View style={styles.yearLeft}>
-            <Ionicons name="calendar-outline" size={16} color="#2563EB" />
+            <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
             <Text style={styles.yearText}>
               Financial Year ({String(new Date().getFullYear() - 1).slice(-2)} Apr to {String(new Date().getFullYear()).slice(-2)} Mar)
             </Text>
@@ -195,11 +196,11 @@ export default function SalesCustomerDetailScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   content: {
     paddingHorizontal: 14,
-    paddingTop: 12,
+    paddingTop: accountingTheme.spacing.md,
     paddingBottom: 110,
   },
   headerActions: {
@@ -209,20 +210,20 @@ const styles = StyleSheet.create({
   },
   headerBlock: {
     alignItems: "center",
-    marginTop: 2,
+    marginTop: 0,
   },
   headerAmount: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   headerMeta: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: 2,
+    fontSize: 11,
     color: "#EAFDFC",
   },
   yearRow: {
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.sm,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -230,23 +231,23 @@ const styles = StyleSheet.create({
   yearLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: accountingTheme.spacing.xs,
     flex: 1,
   },
   yearText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#334155",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
     flex: 1,
   },
   changeText: {
-    fontSize: 12,
-    color: "#2563EB",
-    fontWeight: "700",
+    fontSize: 11,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   errorText: {
-    color: "#DC2626",
-    marginBottom: 12,
+    color: accountingTheme.colors.error,
+    marginBottom: accountingTheme.spacing.md,
   },
   listCard: {
     padding: 0,
@@ -254,29 +255,29 @@ const styles = StyleSheet.create({
   },
   listHeader: {
     paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: accountingTheme.spacing.md,
+    paddingBottom: accountingTheme.spacing.sm,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   sectionMeta: {
-    fontSize: 11,
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.textSecondary,
   },
   invoiceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   invoiceLeft: {
     flex: 1,
@@ -285,31 +286,31 @@ const styles = StyleSheet.create({
   invoiceTopLine: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 6,
+    gap: 6,
+    marginBottom: accountingTheme.spacing.xs,
   },
   invoiceNumber: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#1F2937",
   },
   statusPill: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 999,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: accountingTheme.radius.full,
   },
   statusText: {
-    fontSize: 10,
-    fontWeight: "700",
+    fontSize: 9,
+    fontWeight: accountingTheme.fontWeights.bold,
     textTransform: "capitalize",
   },
   invoiceDate: {
-    fontSize: 12,
-    color: "#64748B",
+    fontSize: 11,
+    color: accountingTheme.colors.textSecondary,
   },
   invoiceAmount: {
-    fontSize: 14,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#111827",
     textAlign: "right",
   },

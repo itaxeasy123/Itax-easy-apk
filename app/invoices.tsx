@@ -1,4 +1,4 @@
-import InvoiceListScreen from '../src/features/invoice/screens/InvoiceListScreen';
+import InvoiceListScreen from '../src/features/accounting/screens/InvoiceListScreen';
 // import { Redirect } from 'expo-router';
 // import { useAuthStore } from '../src/store/authStore';
 

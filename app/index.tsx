@@ -102,11 +102,15 @@ console.log("Hydrated:", isHydrated, "| Token:", token);
   }));
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: '#4480DF' }]}>
       <StatusBar style="light" />
 
       {/* 🌈 BACKGROUND */}
-      <Animated.View style={[StyleSheet.absoluteFillObject, bgStyle]}>
+      <Animated.View style={[
+        StyleSheet.absoluteFillObject, 
+        { top: -50, bottom: -50 }, 
+        bgStyle
+      ]}>
         <LinearGradient
           colors={['#4480DF', '#4FD0BA']}
           style={{ flex: 1 }}

@@ -94,15 +94,24 @@ const roundMoney = (value: number) => Math.round(value);
 export default function ITRExemptionsDeductionsScreen({
   initialTab = "Exemptions",
 }: ITRExemptionsDeductionsScreenProps) {
-  const { deductions, setDeductions } = useITRStore();
+  const { deductions, setDeductions, form16 } = useITRStore();
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [exemptionFields, setExemptionFields] = useState(EXEMPTION_FIELDS);
   
+  const getDeductionValue = (manualVal: string | number, form16Val?: number | string) => {
+    if (manualVal) return String(manualVal);
+    if (form16Val) return String(form16Val);
+    return "";
+  };
+
   // Initialize with store values if available
   const [deductionCards, setDeductionCards] = useState(
     DEDUCTION_CARDS.map(card => {
-      if (card.id === "80c") return { ...card, value: deductions.section80C || "" };
-      if (card.id === "80ccd1b") return { ...card, value: deductions.section80CCD1B || "" };
+      if (card.id === "80c") return { ...card, value: getDeductionValue(deductions.section80C, form16?.section80C) };
+      if (card.id === "80dd") return { ...card, value: getDeductionValue(deductions.section80DD, form16?.section80DD) };
+      if (card.id === "80ddb") return { ...card, value: getDeductionValue(deductions.section80DDB, form16?.section80DDB) };
+      if (card.id === "80ee") return { ...card, value: getDeductionValue(deductions.section80EE, form16?.section80EE) };
+      if (card.id === "80ccd1b") return { ...card, value: getDeductionValue(deductions.section80CCD1B, form16?.section80CCD1B) };
       return card;
     })
   );

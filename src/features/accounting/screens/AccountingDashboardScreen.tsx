@@ -1,16 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
+  Image,
+  Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
-  Image,
-  Pressable,
+  Text,
   useWindowDimensions,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LineChart } from "react-native-chart-kit";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomNav, Card, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
@@ -35,6 +35,12 @@ const getLedgerTotal = (ledgers: Ledger[], types: Ledger["ledgerType"][]) =>
     .reduce((sum, ledger) => sum + Number(ledger.balance || 0), 0);
 
 export default function AccountingDashboardScreen() {
+  const navigateTo = (path: any) => {
+    if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    router.navigate(path);
+  };
   const router = useRouter();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -94,27 +100,6 @@ export default function AccountingDashboardScreen() {
     loadDashboard();
   }, []);
 
-  const chartData = useMemo(
-    () => ({
-      labels: ["Sales", "Purchase", "Parties", "Items"],
-      datasets: [
-        {
-          data: [
-            stats.totalSales || 0,
-            stats.totalPurchases || 0,
-            stats.partyCount || 0,
-            stats.itemCount || 0,
-          ],
-          color: () => "#2563EB",
-          strokeWidth: 3,
-        },
-      ],
-      legend: ["Business Snapshot"],
-    }),
-    [stats]
-  );
-
-  const chartWidth = Math.max(width - 44, 280);
 
   return (
     <View style={styles.containerWrapper}>
@@ -169,33 +154,9 @@ export default function AccountingDashboardScreen() {
             </View>
 
             <Card style={styles.chartCard}>
-              <View style={styles.rowBetween}>
+              <View style={[styles.rowBetween, { marginBottom: 0 }]}>
                 <Text style={styles.sectionTitle}>Live Overview</Text>
-
               </View>
-
-              <LineChart
-                data={chartData}
-                width={chartWidth}
-                height={220}
-                yAxisLabel=""
-                fromZero
-                chartConfig={{
-                  backgroundColor: "#fff",
-                  backgroundGradientFrom: "#fff",
-                  backgroundGradientTo: "#fff",
-                  decimalPlaces: 0,
-                  color: () => "#2563EB",
-                  labelColor: () => "#64748B",
-                  propsForDots: {
-                    r: "5",
-                    strokeWidth: "2",
-                    stroke: "#2563EB",
-                  },
-                }}
-                bezier
-                style={styles.chart}
-              />
 
               <View style={styles.summaryBox}>
                 <View>
@@ -219,7 +180,7 @@ export default function AccountingDashboardScreen() {
               <View style={styles.quickRow}>
                 <Pressable
                   style={styles.quickCard}
-                  onPress={() => router.navigate("/accounting/create-sales")}
+                  onPress={() => navigateTo("/accounting/create-sales")}
                 >
                   <Ionicons name="pricetag" size={20} color="#2563EB" />
                   <Text style={styles.quickText}>Sales Invoice</Text>
@@ -227,7 +188,7 @@ export default function AccountingDashboardScreen() {
 
                 <Pressable
                   style={styles.quickCard}
-                  onPress={() => router.navigate("/accounting/parties/create")}
+                  onPress={() => navigateTo("/accounting/parties/create")}
                 >
                   <Ionicons name="person-add" size={20} color="#10B981" />
                   <Text style={styles.quickText}>New Party</Text>
@@ -235,7 +196,7 @@ export default function AccountingDashboardScreen() {
 
                 <Pressable
                   style={styles.quickCard}
-                  onPress={() => router.navigate("/accounting/items-create")}
+                  onPress={() => navigateTo("/accounting/items-create")}
                 >
                   <Ionicons name="cube" size={20} color="#F59E0B" />
                   <Text style={styles.quickText}>New Item</Text>
@@ -249,10 +210,10 @@ export default function AccountingDashboardScreen() {
               <View style={styles.overviewGrid}>
                 <Pressable
                   style={styles.overviewCard}
-                  onPress={() => router.navigate("/invoice")}
+                  onPress={() => navigateTo("/invoice")}
                 >
                   <Ionicons name="document-text" size={18} color="#10B981" />
-                  <Text style={styles.overviewText}>Invoices</Text>
+                  <Text style={styles.overviewText}>Invoice</Text>
                   <Text style={styles.overviewMeta} numberOfLines={1}>
                     {formatCurrency(stats.receivableBalance)}
                   </Text>
@@ -260,7 +221,7 @@ export default function AccountingDashboardScreen() {
 
                 <Pressable
                   style={styles.overviewCard}
-                  onPress={() => router.navigate("/accounting/bill-payable")}
+                  onPress={() => navigateTo("/accounting/bill-payable")}
                 >
                   <Ionicons name="wallet" size={18} color="#EF4444" />
                   <Text style={styles.overviewText}>Bills</Text>
@@ -271,7 +232,7 @@ export default function AccountingDashboardScreen() {
 
                 <Pressable
                   style={styles.overviewCard}
-                  onPress={() => router.navigate("/accounting/parties")}
+                  onPress={() => navigateTo("/accounting/parties")}
                 >
                   <Ionicons name="people" size={18} color="#2563EB" />
                   <Text style={styles.overviewText}>Parties</Text>
@@ -280,11 +241,51 @@ export default function AccountingDashboardScreen() {
 
                 <Pressable
                   style={styles.overviewCard}
-                  onPress={() => router.navigate("/accounting/items")}
+                  onPress={() => navigateTo("/accounting/items")}
                 >
                   <Ionicons name="layers" size={18} color="#8B5CF6" />
                   <Text style={styles.overviewText}>Items</Text>
                   <Text style={styles.overviewMeta} numberOfLines={1}>{stats.itemCount}</Text>
+                </Pressable>
+
+                <Pressable style={styles.overviewCard} onPress={() => navigateTo("/accounting/ledgers")}>
+                  <Ionicons name="book" size={18} color="#4F46E5" />
+                  <Text style={styles.overviewText}>Accounts</Text>
+                </Pressable>
+
+                <Pressable style={styles.overviewCard} onPress={() => navigateTo("/accounting/vouchers")}>
+                  <Ionicons name="create" size={18} color="#7C3AED" />
+                  <Text style={styles.overviewText}>Journal Entries</Text>
+                </Pressable>
+
+                <Pressable style={styles.overviewCard} onPress={() => navigateTo("/accounting/reports-profit-loss")}>
+                  <Ionicons name="bar-chart" size={18} color="#059669" />
+                  <Text style={styles.overviewText}>Profit & Loss</Text>
+                </Pressable>
+
+                <Pressable style={styles.overviewCard} onPress={() => navigateTo("/accounting/reports-balance-sheet")}>
+                  <Ionicons name="document-text" size={18} color="#D97706" />
+                  <Text style={styles.overviewText}>Balance Sheet</Text>
+                </Pressable>
+
+                <Pressable style={styles.overviewCard} onPress={() => navigateTo("/accounting/trial-balance")}>
+                  <Ionicons name="scale" size={18} color="#2563EB" />
+                  <Text style={styles.overviewText}>Trial Balance</Text>
+                </Pressable>
+
+                <Pressable style={styles.overviewCard} onPress={() => console.log("Opening Balance Screen missing")}>
+                  <Ionicons name="wallet" size={18} color="#10B981" />
+                  <Text style={styles.overviewText}>Opening Balance</Text>
+                </Pressable>
+
+                <Pressable style={styles.overviewCard} onPress={() => console.log("Financial Year Closing missing")}>
+                  <Ionicons name="calendar" size={18} color="#E11D48" />
+                  <Text style={styles.overviewText}>Financial Year Closing</Text>
+                </Pressable>
+
+                <Pressable style={styles.overviewCard} onPress={() => navigateTo("/accounting/credit-note")}>
+                  <Ionicons name="receipt" size={18} color="#6366F1" />
+                  <Text style={styles.overviewText}>Credit Notes</Text>
                 </Pressable>
               </View>
             </View>
@@ -292,7 +293,8 @@ export default function AccountingDashboardScreen() {
         ) : null}
       </ScrollView>
 
-      <Pressable style={[styles.fab, { bottom: 84 + Math.max(insets.bottom, 0) }]} onPress={() => router.navigate("/invoice")}>
+      <Pressable style={[styles.fab, { bottom: 86 + Math.max(insets.bottom, 0) }]} onPress={() => navigateTo("/invoice")}>
+        <Ionicons name="add" size={18} color="#fff" />
         <Text style={styles.fabText}>Create Invoice</Text>
       </Pressable>
 
@@ -310,14 +312,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
-    paddingBottom: 128,
+    padding: 12,
+    paddingBottom: 60,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: 10,
   },
   headerLeft: {
     flexDirection: "row",
@@ -357,7 +359,7 @@ const styles = StyleSheet.create({
   },
   cardImg: {
     width: "48%",
-    height: 100,
+    height: 75,
     borderRadius: 14,
   },
   errorText: {
@@ -377,7 +379,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#64748B",
     marginBottom: 6,
-    textTransform: "uppercase",
     letterSpacing: 0.4,
   },
   statValue: {
@@ -390,7 +391,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   section: {
-    marginTop: 12,
+    marginTop: 6,
   },
   sectionTitle: {
     fontSize: 16,
@@ -414,10 +415,8 @@ const styles = StyleSheet.create({
   summaryBox: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    marginTop: 4,
+    paddingTop: 8,
   },
   amount: {
     fontSize: 16,
@@ -455,25 +454,27 @@ const styles = StyleSheet.create({
   overviewGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
+    gap: 8,
     marginTop: 10,
   },
   overviewCard: {
-    width: "31%",
+    width: "23%",
     backgroundColor: "#fff",
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 4,
     borderRadius: 12,
-    marginBottom: 10,
     borderWidth: 1,
     borderColor: "#E5E7EB",
     alignItems: 'center',
+    marginBottom: 8,
   },
   overviewText: {
-    fontSize: 11,
-    marginTop: 6,
-    fontWeight: "700",
+    fontSize: 10,
+    marginTop: 4,
     color: "#0F172A",
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
   },
   overviewMeta: {
     fontSize: 9,
@@ -483,16 +484,21 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    bottom: 84,
-    right: 20,
+    bottom: 86,
+    right: 16,
     backgroundColor: "#2563EB",
     paddingVertical: 14,
     paddingHorizontal: 18,
     borderRadius: 999,
     elevation: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   fabText: {
     color: "#fff",
     fontWeight: "700",
   },
 });
+
+

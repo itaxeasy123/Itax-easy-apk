@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
+import { accountingTheme } from "../../../theme/accounting";
 
 export default function LedgerCard() {
   return (
@@ -10,9 +11,9 @@ export default function LedgerCard() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: accountingTheme.spacing.lg,
   },
   title: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.lg,
   },
 });

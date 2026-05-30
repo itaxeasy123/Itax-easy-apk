@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { accountingTheme } from "../../../theme/accounting";
 
 type SalesReportSwitcherProps = {
   active: "monthly" | "customers" | "item";
@@ -60,26 +61,26 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    backgroundColor: "#EEF2F7",
-    borderRadius: 999,
+    backgroundColor: accountingTheme.colors.surfaceLight,
+    borderRadius: accountingTheme.radius.full,
     paddingVertical: 10,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
   },
   tabActive: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#2563EB",
+    backgroundColor: accountingTheme.colors.card,
+    borderColor: accountingTheme.colors.primary,
   },
   tabDisabled: {
     opacity: 0.65,
   },
   label: {
-    color: "#64748B",
-    fontSize: 12,
-    fontWeight: "700",
+    color: accountingTheme.colors.textSecondary,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   labelActive: {
-    color: "#2563EB",
+    color: accountingTheme.colors.primary,
   },
 });

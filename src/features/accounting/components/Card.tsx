@@ -1,4 +1,5 @@
 import React from 'react';
+import { accountingTheme } from "../../../theme/accounting";
 import {
   View,
   StyleSheet,
@@ -42,12 +43,12 @@ export default function Card({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.xl,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    padding: 12,
-    marginBottom: 8,
+    borderColor: accountingTheme.colors.border,
+    padding: accountingTheme.spacing.md,
+    marginBottom: accountingTheme.spacing.sm,
     // Use boxShadow (cross-platform) instead of deprecated shadow* props
     boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
     elevation: 2,

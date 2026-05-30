@@ -1,7 +1,8 @@
 import axios from "axios";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { router } from "expo-router";
+import { useAuthStore } from "../store/authStore";
 // ✅ API URL
 const API_URL =
   Constants.expoConfig?.extra?.API_URL || "https://api.itaxeasy.com/api";
@@ -78,11 +79,17 @@ apiClientInstance.interceptors.response.use(
       originalRequest.url?.includes("/forgot-password") ||
       originalRequest.url?.includes("/verify-otp");
 
+    // ✅ TEMPORARY FIX: Skip buggy routes that return 401 incorrectly
+    const isBuggyRoute = 
+      originalRequest.url?.includes("/billpayable") || 
+      originalRequest.url?.includes("/billrecieve");
+
     // 🔴 ONLY refresh if:
     // - 401
     // - NOT auth route
     // - NOT retried
-    if (status === 401 && !originalRequest._retry && !isAuthRoute) {
+    // - NOT a buggy route
+    if (status === 401 && !originalRequest._retry && !isAuthRoute && !isBuggyRoute) {
       originalRequest._retry = true;
 
       try {
@@ -90,6 +97,11 @@ apiClientInstance.interceptors.response.use(
 
         if (!refreshToken) {
           console.log("❌ No refresh token available");
+          if (router.canGoBack()) {
+            router.dismissAll();
+          }
+          router.replace('/login');
+          useAuthStore.getState().logout();
           return Promise.reject(error); // ✅ FIX
         }
 
@@ -113,6 +125,7 @@ apiClientInstance.interceptors.response.use(
         }
 
         await AsyncStorage.setItem("token", newToken);
+        useAuthStore.getState().setAuth(useAuthStore.getState().user as any, newToken);
 
         console.log("✅ Token refreshed");
 
@@ -124,10 +137,11 @@ apiClientInstance.interceptors.response.use(
       } catch (refreshError) {
         console.log("❌ REFRESH FAILED:", refreshError);
 
-        await Promise.all([
-          AsyncStorage.removeItem("token"),
-          AsyncStorage.removeItem("refreshToken"),
-        ]);
+        useAuthStore.getState().logout();
+        if (router.canGoBack()) {
+          router.dismissAll();
+        }
+        router.replace('/login');
 
         return Promise.reject(refreshError);
       }

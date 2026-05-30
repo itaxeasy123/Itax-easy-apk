@@ -9,6 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { AccountingHeader, BottomNav, SalesReportSwitcher, EmptyState } from "../components";
+import { accountingTheme } from "../../../theme/accounting";
 
 type Tab = "monthly" | "customers" | "item";
 
@@ -92,9 +93,9 @@ export default function DebitNoteReportScreen() {
         showBackButton
         rightContent={
           <View style={styles.headerRightIcons}>
-            <Ionicons name="search" size={20} color="#fff" />
-            <Ionicons name="filter" size={20} color="#fff" />
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="search" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="filter" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </View>
         }
         headerContent={
@@ -119,7 +120,7 @@ export default function DebitNoteReportScreen() {
 
           <View style={styles.yearRow}>
             <View style={styles.yearLeft}>
-              <Ionicons name="calendar-outline" size={16} color="#2563EB" />
+              <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
               <Text style={styles.yearText}>
                 Financial Year <Text style={styles.yearTextLight}>(1 Apr 24 to 31 Mar 25)</Text>
               </Text>
@@ -150,103 +151,101 @@ const styles = StyleSheet.create({
   headerRightIcons: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: accountingTheme.spacing.lg,
   },
   headerBlock: {
     alignItems: "center",
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: accountingTheme.spacing.xs,
+    marginBottom: accountingTheme.spacing.md,
   },
   headerAmount: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.xxxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   headerMeta: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: 2,
+    fontSize: 11,
     color: "#EAFDFC",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   mainContainer: {
     flex: 1,
     marginTop: -8, // Slight overlap with header
   },
   topWhiteSection: {
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.lg,
   },
   switcherWrap: {
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.md,
   },
   yearRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingBottom: 16,
+    paddingBottom: accountingTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#EEF2F7",
+    borderBottomColor: accountingTheme.colors.surfaceLight,
   },
   yearLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: accountingTheme.spacing.xs,
     flex: 1,
   },
   yearText: {
-    fontSize: 13,
+    fontSize: 11,
     color: "#334155",
-    fontWeight: "700",
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   yearTextLight: {
-    fontWeight: "400",
-    color: "#64748B",
+    fontWeight: accountingTheme.fontWeights.regular,
+    color: accountingTheme.colors.textSecondary,
   },
   changeText: {
-    fontSize: 13,
-    color: "#2563EB",
-    fontWeight: "600",
+    fontSize: 11,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   listContent: {
     paddingBottom: 110,
   },
   listContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.md,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   firstRow: {
     borderTopWidth: 0,
   },
   rowTitle: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.medium,
     color: "#334155",
   },
   rowAmount: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   itemLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 10,
   },
   itemIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
+    width: 24,
+    height: 24,
+    borderRadius: 4,
     backgroundColor: "#FEF9C3",
     alignItems: "center",
     justifyContent: "center",

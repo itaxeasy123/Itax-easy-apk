@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AccountingHeader } from "../components";
 import { Ionicons } from "@expo/vector-icons";
 import { accountingService } from "../services/accountingService";
+import { accountingTheme } from "../../../theme/accounting";
 
 const format = (value: number | undefined) => {
   if (value === undefined || isNaN(value)) return "₹ 0.00";
@@ -47,7 +48,7 @@ export default function TrialBalanceScreen() {
         showBackButton
         rightContent={
           <Pressable>
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </Pressable>
         }
       />
@@ -55,7 +56,7 @@ export default function TrialBalanceScreen() {
       {/* Financial Year Bar */}
       <View style={styles.periodBar}>
         <View style={styles.periodLeft}>
-          <Ionicons name="calendar-outline" size={16} color="#3B82F6" />
+          <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
           <Text style={styles.periodText}>
             Financial Year <Text style={styles.periodSubText}>(1 Apr 24 to 31 Mar 25)</Text>
           </Text>
@@ -75,7 +76,7 @@ export default function TrialBalanceScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {loading ? (
           <View style={styles.loaderWrap}>
-            <ActivityIndicator size="large" color="#3B82F6" />
+            <ActivityIndicator size="large" color={accountingTheme.colors.primary} />
           </View>
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
@@ -141,7 +142,7 @@ export default function TrialBalanceScreen() {
         <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalDebit)}</Text>
         <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalCredit)}</Text>
       </View>
-      <View style={{ backgroundColor: "#FFFFFF", height: Math.max(insets.bottom, 0) }} />
+      <View style={{ backgroundColor: accountingTheme.colors.card, height: Math.max(insets.bottom, 0) }} />
     </View>
   );
 }
@@ -158,89 +159,89 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: 10,
   },
   periodLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   periodText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#1E293B",
   },
   periodSubText: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#64748B",
+    fontSize: 11,
+    fontWeight: accountingTheme.fontWeights.regular,
+    color: accountingTheme.colors.textSecondary,
   },
   changeText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#3B82F6",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.primary,
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#3B82F6",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    backgroundColor: accountingTheme.colors.primary,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.md,
   },
   thText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   loaderWrap: {
     padding: 40,
     alignItems: "center",
   },
   errorText: {
-    color: "#DC2626",
+    color: accountingTheme.colors.error,
     textAlign: "center",
-    marginTop: 24,
+    marginTop: accountingTheme.spacing.xxl,
   },
   tableCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 18,
+    paddingHorizontal: 14,
+    paddingVertical: accountingTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
   particular: {
     flex: 2,
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#475569",
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   amount: {
     flex: 1.5,
-    fontSize: 12,
-    color: "#0F172A",
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.bold,
     textAlign: "right",
   },
   footer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#3B82F6",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    backgroundColor: accountingTheme.colors.primary,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.lg,
   },
   footerLabel: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "700",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   footerValue: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "700",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 });

@@ -15,12 +15,14 @@ type ITRSaveButtonProps = {
   title?: string;
   loading?: boolean;
   successDuration?: number;
+  disableSuccessState?: boolean;
 };
 
 const ITRSaveButton = ({ 
   onPress, 
   title = "Save Details", 
-  successDuration = 2000 
+  successDuration = 2000,
+  disableSuccessState = false,
 }: ITRSaveButtonProps) => {
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const scaleAnim = new Animated.Value(1);
@@ -37,7 +39,11 @@ const ITRSaveButton = ({
     // Call the original onPress
     try {
       await onPress();
-      setStatus("success");
+      if (disableSuccessState) {
+        setStatus("idle");
+      } else {
+        setStatus("success");
+      }
     } catch (error) {
       setStatus("idle");
     }

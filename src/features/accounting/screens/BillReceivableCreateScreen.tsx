@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { accountingService } from "../services/accountingService";
 import { BillReceivable } from "../types/accountingTypes";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { accountingTheme } from "../../../theme/accounting";
 
 const BILL_RECEIVABLE_CACHE_KEY = "accounting_bill_receivables_cache";
 
@@ -304,7 +305,7 @@ export default function BillReceivableCreateScreen() {
 
         {error ? (
           <View style={styles.errorContainer}>
-            <Ionicons name="alert-circle" size={18} color="#EF4444" />
+            <Ionicons name="alert-circle" size={18} color={accountingTheme.colors.danger} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
         ) : null}
@@ -346,18 +347,18 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    borderTopColor: accountingTheme.colors.border,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.lg,
   },
   container: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   content: {
-    padding: 16,
+    padding: accountingTheme.spacing.lg,
     paddingBottom: 150,
   },
   headerRow: {
@@ -366,46 +367,46 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   backButton: {
-    marginRight: 12,
-    padding: 8,
+    marginRight: accountingTheme.spacing.md,
+    padding: accountingTheme.spacing.sm,
   },
   headline: {
     fontSize: 26,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.lg,
     color: "#60708A",
-    marginTop: 4,
-    marginBottom: 24,
+    marginTop: accountingTheme.spacing.xs,
+    marginBottom: accountingTheme.spacing.xxl,
   },
   field: {
     marginBottom: 18,
   },
   row: {
     flexDirection: "row",
-    gap: 12,
+    gap: accountingTheme.spacing.md,
   },
   halfField: {
     flex: 1,
   },
   label: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#60708A",
-    marginBottom: 8,
+    marginBottom: accountingTheme.spacing.sm,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1,
     borderColor: "#E5EAF3",
     padding: 14,
-    fontSize: 14,
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
   },
   multilineInput: {
     minHeight: 80,
@@ -414,19 +415,19 @@ const styles = StyleSheet.create({
   statusRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   statusButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: accountingTheme.spacing.md,
+    paddingVertical: accountingTheme.spacing.sm,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#E5EAF3",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
   },
   statusButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#60708A",
   },
   statusButtonActive: {
@@ -434,57 +435,57 @@ const styles = StyleSheet.create({
     borderColor: "#347BE5",
   },
   statusButtonTextActive: {
-    color: "#FFFFFF",
+    color: accountingTheme.colors.card,
   },
   errorContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FEF2F2",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
+    backgroundColor: accountingTheme.colors.dangerLight,
+    borderRadius: accountingTheme.radius.lg,
+    padding: accountingTheme.spacing.md,
+    marginBottom: accountingTheme.spacing.lg,
   },
   errorText: {
-    fontSize: 13,
-    color: "#EF4444",
-    marginLeft: 8,
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.danger,
+    marginLeft: accountingTheme.spacing.sm,
     flex: 1,
   },
   successContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#ECFDF5",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
+    borderRadius: accountingTheme.radius.lg,
+    padding: accountingTheme.spacing.md,
+    marginBottom: accountingTheme.spacing.lg,
   },
   successText: {
-    fontSize: 13,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#16A34A",
-    marginLeft: 8,
+    marginLeft: accountingTheme.spacing.sm,
     flex: 1,
   },
   primaryButton: {
     backgroundColor: "#347BE5",
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: accountingTheme.radius.lg,
+    padding: accountingTheme.spacing.lg,
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
   },
   primaryButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.card,
   },
   secondaryButton: {
     backgroundColor: "#E5EAF3",
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: accountingTheme.radius.lg,
+    padding: accountingTheme.spacing.lg,
     alignItems: "center",
   },
   secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#347BE5",
   },
   disabledButton: {

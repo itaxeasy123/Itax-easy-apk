@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AccountingHeader, BottomNav, Card, EmptyState, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Ledger } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 import {
   BankCashTab,
   buildBankCashLedgerRows,
@@ -96,7 +97,7 @@ export default function BankCashReportScreen() {
         title="Bank & Cash"
         subtitle="Track bank accounts and cash balances."
         showBackButton
-        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color="#fff" />}
+        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />}
       />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
@@ -173,8 +174,8 @@ export default function BankCashReportScreen() {
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
-      <Pressable style={[styles.fab, { bottom: 130 + Math.max(insets.bottom, 0) }]} onPress={handleAddLedger}>
-        <Ionicons name="add" size={18} color="#fff" />
+      <Pressable style={[styles.fab, { bottom: 86 + Math.max(insets.bottom, 0) }]} onPress={handleAddLedger}>
+        <Ionicons name="add" size={18} color={accountingTheme.colors.card} />
         <Text style={styles.fabText}>
           {activeTab === "bank" ? "Add New Bank" : "Add Category"}
         </Text>
@@ -198,7 +199,7 @@ export default function BankCashReportScreen() {
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Add Cash Category</Text>
               <Pressable onPress={() => setShowCashCategoryModal(false)} style={styles.closeBtn}>
-                <Ionicons name="close" size={20} color="#94A3B8" />
+                <Ionicons name="close" size={20} color={accountingTheme.colors.textMuted} />
               </Pressable>
             </View>
 
@@ -231,62 +232,62 @@ export default function BankCashReportScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   content: {
     paddingHorizontal: 14,
-    paddingTop: 12,
+    paddingTop: accountingTheme.spacing.md,
     paddingBottom: 112,
   },
   tabRow: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 12,
+    gap: accountingTheme.spacing.sm,
+    marginBottom: accountingTheme.spacing.sm,
   },
   tabChip: {
     flex: 1,
-    backgroundColor: "#EEF2F7",
-    borderRadius: 999,
-    paddingVertical: 10,
+    backgroundColor: accountingTheme.colors.surfaceLight,
+    borderRadius: accountingTheme.radius.full,
+    paddingVertical: accountingTheme.spacing.sm,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#EEF2F7",
+    borderColor: accountingTheme.colors.surfaceLight,
   },
   tabChipActive: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#2563EB",
+    backgroundColor: accountingTheme.colors.card,
+    borderColor: accountingTheme.colors.primary,
   },
   tabText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.textSecondary,
   },
   tabTextActive: {
-    color: "#2563EB",
+    color: accountingTheme.colors.primary,
   },
   summaryRow: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 12,
+    gap: accountingTheme.spacing.sm,
+    marginBottom: accountingTheme.spacing.sm,
   },
   summaryCard: {
     flex: 1,
     marginBottom: 0,
     borderRadius: 18,
-    paddingVertical: 16,
+    paddingVertical: accountingTheme.spacing.md,
     alignItems: "center",
   },
   summaryAmount: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
     textAlign: "center",
   },
   summaryLabel: {
-    marginTop: 4,
-    fontSize: 11,
-    color: "#64748B",
-    fontWeight: "600",
+    marginTop: 2,
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.textSecondary,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   listCard: {
     padding: 0,
@@ -295,53 +296,53 @@ const styles = StyleSheet.create({
   },
   listHeader: {
     paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: accountingTheme.spacing.md,
+    paddingBottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   listTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   listMeta: {
-    fontSize: 11,
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.textSecondary,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   rowLeft: {
     flex: 1,
     paddingRight: 10,
   },
   rowTitle: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#1F2937",
   },
   rowSub: {
-    marginTop: 4,
-    fontSize: 11,
-    color: "#64748B",
+    marginTop: 2,
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.textSecondary,
   },
   rowAmount: {
-    fontSize: 14,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#111827",
     textAlign: "right",
   },
   errorText: {
-    color: "#DC2626",
-    marginBottom: 12,
+    color: accountingTheme.colors.error,
+    marginBottom: accountingTheme.spacing.md,
   },
   bottomSpacer: {
     height: 10,
@@ -349,19 +350,23 @@ const styles = StyleSheet.create({
   fab: {
     position: "absolute",
     right: 16,
-    bottom: 130,
-    backgroundColor: "#2563EB",
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    bottom: 86,
+    backgroundColor: accountingTheme.colors.primary,
+    borderRadius: accountingTheme.radius.full,
+    paddingHorizontal: accountingTheme.spacing.xl,
+    paddingVertical: 14,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    elevation: 5,
+    gap: accountingTheme.spacing.sm,
+    elevation: 4,
+    shadowColor: accountingTheme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   fabText: {
-    color: "#fff",
-    fontWeight: "800",
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
   modalBackdrop: {
     flex: 1,
@@ -372,67 +377,67 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 30,
     elevation: 20,
-    shadowColor: "#000",
+    shadowColor: accountingTheme.colors.black,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
   },
   sheetHandleWrap: {
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: accountingTheme.colors.borderMedium,
     borderRadius: 2,
   },
   sheetHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: accountingTheme.spacing.xl,
+    marginBottom: accountingTheme.spacing.xl,
   },
   sheetTitle: {
-    fontSize: 16,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#1E293B",
   },
   closeBtn: {
-    backgroundColor: "#F1F5F9",
-    padding: 4,
-    borderRadius: 16,
+    backgroundColor: accountingTheme.colors.borderLight,
+    padding: accountingTheme.spacing.xs,
+    borderRadius: accountingTheme.radius.xxl,
   },
   sheetBody: {
-    paddingHorizontal: 20,
+    paddingHorizontal: accountingTheme.spacing.xl,
   },
   sheetInput: {
     height: 48,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     borderRadius: 8,
-    paddingHorizontal: 16,
-    fontSize: 14,
-    color: "#0F172A",
-    marginBottom: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.text,
+    marginBottom: accountingTheme.spacing.lg,
   },
   saveBtn: {
     backgroundColor: "#3B82F6",
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: "center",
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   saveBtnText: {
-    color: "#FFFFFF",
+    color: accountingTheme.colors.card,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 });

@@ -18,6 +18,7 @@ import * as Sharing from "expo-sharing";
 import { AccountingHeader, Button, Card, EmptyState, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Ledger, Party, PartyType } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const partyTypeOptions: { label: string; value: PartyType }[] = [
   { label: "Customer", value: "customer" },
@@ -239,7 +240,7 @@ export default function PartyDetailScreen() {
       .map((l: Ledger) => {
         const isUnpaid = Number(l.balance || 0) > 0;
         const status = isUnpaid ? "Unpaid" : "Paid";
-        const statusColor = isUnpaid ? "#DC2626" : "#16A34A";
+        const statusColor = isUnpaid ? accountingTheme.colors.error : "#16A34A";
         const period = `${l.year ?? "-"}/${String(l.month ?? "-")}`;
         const amt = `Rs ${Math.abs(Number(l.balance || 0)).toLocaleString("en-IN")}`;
         return `
@@ -462,9 +463,9 @@ export default function PartyDetailScreen() {
         showBackButton
         rightContent={
           <View style={styles.headerRightIcons}>
-            <Ionicons name="search" size={20} color="#fff" />
+            <Ionicons name="search" size={20} color={accountingTheme.colors.card} />
             <Pressable onPress={() => setShowSortModal(true)}>
-              <Ionicons name="filter" size={20} color="#fff" />
+              <Ionicons name="filter" size={20} color={accountingTheme.colors.card} />
             </Pressable>
           </View>
         }
@@ -487,19 +488,19 @@ export default function PartyDetailScreen() {
 
             <View style={styles.headerActionRow}>
               <Pressable style={styles.headerActionBtn} onPress={() => onContactPress("whatsapp")}>
-                <Ionicons name="logo-whatsapp" size={20} color="#fff" />
+                <Ionicons name="logo-whatsapp" size={20} color={accountingTheme.colors.card} />
                 <Text style={styles.headerActionText}>WhatsApp</Text>
               </Pressable>
               <Pressable style={styles.headerActionBtn} onPress={() => onContactPress("call")}>
-                <Ionicons name="call" size={20} color="#fff" />
+                <Ionicons name="call" size={20} color={accountingTheme.colors.card} />
                 <Text style={styles.headerActionText}>Call</Text>
               </Pressable>
               <Pressable style={styles.headerActionBtn} onPress={() => onContactPress("email")}>
-                <Ionicons name="mail" size={20} color="#fff" />
+                <Ionicons name="mail" size={20} color={accountingTheme.colors.card} />
                 <Text style={styles.headerActionText}>Email</Text>
               </Pressable>
               <Pressable style={styles.headerActionBtn} onPress={handleMoreOptions}>
-                <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+                <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
                 <Text style={styles.headerActionText}>More</Text>
               </Pressable>
             </View>
@@ -598,7 +599,7 @@ export default function PartyDetailScreen() {
               </Pressable>
 
               <Pressable style={styles.optionRow} onPress={handleDownloadCSV}>
-                <Ionicons name="grid-outline" size={18} color="#2563EB" style={styles.optionIcon} />
+                <Ionicons name="grid-outline" size={18} color={accountingTheme.colors.primary} style={styles.optionIcon} />
                 <Text style={styles.optionText}>Download (CSV)</Text>
               </Pressable>
 
@@ -608,7 +609,7 @@ export default function PartyDetailScreen() {
               </Pressable>
 
               <Pressable style={styles.optionRow} onPress={() => { setShowActionModal(false); handleDelete(); }}>
-                <Ionicons name="trash" size={18} color="#DC2626" style={styles.optionIcon} />
+                <Ionicons name="trash" size={18} color={accountingTheme.colors.error} style={styles.optionIcon} />
                 <Text style={[styles.optionText, styles.dangerText]}>Delete Customer</Text>
               </Pressable>
             </View>
@@ -660,125 +661,125 @@ export default function PartyDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
   },
   content: {
-    paddingBottom: 24,
+    paddingBottom: accountingTheme.spacing.xxl,
   },
   headerRightIcons: {
     flexDirection: "row",
-    gap: 16,
+    gap: accountingTheme.spacing.lg,
     alignItems: "center",
   },
   headerProfileArea: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.xs,
   },
   profileRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 10,
   },
   headerAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#FFFFFF",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: accountingTheme.colors.card,
     alignItems: "center",
     justifyContent: "center",
   },
   headerAvatarText: {
-    fontSize: 20,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#334155",
   },
   profileInfo: {
     flex: 1,
   },
   profileName: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.card,
   },
   profileBalance: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    marginTop: 4,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
+    marginTop: 2,
   },
   profileBalanceLabel: {
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 11,
+    fontWeight: accountingTheme.fontWeights.medium,
     color: "rgba(255, 255, 255, 0.8)",
   },
   headerActionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
-    marginBottom: 8,
+    marginTop: accountingTheme.spacing.md,
+    marginBottom: accountingTheme.spacing.xs,
   },
   headerActionBtn: {
     alignItems: "center",
-    gap: 4,
+    gap: 2,
   },
   headerActionText: {
-    fontSize: 11,
-    color: "#FFFFFF",
-    fontWeight: "500",
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   tabContainer: {
     flexDirection: "row",
-    backgroundColor: "#F1F5F9",
-    borderRadius: 999,
-    padding: 4,
-    marginHorizontal: 16,
-    marginTop: 16,
+    backgroundColor: accountingTheme.colors.borderLight,
+    borderRadius: accountingTheme.radius.full,
+    padding: 2,
+    marginHorizontal: accountingTheme.spacing.md,
+    marginTop: 10,
   },
   tabButton: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: accountingTheme.spacing.sm,
     alignItems: "center",
-    borderRadius: 999,
+    borderRadius: accountingTheme.radius.full,
   },
   tabButtonActive: {
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#000",
+    backgroundColor: accountingTheme.colors.card,
+    shadowColor: accountingTheme.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
   },
   tabText: {
-    fontSize: 13,
-    color: "#64748B",
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.textSecondary,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   tabTextActive: {
-    color: "#2563EB",
+    color: accountingTheme.colors.primary,
   },
   yearRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    marginTop: 20,
-    paddingBottom: 16,
+    paddingHorizontal: accountingTheme.spacing.md,
+    marginTop: accountingTheme.spacing.md,
+    paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
   yearLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: accountingTheme.spacing.xs,
   },
   yearText: {
-    fontSize: 12,
-    color: "#64748B",
-    fontWeight: "500",
+    fontSize: 11,
+    color: accountingTheme.colors.textSecondary,
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   changeText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#3B82F6",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   listArea: {
     marginTop: 0,
@@ -786,10 +787,10 @@ const styles = StyleSheet.create({
   invoiceRowClean: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: accountingTheme.spacing.md,
+    paddingHorizontal: accountingTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
   invoiceLeft: {
     flex: 1,
@@ -797,12 +798,12 @@ const styles = StyleSheet.create({
   invoiceTitleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 6,
+    gap: 6,
+    marginBottom: accountingTheme.spacing.xs,
   },
   invoiceNumber: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#1E293B",
   },
   statusBadge: {
@@ -811,33 +812,33 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   statusPaid: {
-    backgroundColor: "#DCFCE7",
+    backgroundColor: accountingTheme.colors.successLight,
   },
   statusUnpaid: {
     backgroundColor: "#FEE2E2",
   },
   statusBadgeText: {
-    fontSize: 10,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.xs,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   statusBadgeTextPaid: {
     color: "#16A34A",
   },
   statusBadgeTextUnpaid: {
-    color: "#DC2626",
+    color: accountingTheme.colors.error,
   },
   invoiceDate: {
-    fontSize: 12,
-    color: "#94A3B8",
+    fontSize: 11,
+    color: accountingTheme.colors.textMuted,
   },
   invoiceRight: {
     alignItems: "flex-end",
   },
   invoiceAmount: {
-    fontSize: 15,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginBottom: 6,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
+    marginBottom: accountingTheme.spacing.xs,
   },
   badgesRow: {
     flexDirection: "row",
@@ -850,9 +851,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   eInvoiceText: {
-    fontSize: 10,
+    fontSize: accountingTheme.fontSizes.xs,
     color: "#3B82F6",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   eWayBadge: {
     backgroundColor: "#FFFBEB",
@@ -861,47 +862,47 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   eWayText: {
-    fontSize: 10,
-    color: "#F59E0B",
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.warning,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   formArea: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: accountingTheme.spacing.md,
+    paddingTop: accountingTheme.spacing.md,
     paddingBottom: 40,
   },
   sectionCardTitle: {
-    fontSize: 16,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#1E293B",
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.md,
   },
   field: {
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.md,
   },
   label: {
-    fontSize: 12,
-    color: "#64748B",
-    marginBottom: 6,
-    fontWeight: "600",
+    fontSize: 11,
+    color: accountingTheme.colors.textSecondary,
+    marginBottom: accountingTheme.spacing.xs,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   input: {
-    height: 48,
-    backgroundColor: "#FFFFFF",
+    height: 42,
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     borderRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 14,
-    color: "#0F172A",
+    paddingHorizontal: 10,
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.text,
   },
   errorText: {
-    color: "#DC2626",
-    marginBottom: 12,
-    fontSize: 13,
+    color: accountingTheme.colors.error,
+    marginBottom: accountingTheme.spacing.md,
+    fontSize: accountingTheme.fontSizes.md,
   },
   deleteWrap: {
-    marginTop: 12,
+    marginTop: accountingTheme.spacing.md,
   },
   modalBackdrop: {
     flex: 1,
@@ -912,73 +913,73 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 30,
   },
   sheetHandleWrap: {
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: accountingTheme.colors.borderMedium,
     borderRadius: 2,
   },
   sheetOptions: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: accountingTheme.spacing.lg,
+    paddingHorizontal: accountingTheme.spacing.xxl,
   },
   optionIcon: {
-    marginRight: 12,
+    marginRight: accountingTheme.spacing.md,
   },
   optionText: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.lg,
     color: "#475569",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   dangerText: {
-    color: "#DC2626",
+    color: accountingTheme.colors.error,
   },
   sheetHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 24,
-    marginBottom: 8,
+    paddingHorizontal: accountingTheme.spacing.xxl,
+    marginBottom: accountingTheme.spacing.sm,
   },
   sheetTitle: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#1E293B",
   },
   resetText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#3B82F6",
   },
   sortOptionRow: {
     paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: "#E5EAF3",
   },
   sortOptionRowActive: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: accountingTheme.colors.borderLight,
   },
   sortOptionText: {
-    fontSize: 14,
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.textSecondary,
   },
   sortOptionTextActive: {
-    color: "#0F172A",
-    fontWeight: "700",
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 });

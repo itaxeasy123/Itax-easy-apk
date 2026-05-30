@@ -11,6 +11,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { AccountingHeader, SalesReportSwitcher, EmptyState } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Payment } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 type Tab = "monthly" | "customers";
 
@@ -129,9 +130,9 @@ export default function PaymentsScreen() {
         showBackButton
         rightContent={
           <View style={styles.headerRightIcons}>
-            <Ionicons name="search" size={20} color="#fff" />
-            <Ionicons name="filter" size={20} color="#fff" />
-            <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+            <Ionicons name="search" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="filter" size={20} color={accountingTheme.colors.card} />
+            <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </View>
         }
         headerContent={
@@ -154,7 +155,7 @@ export default function PaymentsScreen() {
 
           <View style={styles.yearRow}>
             <View style={styles.yearLeft}>
-              <Ionicons name="calendar-outline" size={16} color="#2563EB" />
+              <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
               <Text style={styles.yearText}>
                 Financial Year <Text style={styles.yearTextLight}>(1 Apr 24 to 31 Mar 25)</Text>
               </Text>
@@ -175,7 +176,7 @@ export default function PaymentsScreen() {
           style={styles.fab}
           onPress={() => router.navigate("/accounting/payment-create")}
         >
-          <Ionicons name="add" size={32} color="#fff" />
+          <Ionicons name="add" size={32} color={accountingTheme.colors.card} />
         </Pressable>
       </View>
 
@@ -191,45 +192,45 @@ const styles = StyleSheet.create({
   headerRightIcons: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: accountingTheme.spacing.lg,
   },
   headerBlock: {
     alignItems: "center",
     marginTop: 10,
-    marginBottom: 20,
+    marginBottom: accountingTheme.spacing.xl,
   },
   headerAmount: {
     fontSize: 28,
-    fontWeight: "800",
-    color: "#FFFFFF",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.card,
   },
   headerMeta: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: accountingTheme.spacing.xs,
+    fontSize: accountingTheme.fontSizes.sm,
     color: "#EAFDFC",
-    fontWeight: "600",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   mainContainer: {
     flex: 1,
     marginTop: -8,
   },
   topWhiteSection: {
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    backgroundColor: accountingTheme.colors.card,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingTop: accountingTheme.spacing.lg,
+    borderTopLeftRadius: accountingTheme.radius.xxl,
+    borderTopRightRadius: accountingTheme.radius.xxl,
   },
   switcherWrap: {
-    marginBottom: 16,
+    marginBottom: accountingTheme.spacing.lg,
   },
   yearRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingBottom: 16,
+    paddingBottom: accountingTheme.spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: "#EEF2F7",
+    borderBottomColor: accountingTheme.colors.surfaceLight,
   },
   yearLeft: {
     flexDirection: "row",
@@ -238,47 +239,47 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   yearText: {
-    fontSize: 13,
+    fontSize: accountingTheme.fontSizes.md,
     color: "#334155",
-    fontWeight: "700",
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   yearTextLight: {
-    fontWeight: "400",
-    color: "#64748B",
+    fontWeight: accountingTheme.fontWeights.regular,
+    color: accountingTheme.colors.textSecondary,
   },
   changeText: {
-    fontSize: 13,
-    color: "#2563EB",
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.md,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   listContent: {
     paddingBottom: 110,
   },
   listContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     minHeight: 400,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    paddingVertical: accountingTheme.spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   firstRow: {
     borderTopWidth: 0,
   },
   rowTitle: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.medium,
     color: "#334155",
   },
   rowAmount: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   fab: {
     position: 'absolute',
@@ -291,7 +292,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: accountingTheme.colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,

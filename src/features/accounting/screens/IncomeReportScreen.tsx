@@ -4,6 +4,7 @@ import { AccountingHeader, BottomNav } from "../components";
 import { Ionicons } from "@expo/vector-icons";
 import { accountingService } from "../services/accountingService";
 import { Ledger } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const format = (value: number) =>
   `Rs ${Math.abs(value).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
@@ -64,7 +65,7 @@ export default function IncomeReportScreen() {
       <AccountingHeader
         title="Income Analysis"
         showBackButton
-        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color="#fff" />}
+        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />}
       />
       <ScrollView contentContainerStyle={styles.content}>
         {loading ? <Text style={styles.stateText}>Loading income analysis...</Text> : null}
@@ -100,7 +101,7 @@ export default function IncomeReportScreen() {
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Purchase Outflow</Text>
-            <Text style={[styles.value, { color: "#DC2626" }]}>{format(purchases)}</Text>
+            <Text style={[styles.value, { color: accountingTheme.colors.error }]}>{format(purchases)}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Net Surplus</Text>
@@ -125,51 +126,51 @@ export default function IncomeReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F9FF" },
-  content: { padding: 16, paddingBottom: 24 },
-  stateText: { color: "#64748B" },
-  errorText: { color: "#DC2626" },
+  container: { flex: 1, backgroundColor: accountingTheme.colors.background },
+  content: { padding: accountingTheme.spacing.lg, paddingBottom: accountingTheme.spacing.xxl },
+  stateText: { color: accountingTheme.colors.textSecondary },
+  errorText: { color: accountingTheme.colors.error },
   topCard: {
     backgroundColor: "#14B8A6",
-    borderRadius: 12,
+    borderRadius: accountingTheme.radius.lg,
     padding: 14,
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  metricLabel: { fontSize: 12, color: "#D1FAF5", textTransform: "uppercase" },
-  metricValue: { marginTop: 6, color: "#FFFFFF", fontSize: 18, fontWeight: "800" },
+  metricLabel: { fontSize: accountingTheme.fontSizes.sm, color: "#D1FAF5", textTransform: "uppercase" },
+  metricValue: { marginTop: 6, color: accountingTheme.colors.card, fontSize: accountingTheme.fontSizes.xxl, fontWeight: accountingTheme.fontWeights.extraBold },
   statsRow: {
-    marginTop: 12,
+    marginTop: accountingTheme.spacing.md,
     flexDirection: "row",
     gap: 10,
   },
   statsChip: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.md,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: accountingTheme.colors.border,
     padding: 10,
   },
-  statsLabel: { fontSize: 12, color: "#64748B" },
-  statsValue: { marginTop: 4, fontSize: 16, fontWeight: "800", color: "#0F172A" },
+  statsLabel: { fontSize: accountingTheme.fontSizes.sm, color: accountingTheme.colors.textSecondary },
+  statsValue: { marginTop: accountingTheme.spacing.xs, fontSize: accountingTheme.fontSizes.xl, fontWeight: accountingTheme.fontWeights.extraBold, color: accountingTheme.colors.text },
   tableCard: {
-    marginTop: 12,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    marginTop: accountingTheme.spacing.md,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: accountingTheme.colors.border,
     padding: 14,
   },
-  tableTitle: { fontSize: 15, color: "#0F172A", fontWeight: "700", marginBottom: 8 },
+  tableTitle: { fontSize: 15, color: accountingTheme.colors.text, fontWeight: accountingTheme.fontWeights.bold, marginBottom: accountingTheme.spacing.sm },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: accountingTheme.spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
-  label: { fontSize: 13, color: "#475569", flex: 1, paddingRight: 8 },
-  value: { fontSize: 13, color: "#0F172A", fontWeight: "700" },
+  label: { fontSize: accountingTheme.fontSizes.md, color: "#475569", flex: 1, paddingRight: accountingTheme.spacing.sm },
+  value: { fontSize: accountingTheme.fontSizes.md, color: accountingTheme.colors.text, fontWeight: accountingTheme.fontWeights.bold },
 });

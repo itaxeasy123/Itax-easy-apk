@@ -20,13 +20,16 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { colors, fontSizes, fontWeights, radius, spacing } from '../../../theme';
 import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
-import { invoiceService } from '../services/invoiceService';
+import { accountingService as invoiceService } from '../services/accountingService';
 import type {
   Invoice,
   InvoiceStatus,
   InvoiceType,
   Pagination,
-} from '../types/invoice.types';
+} from '../types/accountingTypes';
+import CreateInvoiceSheet from '../components/CreateInvoiceSheet';
+import { AccountingHeader, Button } from '../components';
+import { accountingTheme } from '../../../theme/accounting';
 
 type InvoiceListTypeFilter = 'all' | InvoiceType;
 type InvoiceListStatusFilter = 'all' | InvoiceStatus;
@@ -153,24 +156,19 @@ async function buildPartyNameMap(invoices: Invoice[]) {
     invoices.map((invoice) => invoice.partyId).filter(Boolean)
   );
   const partyNameMap = new Map<string, string>();
-  let currentPage = 1;
-  let hasMore = true;
 
-  while (hasMore && unresolvedIds.size > 0) {
-    const response = await invoiceService.getParties({
-      limit: PARTY_PAGE_LIMIT,
-      page: currentPage,
-    });
+  try {
+    const response = await invoiceService.getParties();
+    const parties = response.data || [];
 
-    response.parties.forEach((party) => {
+    parties.forEach((party: any) => {
       if (unresolvedIds.has(party.id)) {
         partyNameMap.set(party.id, party.partyName);
         unresolvedIds.delete(party.id);
       }
     });
-
-    hasMore = response.parties.length === PARTY_PAGE_LIMIT;
-    currentPage += 1;
+  } catch (error) {
+    console.error(error);
   }
 
   return partyNameMap;
@@ -189,6 +187,7 @@ export default function InvoiceListScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
+  const [isSheetVisible, setIsSheetVisible] = useState(false);
 
   const loadInvoices = useCallback(
     async (
@@ -269,27 +268,22 @@ export default function InvoiceListScreen() {
   const hasMore = pagination.currentPage < pagination.pages;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.screen}>
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => router.back()} style={styles.headerIconButton}>
-            <Ionicons color={colors.text} name="chevron-back" size={18} />
+    <View style={styles.container}>
+      <AccountingHeader
+        title="Invoice List"
+        subtitle={resultLabel}
+        showBackButton
+        rightContent={
+          <Pressable onPress={() => void loadInvoices('refresh')} style={{ padding: 4 }}>
+            <Ionicons name="refresh" size={20} color={accountingTheme.colors.card} />
           </Pressable>
-
-          <View style={styles.headerTextWrap}>
-            <Text style={styles.headerTitle}>Invoice List</Text>
-            <Text style={styles.headerSubtitle}>{resultLabel}</Text>
-          </View>
-
-          <Pressable onPress={() => void loadInvoices('refresh')} style={styles.headerIconButton}>
-            <Ionicons color={colors.textMuted} name="refresh-outline" size={18} />
-          </Pressable>
-        </View>
+        }
+      />
 
         <ScrollView
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingBottom: 104 + Math.max(insets.bottom, spacing.sm) },
+            { paddingBottom: 120 },
           ]}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={() => void loadInvoices('refresh')} />
@@ -463,59 +457,52 @@ export default function InvoiceListScreen() {
           ) : null}
         </ScrollView>
 
-        <View style={[styles.bottomDock, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
-          <Pressable style={styles.primaryButton} onPress={() => router.navigate('/invoice-create')}>
-            <Ionicons color={colors.white} name="add" size={18} />
-            <Text style={styles.primaryButtonText}>Create Invoice</Text>
-          </Pressable>
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
+          <Button
+            title="Create Invoice"
+            onPress={() => setIsSheetVisible(true)}
+            icon={<Ionicons name="add" size={20} color={accountingTheme.colors.card} />}
+            size="large"
+            fullWidth
+          />
         </View>
-      </View>
-    </SafeAreaView>
+        <CreateInvoiceSheet visible={isSheetVisible} onClose={() => setIsSheetVisible(false)} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: '#EEF3FB',
+  container: {
     flex: 1,
+    backgroundColor: accountingTheme.colors.card,
   },
-  screen: {
-    backgroundColor: '#EEF3FB',
-    flex: 1,
-  },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
+    marginBottom: 10,
   },
-  headerIconButton: {
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.pill,
-    height: 36,
-    justifyContent: 'center',
-    width: 36,
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
-  headerTextWrap: {
-    alignItems: 'center',
-    flex: 1,
-    paddingHorizontal: spacing.sm,
+  backBtn: {
+    marginRight: 4,
+    padding: 4,
+    marginLeft: -4,
   },
-  headerTitle: {
-    color: '#304766',
-    fontSize: fontSizes.xl,
-    fontWeight: fontWeights.bold,
-  },
-  headerSubtitle: {
-    color: colors.textMuted,
-    fontSize: fontSizes.sm,
-    marginTop: 2,
+  eyebrow: {
+    fontSize: 15,
+    color: "#121213ff",
+    fontWeight: "700",
+    letterSpacing: 0.4,
   },
   scrollContent: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
+    paddingTop: spacing.xs,
   },
   searchBox: {
     alignItems: 'center',
@@ -592,13 +579,13 @@ const styles = StyleSheet.create({
   },
   invoiceCard: {
     backgroundColor: colors.surface,
-    borderRadius: radius.xl,
-    elevation: 2,
-    padding: spacing.md,
+    borderRadius: radius.md,
+    elevation: 1,
+    padding: 10,
     shadowColor: '#B5C2D7',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
   invoiceTopRow: {
     flexDirection: 'row',
@@ -606,30 +593,30 @@ const styles = StyleSheet.create({
   },
   invoiceTitleWrap: {
     flex: 1,
-    paddingRight: spacing.sm,
+    paddingRight: spacing.xs,
   },
   invoiceNumber: {
     color: '#354D72',
-    fontSize: fontSizes.lg,
-    fontWeight: fontWeights.bold,
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.semibold,
   },
   invoiceParty: {
     color: '#61748E',
-    fontSize: fontSizes.md,
-    marginTop: 4,
+    fontSize: fontSizes.sm,
+    marginTop: 2,
   },
   amountWrap: {
     alignItems: 'flex-end',
   },
   amountValue: {
     color: '#405474',
-    fontSize: fontSizes.lg,
+    fontSize: fontSizes.md,
     fontWeight: fontWeights.bold,
   },
   amountDate: {
     color: colors.textMuted,
-    fontSize: fontSizes.sm,
-    marginTop: 4,
+    fontSize: fontSizes.xs,
+    marginTop: 2,
   },
   printActionButton: {
     marginTop: 8,
@@ -653,7 +640,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.xs,
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
   },
   metaChip: {
     borderRadius: radius.pill,
@@ -667,8 +654,8 @@ const styles = StyleSheet.create({
   invoiceBottomRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.md,
-    marginTop: spacing.md,
+    gap: spacing.sm,
+    marginTop: spacing.sm,
   },
   inlineMeta: {
     alignItems: 'center',
@@ -715,27 +702,24 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.md,
     fontWeight: fontWeights.semibold,
   },
-  bottomDock: {
-    backgroundColor: '#EEF3FB',
+  footer: {
+    position: "absolute",
     bottom: 0,
     left: 0,
-    paddingHorizontal: spacing.md,
-    position: 'absolute',
     right: 0,
-    paddingTop: spacing.xs,
+    backgroundColor: accountingTheme.colors.card,
+    padding: accountingTheme.spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: accountingTheme.colors.border,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
   },
-  primaryButton: {
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    flexDirection: 'row',
-    gap: spacing.xs,
-    justifyContent: 'center',
-    paddingVertical: 14,
-  },
-  primaryButtonText: {
-    color: colors.white,
-    fontSize: fontSizes.lg,
-    fontWeight: fontWeights.semibold,
+  fabText: {
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.lg,
   },
 });

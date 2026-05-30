@@ -34,6 +34,7 @@ import {
 } from "expo-router";
 
 import GSTBottomBar from "../components/GSTBottomBar";
+import { safeParseJson } from "../utils/gstHelpers";
 
 interface InvoiceRecord {
   id: number;
@@ -85,9 +86,13 @@ export default function AmendedExportsInvoicesScreen() {
     ) {
 
       const updatedInvoice =
-        JSON.parse(
-          params.updatedInvoice as string
+        safeParseJson<InvoiceRecord>(
+          params.updatedInvoice
         );
+
+      if (!updatedInvoice) {
+        return;
+      }
 
       setRecords((prev) =>
         prev.map((item) =>

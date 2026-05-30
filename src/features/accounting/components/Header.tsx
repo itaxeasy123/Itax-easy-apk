@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { accountingTheme } from "../../../theme/accounting";
 
 interface HeaderProps {
   title: string;
@@ -41,7 +42,7 @@ export default function Header({
       <View style={styles.headerRow}>
         {showBackButton && (
           <Pressable onPress={handleBackPress} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={24} color="#2563eb" />
+            <Ionicons name="chevron-back" size={24} color={accountingTheme.colors.primary} />
           </Pressable>
         )}
         <View style={styles.titleContainer}>
@@ -57,9 +58,9 @@ export default function Header({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 14,
-    paddingTop: 8,
-    paddingBottom: 8,
-    backgroundColor: '#fff',
+    paddingTop: accountingTheme.spacing.sm,
+    paddingBottom: accountingTheme.spacing.sm,
+    backgroundColor: accountingTheme.colors.card,
   },
   headerRow: {
     flexDirection: 'row',
@@ -74,16 +75,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: '#1f2937',
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: accountingTheme.fontSizes.sm,
     color: '#6b7280',
     marginTop: 2,
   },
   rightContent: {
-    marginLeft: 12,
+    marginLeft: accountingTheme.spacing.md,
   },
 });

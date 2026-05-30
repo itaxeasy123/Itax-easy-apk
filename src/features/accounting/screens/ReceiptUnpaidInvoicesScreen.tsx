@@ -16,6 +16,7 @@ import { accountingService } from "../services/accountingService";
 import { invoiceService } from "../../invoice/services/invoiceService";
 import { voucherService } from "../services/voucherService";
 import { Ledger, Party, VoucherLine } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 import {
   findLedgerByType,
   formatDate,
@@ -284,7 +285,7 @@ export default function ReceiptUnpaidInvoicesScreen() {
             value={search}
             onChangeText={setSearch}
             placeholder="Search invoice"
-            style={[styles.input, { marginTop: 12 }]}
+            style={[styles.input, { marginTop: accountingTheme.spacing.md }]}
           />
         </Card>
 
@@ -321,7 +322,7 @@ export default function ReceiptUnpaidInvoicesScreen() {
             ))
           ) : (
             <View style={styles.emptyBox}>
-              <Ionicons name="document-text-outline" size={28} color="#94A3B8" />
+              <Ionicons name="document-text-outline" size={28} color={accountingTheme.colors.textMuted} />
               <Text style={styles.emptyTitle}>No unpaid invoices</Text>
               <Text style={styles.emptyText}>
                 Choose a party to see its unpaid sales invoices.
@@ -332,7 +333,7 @@ export default function ReceiptUnpaidInvoicesScreen() {
 
         {error ? (
           <View style={styles.errorBox}>
-            <Ionicons name="alert-circle" size={18} color="#DC2626" />
+            <Ionicons name="alert-circle" size={18} color={accountingTheme.colors.error} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
         ) : null}
@@ -361,109 +362,109 @@ export default function ReceiptUnpaidInvoicesScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: accountingTheme.colors.background,
   },
   scroll: {
     flex: 1,
   },
   content: {
     paddingHorizontal: 14,
-    paddingTop: 12,
+    paddingTop: accountingTheme.spacing.md,
     paddingBottom: 150,
   },
   topCard: {
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
   },
   rowBetween: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 12,
+    gap: accountingTheme.spacing.md,
   },
   topLabel: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   topMeta: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 4,
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.textSecondary,
+    marginTop: accountingTheme.spacing.xs,
   },
   editLink: {
-    color: "#2563EB",
-    fontWeight: "700",
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: accountingTheme.spacing.md,
   },
   sectionTitle: {
     fontSize: 15,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   smallAction: {
-    color: "#2563EB",
-    fontWeight: "700",
-    fontSize: 12,
+    color: accountingTheme.colors.primary,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.sm,
   },
   partyList: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
   },
   partyChip: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    backgroundColor: "#fff",
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderColor: accountingTheme.colors.border,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.full,
+    paddingHorizontal: accountingTheme.spacing.md,
+    paddingVertical: accountingTheme.spacing.sm,
   },
   partyChipActive: {
-    borderColor: "#2563EB",
+    borderColor: accountingTheme.colors.primary,
     backgroundColor: "#EFF6FF",
   },
   partyChipText: {
     color: "#475569",
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   partyChipTextActive: {
-    color: "#2563EB",
+    color: accountingTheme.colors.primary,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.lg,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    color: "#0F172A",
+    borderColor: accountingTheme.colors.border,
+    paddingHorizontal: accountingTheme.spacing.md,
+    paddingVertical: accountingTheme.spacing.md,
+    color: accountingTheme.colors.text,
   },
   invoiceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 12,
+    gap: accountingTheme.spacing.md,
     paddingVertical: 14,
     borderTopWidth: 1,
-    borderTopColor: "#EEF2F7",
+    borderTopColor: accountingTheme.colors.surfaceLight,
   },
   invoiceLeft: {
     flex: 1,
   },
   invoiceTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   invoiceMeta: {
     fontSize: 11,
-    color: "#64748B",
-    marginTop: 4,
+    color: accountingTheme.colors.textSecondary,
+    marginTop: accountingTheme.spacing.xs,
   },
   invoiceRight: {
     width: 135,
@@ -473,63 +474,63 @@ const styles = StyleSheet.create({
     width: "100%",
     borderWidth: 1,
     borderColor: "#CBD5E1",
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
+    borderRadius: accountingTheme.radius.lg,
+    backgroundColor: accountingTheme.colors.card,
     paddingHorizontal: 10,
     paddingVertical: 10,
     textAlign: "center",
   },
   smallAmount: {
-    fontSize: 10,
-    color: "#64748B",
-    marginTop: 4,
+    fontSize: accountingTheme.fontSizes.xs,
+    color: accountingTheme.colors.textSecondary,
+    marginTop: accountingTheme.spacing.xs,
     textAlign: "right",
   },
   fullButton: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
     borderWidth: 1,
-    borderColor: "#2563EB",
+    borderColor: accountingTheme.colors.primary,
     backgroundColor: "#EFF6FF",
-    borderRadius: 999,
+    borderRadius: accountingTheme.radius.full,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: accountingTheme.spacing.sm,
   },
   fullButtonText: {
-    color: "#2563EB",
+    color: accountingTheme.colors.primary,
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
   emptyBox: {
     alignItems: "center",
-    paddingVertical: 20,
+    paddingVertical: accountingTheme.spacing.xl,
   },
   emptyTitle: {
     marginTop: 10,
     fontSize: 15,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   emptyText: {
     marginTop: 6,
-    fontSize: 12,
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 18,
   },
   errorBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: "#FEF2F2",
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 12,
+    gap: accountingTheme.spacing.sm,
+    backgroundColor: accountingTheme.colors.dangerLight,
+    borderRadius: accountingTheme.radius.lg,
+    padding: accountingTheme.spacing.md,
+    marginTop: accountingTheme.spacing.md,
   },
   errorText: {
     flex: 1,
-    color: "#DC2626",
-    fontSize: 12,
-    fontWeight: "600",
+    color: accountingTheme.colors.error,
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   bottomSpacer: {
     height: 12,
@@ -539,27 +540,27 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: accountingTheme.colors.border,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 12,
+    gap: accountingTheme.spacing.md,
   },
   footerLabel: {
     fontSize: 11,
-    color: "#64748B",
-    fontWeight: "700",
+    color: accountingTheme.colors.textSecondary,
+    fontWeight: accountingTheme.fontWeights.bold,
     textTransform: "uppercase",
   },
   footerAmount: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginTop: 4,
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
+    marginTop: accountingTheme.spacing.xs,
   },
   footerButton: {
     minWidth: 132,

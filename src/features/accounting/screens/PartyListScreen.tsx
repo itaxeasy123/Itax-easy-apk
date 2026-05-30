@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, BottomNav, Card, EmptyState, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Ledger, Party } from "../types/accountingTypes";
+import { accountingTheme } from "../../../theme/accounting";
 
 const formatCurrency = (value: number) =>
   `Rs ${Math.abs(value || 0).toLocaleString("en-IN", {
@@ -99,7 +100,7 @@ export default function PartyListScreen() {
       <AccountingHeader
         title="Parties"
         showBackButton
-        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color="#fff" />}
+        rightContent={<Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />}
         headerContent={(
           <View style={styles.headerTabsWrap}>
             <View style={styles.tabContainer}>
@@ -139,17 +140,17 @@ export default function PartyListScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.searchRow}>
           <View style={styles.searchBox}>
-            <Ionicons name="search" size={18} color="#94A3B8" />
+            <Ionicons name="search" size={18} color={accountingTheme.colors.textMuted} />
             <TextInput
               value={search}
               onChangeText={setSearch}
               placeholder="Search"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={accountingTheme.colors.textMuted}
               style={styles.searchInput}
             />
           </View>
           <Pressable style={styles.filterButton} onPress={() => setShowFilterModal(true)}>
-            <Ionicons name="filter-outline" size={18} color="#64748B" />
+            <Ionicons name="filter-outline" size={18} color={accountingTheme.colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -200,7 +201,7 @@ export default function PartyListScreen() {
       </ScrollView>
 
       <Pressable style={[styles.fab, { bottom: 86 + Math.max(insets.bottom, 0) }]} onPress={() => router.navigate("/accounting/parties/create")}>
-        <Ionicons name="person-add" size={18} color="#fff" />
+        <Ionicons name="person-add" size={18} color={accountingTheme.colors.card} />
         <Text style={styles.fabText}>Add Party</Text>
       </Pressable>
 
@@ -250,43 +251,43 @@ export default function PartyListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
   },
   headerTabsWrap: {
     alignItems: "center",
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.xs,
   },
   tabContainer: {
     flexDirection: "row",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 999,
+    borderRadius: accountingTheme.radius.full,
     padding: 2,
     width: "80%",
     alignSelf: "center",
   },
   tabButton: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 6,
     alignItems: "center",
-    borderRadius: 999,
+    borderRadius: accountingTheme.radius.full,
   },
   tabButtonActive: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
   },
   tabText: {
-    fontSize: 14,
-    color: "#FFFFFF",
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.sm,
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   tabTextActive: {
-    color: "#2563EB",
+    color: accountingTheme.colors.primary,
   },
   balanceRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 24,
-    paddingBottom: 8,
+    marginTop: accountingTheme.spacing.md,
+    paddingBottom: accountingTheme.spacing.xs,
     width: "100%",
   },
   balanceColumn: {
@@ -294,118 +295,118 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   balanceValue: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "800",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
   balanceLabel: {
     color: "#EAFDFC",
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: "500",
+    fontSize: accountingTheme.fontSizes.xs,
+    marginTop: 2,
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   verticalDivider: {
     width: 1,
-    height: 30,
+    height: 24,
     backgroundColor: "rgba(255, 255, 255, 0.3)",
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     paddingBottom: 120,
   },
   searchRow: {
     flexDirection: "row",
-    gap: 10,
+    gap: accountingTheme.spacing.sm,
     alignItems: "center",
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: 10,
+    marginBottom: 6,
   },
   searchBox: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 999,
+    backgroundColor: accountingTheme.colors.card,
+    borderRadius: accountingTheme.radius.full,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    height: 44,
+    paddingHorizontal: accountingTheme.spacing.md,
+    height: 38,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 8,
-    color: "#0F172A",
-    fontSize: 14,
+    marginLeft: 6,
+    color: accountingTheme.colors.text,
+    fontSize: accountingTheme.fontSizes.md,
   },
   filterButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
+    width: 38,
+    height: 38,
+    borderRadius: accountingTheme.radius.md,
+    backgroundColor: accountingTheme.colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: accountingTheme.colors.borderMedium,
     alignItems: "center",
     justifyContent: "center",
   },
   listArea: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   partyRowClean: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 14,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
   avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#F1F5F9",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: accountingTheme.colors.borderLight,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
+    marginRight: 10,
   },
   avatarText: {
     color: "#334155",
-    fontWeight: "700",
-    fontSize: 14,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.sm,
   },
   partyNameClean: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#1E293B",
   },
   partyBalanceClean: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0F172A",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.text,
   },
   messageCard: {
-    marginTop: 20,
+    marginTop: accountingTheme.spacing.xl,
   },
   fab: {
     position: "absolute",
     right: 16,
     bottom: 86,
-    backgroundColor: "#3B82F6",
-    borderRadius: 999,
-    paddingHorizontal: 20,
+    backgroundColor: accountingTheme.colors.primary,
+    borderRadius: accountingTheme.radius.full,
+    paddingHorizontal: accountingTheme.spacing.xl,
     paddingVertical: 14,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: accountingTheme.spacing.sm,
     elevation: 4,
-    shadowColor: "#3B82F6",
+    shadowColor: accountingTheme.colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
   fabText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 14,
+    color: accountingTheme.colors.card,
+    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: accountingTheme.fontSizes.lg,
   },
   modalBackdrop: {
     flex: 1,
@@ -416,56 +417,56 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 30,
   },
   sheetHandleWrap: {
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: accountingTheme.colors.borderMedium,
     borderRadius: 2,
   },
   sheetHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 24,
-    marginBottom: 8,
+    paddingHorizontal: accountingTheme.spacing.xxl,
+    marginBottom: accountingTheme.spacing.sm,
   },
   sheetTitle: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: accountingTheme.fontSizes.xxl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#1E293B",
   },
   resetText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#3B82F6",
   },
   sheetOptions: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   optionRow: {
     paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: "#E5EAF3",
   },
   optionRowActive: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: accountingTheme.colors.borderLight,
   },
   optionText: {
-    fontSize: 14,
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.lg,
+    color: accountingTheme.colors.textSecondary,
   },
   optionTextActive: {
-    color: "#0F172A",
-    fontWeight: "700",
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
 });

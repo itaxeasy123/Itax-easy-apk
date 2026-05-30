@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle, G } from "react-native-svg";
 import { useRouter } from "expo-router";
 import { BottomNav, AccountingHeader } from "../components";
+import { accountingTheme } from "../../../theme/accounting";
 
 const { width } = Dimensions.get("window");
 
@@ -41,11 +42,11 @@ export default function ExpenseReportScreen() {
         rightContent={
           <View style={styles.headerIcons}>
             <Pressable onPress={() => setShowSortModal(true)}>
-              <Ionicons name="filter-outline" size={20} color="#FFFFFF" />
+              <Ionicons name="filter-outline" size={20} color={accountingTheme.colors.card} />
             </Pressable>
-            <Ionicons name="settings-outline" size={20} color="#FFFFFF" />
+            <Ionicons name="settings-outline" size={20} color={accountingTheme.colors.card} />
             <Pressable onPress={() => setShowMoreModal(true)}>
-              <Ionicons name="ellipsis-horizontal" size={20} color="#FFFFFF" />
+              <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
             </Pressable>
           </View>
         }
@@ -244,14 +245,14 @@ const styles = StyleSheet.create({
   headerIcons: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: accountingTheme.spacing.lg,
   },
   tabsContainer: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderRadius: 24,
-    marginTop: 20,
-    padding: 4,
+    marginTop: accountingTheme.spacing.xl,
+    padding: accountingTheme.spacing.xs,
     width: "100%",
   },
   tabBtn: {
@@ -261,8 +262,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   tabBtnActive: {
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#000",
+    backgroundColor: accountingTheme.colors.card,
+    shadowColor: accountingTheme.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -271,9 +272,9 @@ const styles = StyleSheet.create({
     borderColor: "#E5EAF3",
   },
   tabText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.md,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+    color: accountingTheme.colors.textSecondary,
   },
   tabTextActive: {
     color: "#3B82F6",
@@ -283,31 +284,31 @@ const styles = StyleSheet.create({
   },
   timeFilterWrap: {
     alignItems: "center",
-    marginTop: 24,
+    marginTop: accountingTheme.spacing.xxl,
   },
   timeFilterContainer: {
     flexDirection: "row",
     backgroundColor: "#F8FAFC",
     borderRadius: 24,
-    padding: 4,
+    padding: accountingTheme.spacing.xs,
   },
   timeFilterBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: accountingTheme.spacing.sm,
+    paddingHorizontal: accountingTheme.spacing.lg,
     borderRadius: 20,
   },
   timeFilterBtnActive: {
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#000",
+    backgroundColor: accountingTheme.colors.card,
+    shadowColor: accountingTheme.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
   },
   timeFilterText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#64748B",
+    fontSize: accountingTheme.fontSizes.sm,
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.textSecondary,
   },
   timeFilterTextActive: {
     color: "#3B82F6",
@@ -329,55 +330,55 @@ const styles = StyleSheet.create({
   },
   chartCenterLabel: {
     fontSize: 9,
-    fontWeight: "700",
-    color: "#64748B",
+    fontWeight: accountingTheme.fontWeights.bold,
+    color: accountingTheme.colors.textSecondary,
     marginBottom: 2,
     letterSpacing: 0.5,
   },
   chartCenterAmount: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: accountingTheme.fontWeights.extraBold,
     color: "#1E293B",
-    marginTop: 4,
+    marginTop: accountingTheme.spacing.xs,
   },
   listContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: accountingTheme.spacing.lg,
   },
   listItem: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
   listAvatar: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: accountingTheme.radius.xxl,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
+    marginRight: accountingTheme.spacing.md,
   },
   listAvatarText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "700",
+    color: accountingTheme.colors.card,
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.bold,
   },
   listLabel: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.medium,
     color: "#334155",
   },
   listAmount: {
     fontSize: 15,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: accountingTheme.colors.text,
   },
   emptyText: {
     textAlign: "center",
-    marginTop: 24,
-    color: "#64748B",
+    marginTop: accountingTheme.spacing.xxl,
+    color: accountingTheme.colors.textSecondary,
   },
   modalBackdrop: {
     flex: 1,
@@ -388,72 +389,72 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: accountingTheme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 30,
   },
   sheetHandleWrap: {
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: accountingTheme.spacing.md,
   },
   sheetHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: accountingTheme.colors.borderMedium,
     borderRadius: 2,
   },
   sheetHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 24,
-    paddingBottom: 16,
+    paddingHorizontal: accountingTheme.spacing.xxl,
+    paddingBottom: accountingTheme.spacing.lg,
   },
   sheetTitle: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.bold,
     color: "#1E293B",
   },
   resetText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: accountingTheme.fontSizes.lg,
+    fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#3B82F6",
   },
   sheetOptions: {
-    marginTop: 8,
+    marginTop: accountingTheme.spacing.sm,
   },
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: accountingTheme.spacing.lg,
+    paddingHorizontal: accountingTheme.spacing.xxl,
     borderBottomWidth: 1,
     borderBottomColor: "#E5EAF3",
   },
   optionIcon: {
-    marginRight: 12,
+    marginRight: accountingTheme.spacing.md,
   },
   optionText: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.lg,
     color: "#475569",
-    fontWeight: "500",
+    fontWeight: accountingTheme.fontWeights.medium,
   },
   sortOptionRow: {
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: accountingTheme.spacing.lg,
+    paddingHorizontal: accountingTheme.spacing.xxl,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: accountingTheme.colors.borderLight,
   },
   sortOptionRowActive: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: accountingTheme.colors.borderLight,
   },
   sortOptionText: {
-    fontSize: 14,
+    fontSize: accountingTheme.fontSizes.lg,
     color: "#475569",
   },
   sortOptionTextActive: {
-    color: "#0F172A",
-    fontWeight: "600",
+    color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
 });

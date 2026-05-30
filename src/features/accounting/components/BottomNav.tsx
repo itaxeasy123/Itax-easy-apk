@@ -8,6 +8,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, type Href } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { accountingTheme } from "../../../theme/accounting";
 
 interface NavItem {
   label: string;
@@ -21,6 +22,7 @@ interface BottomNavProps {
 
 const NavItems: NavItem[] = [
   { label: 'Home', icon: 'home', route: '/accounting' },
+
   { label: 'Parties', icon: 'people', route: '/accounting/parties' },
   { label: 'Items', icon: 'list', route: '/accounting/items' },
   { label: 'Reports', icon: 'bar-chart', route: '/accounting/reports' },
@@ -42,27 +44,29 @@ export default function BottomNav({ activeRoute = '/accounting' }: BottomNavProp
           return (
             <Pressable
               key={item.label}
-              style={[
-                styles.navItem,
-                isActive && styles.navItemActive,
-              ]}
+              style={styles.bottomItem}
               onPress={() => handleNavigation(item.route)}
             >
-              <View style={styles.itemContent}>
+              <View
+                style={[
+                  styles.bottomIconWrap,
+                  isActive && styles.bottomIconWrapActive,
+                ]}
+              >
                 <Ionicons
                   name={item.icon}
-                  size={24}
-                  color={isActive ? '#2563eb' : '#999'}
+                  size={20}
+                  color={isActive ? "#347BE5" : "#94A3B8"}
                 />
-                <Text
-                  style={[
-                    styles.label,
-                    isActive && styles.labelActive,
-                  ]}
-                >
-                  {item.label}
-                </Text>
               </View>
+              <Text
+                style={[
+                  styles.bottomText,
+                  isActive && styles.bottomTextActive,
+                ]}
+              >
+                {item.label}
+              </Text>
             </Pressable>
           );
         })}
@@ -81,32 +85,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingVertical: 8,
     backgroundColor: '#fff',
+    paddingTop: 6,
+    paddingBottom: 6,
   },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+  bottomItem: {
     flex: 1,
-  },
-  navItemActive: {
-    backgroundColor: '#f0f9ff',
-    borderRadius: 8,
-  },
-  itemContent: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    paddingVertical: 6,
   },
-  label: {
-    fontSize: 11,
+  bottomIconWrap: {
+    width: 34,
+    height: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bottomIconWrapActive: {
+    backgroundColor: '#f0f9ff',
+  },
+  bottomText: {
+    fontSize: 10,
     color: '#999',
-    marginTop: 4,
+    marginTop: 2,
     fontWeight: '500',
   },
-  labelActive: {
+  bottomTextActive: {
     color: '#2563eb',
     fontWeight: '600',
   },
