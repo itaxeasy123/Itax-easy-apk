@@ -109,7 +109,7 @@ const {
     setModalVisible(false);
 
     router.push(
-      "/gst/gstr3b" as any
+      "/gst/gstr3b-online" as any
     );
   };
 
@@ -179,97 +179,6 @@ const {
 
         {/* PROFILE */}
 
-        {/* <View
-          style={styles.profileCard}
-        >
-          <View
-            style={
-              styles.profileLeft
-            }
-          >
-            <View
-              style={styles.avatar}
-            >
-              <Ionicons
-                name="person"
-                size={28}
-                color="#FFF"
-              />
-            </View>
-
-            <View
-              style={
-                styles.profileContent
-              }
-            >
-              <View
-                style={styles.row}
-              >
-                <Text
-                  style={
-                    styles.label
-                  }
-                >
-                  ID
-                </Text>
-
-                <Text
-                  style={
-                    styles.value
-                  }
-                >
-                  :
-                  {" "}
-                  {
-                    mockProfile.id
-                  }
-                </Text>
-              </View>
-
-              <View
-                style={styles.row}
-              >
-                <Text
-                  style={
-                    styles.label
-                  }
-                >
-                  GSTIN
-                </Text>
-
-                <Text
-                  style={
-                    styles.value
-                  }
-                >
-                  :
-                  {" "}
-                  {
-                    mockProfile.gstin
-                  }
-                </Text>
-              </View>
-
-              <Text
-                style={
-                  styles.financialYear
-                }
-              >
-                Financial year :
-                {" "}
-                {
-                  assessmentYear
-                }
-              </Text>
-            </View>
-          </View>
-
-          <Ionicons
-            name="chevron-forward"
-            size={24}
-            color="#222"
-          />
-        </View> */}
 <TouchableOpacity
   activeOpacity={0.9}
   style={styles.profileCard}

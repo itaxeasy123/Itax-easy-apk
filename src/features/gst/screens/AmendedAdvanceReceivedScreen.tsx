@@ -1,5 +1,4 @@
-// FILE:
-// src/features/gst/screens/AmendedAdvanceReceivedScreen.tsx
+
 
 import React, {
   useEffect,
