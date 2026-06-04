@@ -153,26 +153,26 @@ export default function AccountingDashboardScreen() {
               </Card>
             </View>
 
-            <Card style={styles.chartCard}>
+            <View style={styles.section}>
               <View style={[styles.rowBetween, { marginBottom: 0 }]}>
                 <Text style={styles.sectionTitle}>Live Overview</Text>
               </View>
 
-              <View style={styles.summaryBox}>
-                <View>
+              <View style={styles.liveOverviewRow}>
+                <Card style={styles.liveOverviewCard}>
                   <Text style={styles.amount}>{stats.partyCount}</Text>
                   <Text style={styles.sub}>Parties</Text>
-                </View>
-                <View>
+                </Card>
+                <Card style={styles.liveOverviewCard}>
                   <Text style={styles.amount}>{stats.itemCount}</Text>
                   <Text style={styles.sub}>Items</Text>
-                </View>
-                <View>
+                </Card>
+                <Card style={styles.liveOverviewCard}>
                   <Text style={styles.amount}>{stats.ledgerCount}</Text>
                   <Text style={styles.sub}>Ledgers</Text>
-                </View>
+                </Card>
               </View>
-            </Card>
+            </View>
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Quick Create</Text>
@@ -214,9 +214,6 @@ export default function AccountingDashboardScreen() {
                 >
                   <Ionicons name="document-text" size={18} color="#10B981" />
                   <Text style={styles.overviewText}>Invoice</Text>
-                  <Text style={styles.overviewMeta} numberOfLines={1}>
-                    {formatCurrency(stats.receivableBalance)}
-                  </Text>
                 </Pressable>
 
                 <Pressable
@@ -225,9 +222,6 @@ export default function AccountingDashboardScreen() {
                 >
                   <Ionicons name="wallet" size={18} color="#EF4444" />
                   <Text style={styles.overviewText}>Bills</Text>
-                  <Text style={styles.overviewMeta} numberOfLines={1}>
-                    {formatCurrency(stats.payableBalance)}
-                  </Text>
                 </Pressable>
 
                 <Pressable
@@ -236,7 +230,6 @@ export default function AccountingDashboardScreen() {
                 >
                   <Ionicons name="people" size={18} color="#2563EB" />
                   <Text style={styles.overviewText}>Parties</Text>
-                  <Text style={styles.overviewMeta} numberOfLines={1}>{stats.partyCount}</Text>
                 </Pressable>
 
                 <Pressable
@@ -245,7 +238,6 @@ export default function AccountingDashboardScreen() {
                 >
                   <Ionicons name="layers" size={18} color="#8B5CF6" />
                   <Text style={styles.overviewText}>Items</Text>
-                  <Text style={styles.overviewMeta} numberOfLines={1}>{stats.itemCount}</Text>
                 </Pressable>
 
                 <Pressable style={styles.overviewCard} onPress={() => navigateTo("/accounting/ledgers")}>
@@ -287,6 +279,10 @@ export default function AccountingDashboardScreen() {
                   <Ionicons name="receipt" size={18} color="#6366F1" />
                   <Text style={styles.overviewText}>Credit Notes</Text>
                 </Pressable>
+
+                {/* Invisible placeholders to align the last row to the left */}
+                <View style={[styles.overviewCard, { borderWidth: 0, backgroundColor: "transparent" }]} />
+                <View style={[styles.overviewCard, { borderWidth: 0, backgroundColor: "transparent" }]} />
               </View>
             </View>
           </>
@@ -390,6 +386,17 @@ const styles = StyleSheet.create({
     marginTop: 8,
     padding: 10,
   },
+  liveOverviewRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+    marginTop: 10,
+  },
+  liveOverviewCard: {
+    flex: 1,
+    padding: 12,
+    alignItems: "center",
+  },
   section: {
     marginTop: 6,
   },
@@ -454,12 +461,11 @@ const styles = StyleSheet.create({
   overviewGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "flex-start",
-    gap: 8,
+    justifyContent: "space-between",
     marginTop: 10,
   },
   overviewCard: {
-    width: "23%",
+    width: "23.5%",
     backgroundColor: "#fff",
     paddingVertical: 10,
     paddingHorizontal: 4,
@@ -467,7 +473,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5E7EB",
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   overviewText: {
     fontSize: 10,

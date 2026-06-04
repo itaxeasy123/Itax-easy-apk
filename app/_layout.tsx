@@ -58,7 +58,7 @@ export default function RootLayout() {
     if (!isHydrated) return;
 
     const segment = segments[0] as string | undefined;
-    const inAuthGroup = segment === 'login' || segment === 'signup' || segment === 'verify-otp';
+    const inAuthGroup = segment === 'login' || segment === 'signup' || segment === 'verify-otp' || segment === 'forgot-password';
 
     if (!token && !inAuthGroup && segments[0] !== undefined) {
       // We use a small timeout to let navigation mount fully

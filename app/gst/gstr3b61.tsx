@@ -1,0 +1,1 @@
+export {default} from "../../src/features/gst/screens/GSTR3B61Screen";

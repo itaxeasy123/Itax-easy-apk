@@ -93,7 +93,7 @@ export default function ITRManualFillScreen() {
     <View style={styles.screen}>
       <ITRHeader
         title="Manually Fill ITR"
-        rightContent={<Text style={styles.headerYear}>{`(${displayYear})`}</Text>}
+        rightContent={assessmentYear ? <Text style={styles.headerYear}>{`AY ${assessmentYear}`}</Text> : undefined}
       />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -218,7 +218,7 @@ export default function ITRManualFillScreen() {
                 setShowYearModal(false);
               }
             }} style={[styles.modalOption, assessmentYear === opt && styles.modalOptionActive]}>
-              <Text style={[styles.modalOptionText, assessmentYear === opt && styles.modalOptionTextActive]}>{opt}</Text>
+              <Text style={[styles.modalOptionText, assessmentYear === opt && styles.modalOptionTextActive]}>AY {opt}</Text>
               {assessmentYear === opt && <Ionicons name="checkmark-circle" size={20} color={itrColors.primary} />}
             </Pressable>
           ))}

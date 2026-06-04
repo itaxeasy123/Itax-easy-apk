@@ -23,13 +23,12 @@ import {
   useLocalSearchParams,
   router,
 } from "expo-router";
-
+import {
+  useGSTBusinessProfileStore,
+} from "../store/gstBusinessProfileStore";
+import GSTLoginPopup from "../components/GSTLoginPopup";
 import GSTBottomBar from "../components/GSTBottomBar";
 
-const mockProfile = {
-  id: "Shabaz Alam",
-  gstin: "22AAAAA0000A1Z5",
-};
 
 const GSTR1_STATUS = [
   {
@@ -71,6 +70,15 @@ export default function GSTReturnScreen() {
 
   const [modalVisible, setModalVisible] =
     useState(false);
+const {
+  businessProfile,
+} =
+  useGSTBusinessProfileStore();
+
+    const [
+  showGSTLoginPopup,
+  setShowGSTLoginPopup,
+] = useState(false);
 
   const assessmentYear = useMemo(() => {
     return (
@@ -101,7 +109,7 @@ export default function GSTReturnScreen() {
     setModalVisible(false);
 
     router.push(
-      "/gst/gstr3b" as any
+      "/gst/gstr3b-online" as any
     );
   };
 
@@ -171,98 +179,106 @@ export default function GSTReturnScreen() {
 
         {/* PROFILE */}
 
-        <View
-          style={styles.profileCard}
+<TouchableOpacity
+  activeOpacity={0.9}
+  style={styles.profileCard}
+  onPress={() =>
+    router.push(
+      "/gst/businessprofile" as any
+    )
+  }
+>
+  <View
+    style={
+      styles.profileLeft
+    }
+  >
+    <View
+      style={styles.avatar}
+    >
+      <Ionicons
+        name="person"
+        size={28}
+        color="#FFF"
+      />
+    </View>
+
+    <View
+      style={
+        styles.profileContent
+      }
+    >
+      <View
+        style={styles.row}
+      >
+        <Text
+          style={
+            styles.label
+          }
         >
-          <View
-            style={
-              styles.profileLeft
-            }
-          >
-            <View
-              style={styles.avatar}
-            >
-              <Ionicons
-                name="person"
-                size={28}
-                color="#FFF"
-              />
-            </View>
+          ID
+        </Text>
 
-            <View
-              style={
-                styles.profileContent
-              }
-            >
-              <View
-                style={styles.row}
-              >
-                <Text
-                  style={
-                    styles.label
-                  }
-                >
-                  ID
-                </Text>
+        <Text
+          style={
+            styles.value
+          }
+        >
+          :
+          {" "}
+          {
+            businessProfile?.id ||
+            "N/A"
+          }
+        </Text>
+      </View>
 
-                <Text
-                  style={
-                    styles.value
-                  }
-                >
-                  :
-                  {" "}
-                  {
-                    mockProfile.id
-                  }
-                </Text>
-              </View>
+      <View
+        style={styles.row}
+      >
+        <Text
+          style={
+            styles.label
+          }
+        >
+          GSTIN
+        </Text>
 
-              <View
-                style={styles.row}
-              >
-                <Text
-                  style={
-                    styles.label
-                  }
-                >
-                  GSTIN
-                </Text>
+        <Text
+          style={
+            styles.value
+          }
+        >
+          :
+          {" "}
+          {
+            businessProfile?.gstin ||
+            "N/A"
+          }
+        </Text>
+      </View>
 
-                <Text
-                  style={
-                    styles.value
-                  }
-                >
-                  :
-                  {" "}
-                  {
-                    mockProfile.gstin
-                  }
-                </Text>
-              </View>
+      <Text
+        style={
+          styles.financialYear
+        }
+      >
+        Financial year :
+        {" "}
+        {
+          businessProfile?.financialYear ||
+          assessmentYear
+        }
+      </Text>
+    </View>
+  </View>
 
-              <Text
-                style={
-                  styles.financialYear
-                }
-              >
-                Financial year :
-                {" "}
-                {
-                  assessmentYear
-                }
-              </Text>
-            </View>
-          </View>
-
-          <Ionicons
-            name="chevron-forward"
-            size={24}
-            color="#222"
-          />
-        </View>
-
+  <Ionicons
+    name="chevron-forward"
+    size={24}
+    color="#222"
+  />
+</TouchableOpacity>
         {/* ACTIONS */}
 
         <View
@@ -277,9 +293,12 @@ export default function GSTReturnScreen() {
               styles.actionCard
             }
             activeOpacity={0.85}
-            onPress={
-              handleGSTLogin
-            }
+            // onPress={
+            //   handleGSTLogin
+            // }
+            onPress={() =>
+  setShowGSTLoginPopup(true)
+}
           >
             <MaterialIcons
               name="login"
@@ -661,6 +680,17 @@ export default function GSTReturnScreen() {
     </View>
   </View>
 </Modal>
+  {/* gst login popup */}
+<GSTLoginPopup
+  visible={
+    showGSTLoginPopup
+  }
+  onClose={() =>
+    setShowGSTLoginPopup(
+      false
+    )
+  }
+/>
     </SafeAreaView>
   );
 }

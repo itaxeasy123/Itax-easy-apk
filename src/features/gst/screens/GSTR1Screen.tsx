@@ -33,9 +33,7 @@ export default function GSTR1Screen() {
       {/* HEADER */}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.replace("/gst/returns")}
-        >
+        <TouchableOpacity onPress={() => router.replace("/gst/returns")}>
           <Ionicons name="arrow-back" size={22} color="#FFF" />
         </TouchableOpacity>
 
@@ -88,8 +86,11 @@ export default function GSTR1Screen() {
 
         {/* OTHER DROPDOWNS */}
 
-
-        <TouchableOpacity style={styles.dropdown}>
+        <TouchableOpacity
+          style={styles.dropdown}
+          activeOpacity={0.9}
+          onPress={() => router.push("/gst/gstr1-einvoice-download" as any)}
+        >
           <Text style={styles.dropdownText}>E-Invoice Download History</Text>
 
           <Ionicons name="chevron-down" size={20} color="#555" />
@@ -280,4 +281,3 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
 });
-

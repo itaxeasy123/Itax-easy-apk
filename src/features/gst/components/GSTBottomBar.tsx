@@ -279,15 +279,25 @@ export default function GSTBottomBar() {
         <TouchableOpacity
           activeOpacity={0.8}
           style={styles.item}
+          onPress={() => router.push("/gst/tools")}
         >
           <Ionicons
             name="construct"
             size={18}
-            color={iconColor}
+            color={
+              pathname === "/gst/tools"
+                ? "#4C7DFF"
+                : iconColor
+            }
           />
 
           <Text
-            style={styles.label}
+            style={[
+              styles.label,
+              pathname === "/gst/tools" && {
+                color: "#4C7DFF",
+              },
+            ]}
           >
             Tools
           </Text>

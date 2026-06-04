@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput , Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";`nimport { Platform } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
 import { useRouter } from "expo-router";
 import { AccountingHeader } from "../components";
 
