@@ -8,24 +8,26 @@ import {
   SafeAreaView,
   ScrollView,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { Ionicons } from "@expo/vector-icons";
 
 import { router, useLocalSearchParams } from "expo-router";
 
 import GSTBottomBar from "../components/GSTBottomBar";
+import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
 
 import GSTR1RecordSection from "../components/GSTR1RecordSection";
 import GSTR1AmmendRecordSection from "../components/GSTR1AmmendRecordSection";
+import GSTR1EInvoiceSection from "../components/GSTR1EInvoiceSection";
 export default function GSTR1Screen() {
-  const params = useLocalSearchParams();
+  const { businessProfile } = useGSTBusinessProfileStore();
 
-  const assessmentYear = params.assessmentYear || "2024-25";
+  const assessmentYear = businessProfile?.financialYear || "2024-25";
 
   const profile = {
-    name: "Shabaz Alam",
-
-    gstin: "22AAAAA0000A1Z5",
+    name: businessProfile?.id || "N/A",
+    gstin: businessProfile?.gstin || "N/A",
   };
 
   return (
@@ -33,7 +35,7 @@ export default function GSTR1Screen() {
       {/* HEADER */}
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.replace("/gst/returns")}>
+        <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color="#FFF" />
         </TouchableOpacity>
 
@@ -50,7 +52,10 @@ export default function GSTR1Screen() {
       >
         {/* PROFILE */}
 
-        <View style={styles.profileCard}>
+        <LinearGradient 
+          colors={["#C8F1BF", "#E1F3DD", "#DCF3D9"]} 
+          style={styles.profileCard}
+        >
           <View style={styles.profileLeft}>
             <View style={styles.avatar}>
               <Ionicons name="person" size={24} color="#FFF" />
@@ -76,7 +81,7 @@ export default function GSTR1Screen() {
           </View>
 
           <Ionicons name="chevron-forward" size={20} color="#333" />
-        </View>
+        </LinearGradient>
 
         {/* RECORD SECTION */}
 
@@ -86,15 +91,7 @@ export default function GSTR1Screen() {
 
         {/* OTHER DROPDOWNS */}
 
-        <TouchableOpacity
-          style={styles.dropdown}
-          activeOpacity={0.9}
-          onPress={() => router.push("/gst/gstr1-einvoice-download" as any)}
-        >
-          <Text style={styles.dropdownText}>E-Invoice Download History</Text>
-
-          <Ionicons name="chevron-down" size={20} color="#555" />
-        </TouchableOpacity>
+        <GSTR1EInvoiceSection />
 
         {/* BUTTONS */}
 
@@ -150,7 +147,7 @@ const styles = StyleSheet.create({
   profileCard: {
     backgroundColor: "#DDEFD8",
 
-    marginTop: 10,
+    marginTop: 0,
 
     padding: 12,
 

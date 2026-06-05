@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -13,88 +13,67 @@ import {
 
 import {
   router,
-  usePathname,
-  useLocalSearchParams,
 } from "expo-router";
 
 const invoiceSections = [
   {
-    title:
-      "4A,4B,6C-B2B Invoices",
-
+    title: "4A,4B,6B,6C-B2B Invoices",
     count: 0,
+    route: "/gst/b2b-invoices",
   },
-
   {
-    title:
-      "5A-B2C (Large Invoices)",
-
+    title: "5A-B2C (Large Invoices)",
     count: 0,
+    route: "/gst/b2c-large",
   },
-
   {
-    title:
-      "6A-Export Invoices",
-
+    title: "6A-Export Invoices",
     count: 0,
+    route: "/gst/export-invoices",
   },
-
   {
-    title:
-      "7-B2C Others",
-
+    title: "7-B2C Others",
     count: 0,
+    route: "/gst/b2c-others",
+  },
+  {
+    title: "8A,8B, 8C,8D-Nil Rated Supplies",
+    count: 0,
+    route: "/gst/nil-rated-supplies",
+  },
+  {
+    title: "9B-Credit/Debit Notes(Registered)",
+    count: 0,
+    route: "/gst/credit-debit-notes",
+  },
+  {
+    title: "9B-Credit/Debit Notes(UnRegistered)",
+    count: 0,
+    route: "/gst/unregistered-debit-notes",
+  },
+  {
+    title: "11A(1),11A(2)-Tax Liability (Advances Received)",
+    count: 0,
+    route: "/gst/gstr1-tax-liability",
+  },
+  {
+    title: "11B(1),11B(2)-Tax Adjustment of(Advances)",
+    count: 0,
+    route: "/gst/gstr1-adjustment-advances",
+  },
+  {
+    title: "12-HSN-wise Summary of Outward Supplies",
+    count: 0,
+    route: "/gst/gstr1-hsn-summary",
   },
 ];
 
 export default function GSTR1RecordSection() {
-  const pathname =
-    usePathname();
+  const [expanded, setExpanded] = useState(false);
 
-  const params =
-    useLocalSearchParams();
-
-  const expanded =
-    pathname ===
-    "/gst/gstr1-records";
-
-  const handleToggle =
-    () => {
-      const routeParams = {
-        assessmentYear:
-          params.assessmentYear,
-
-        quarter:
-          params.quarter,
-
-        month:
-          params.month,
-      };
-
-      /* CLOSE */
-
-      if (expanded) {
-        router.replace({
-          pathname:
-            "/gst/gstr1",
-
-          params:
-            routeParams,
-        });
-
-        return;
-      }
-
-      /* OPEN */
-
-      router.replace({
-        pathname:
-          "/gst/gstr1-records",
-
-        params:
-          routeParams,
-      });
-    };
+  const handleToggle = () => {
+    setExpanded(!expanded);
+  };
 
   return (
     <>
@@ -147,21 +126,7 @@ export default function GSTR1RecordSection() {
                 /* PAGE OPEN */
 
                 onPress={() =>
-                  router.push({
-                    pathname:
-                      "/gst/b2b-invoices",
-
-                    params: {
-                      assessmentYear:
-                        params.assessmentYear,
-
-                      quarter:
-                        params.quarter,
-
-                      month:
-                        params.month,
-                    },
-                  })
+                  router.push(item.route as any)
                 }
               >
                 {/* TOP */}

@@ -18,6 +18,7 @@ import { invoiceService } from "../../invoice/services/invoiceService";
 import { voucherService } from "../services/voucherService";
 import { Ledger, Party, VoucherLine } from "../types/accountingTypes";
 import { accountingTheme } from "../../../theme/accounting";
+import InlinePartySelector from "../components/InlinePartySelector";
 import {
   findLedgerByType,
   formatMoney,
@@ -363,12 +364,12 @@ export default function DebitNoteCreateScreen() {
             </Pressable>
           </View>
 
-          <Pressable style={styles.partyField} onPress={() => setShowPartySheet(true)}>
-            <Text style={selectedParty ? styles.partyFieldText : styles.partyPlaceholder}>
-              {selectedParty?.displayName || "Select Party"}
-            </Text>
-            <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
-          </Pressable>
+          <InlinePartySelector
+            parties={parties}
+            selectedPartyId={selectedPartyId}
+            onSelect={setSelectedPartyId}
+            placeholder="Search"
+          />
 
           <View style={styles.dropdownField}>
             <Text style={styles.dropdownLabel}>Return Reason</Text>
@@ -599,45 +600,6 @@ export default function DebitNoteCreateScreen() {
           style={styles.footerButton}
         />
       </View>
-
-      <Modal
-        visible={showPartySheet}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowPartySheet(false)}
-      >
-        <View style={styles.modalBackdrop}>
-          <Pressable style={StyleSheet.absoluteFillObject} onPress={() => setShowPartySheet(false)} />
-          <View style={styles.sheet}>
-            <View style={styles.sheetHandle} />
-            <Text style={styles.sheetTitle}>Select Party</Text>
-            <TextInput
-              value={partySearch}
-              onChangeText={setPartySearch}
-              placeholder="Search"
-              style={styles.sheetSearch}
-            />
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.sheetList}>
-              {visibleParties.map((party) => (
-                <Pressable
-                  key={party.id}
-                  style={styles.sheetRow}
-                  onPress={() => {
-                    setSelectedPartyId(party.id);
-                    setShowPartySheet(false);
-                  }}
-                >
-                  <Text style={styles.sheetRowTitle}>{party.displayName}</Text>
-                  <Text style={styles.sheetRowMeta}>{party.type}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-            <Pressable style={styles.sheetButton} onPress={() => setShowPartySheet(false)}>
-              <Text style={styles.sheetButtonText}>Add Record</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
 
       <Modal
         visible={showInvoiceSheet}

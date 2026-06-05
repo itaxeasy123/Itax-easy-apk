@@ -199,24 +199,11 @@ export default function ITRManualFillScreen() {
           <Text style={styles.modalTitle}>Select Assessment Year</Text>
           {["2025-26", "2024-25"].map((opt) => (
             <Pressable key={opt} onPress={() => { 
-              if (opt !== assessmentYear && assessmentYear) {
-                Alert.alert(
-                  "Change Assessment Year?",
-                  "Changing the Assessment Year will clear all your imported Form-16 and manually filled data. Are you sure you want to proceed?",
-                  [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Yes, Reset Data", style: "destructive", onPress: () => {
-                        resetITR();
-                        setAssessmentYear(opt);
-                        setShowYearModal(false);
-                      }
-                    }
-                  ]
-                );
-              } else {
+              if (opt !== assessmentYear) {
+                if (assessmentYear) resetITR();
                 setAssessmentYear(opt);
-                setShowYearModal(false);
               }
+              setShowYearModal(false);
             }} style={[styles.modalOption, assessmentYear === opt && styles.modalOptionActive]}>
               <Text style={[styles.modalOptionText, assessmentYear === opt && styles.modalOptionTextActive]}>AY {opt}</Text>
               {assessmentYear === opt && <Ionicons name="checkmark-circle" size={20} color={itrColors.primary} />}

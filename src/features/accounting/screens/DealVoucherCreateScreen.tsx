@@ -18,6 +18,7 @@ import { voucherService } from "../services/voucherService";
 import { useAccountingSessionStore } from "../../../store/accountingSessionStore";
 import { Ledger, Party, VoucherLine } from "../types/accountingTypes";
 import { accountingTheme } from "../../../theme/accounting";
+import InlinePartySelector from "../components/InlinePartySelector";
 import {
   addDaysInputValue,
   findLedgerByType,
@@ -443,12 +444,12 @@ export default function DealVoucherCreateScreen({
             </Pressable>
           </View>
 
-          <Pressable style={styles.partyField} onPress={() => setShowPartySheet(true)}>
-            <Text style={selectedParty ? styles.partyFieldText : styles.partyPlaceholder}>
-              {selectedParty?.partyName || "Select Party"}
-            </Text>
-            <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
-          </Pressable>
+          <InlinePartySelector
+            parties={parties}
+            selectedPartyId={selectedPartyId}
+            onSelect={setSelectedPartyId}
+            placeholder="Search"
+          />
 
           {selectedParty ? (
             <Text style={styles.balanceText}>
@@ -674,45 +675,6 @@ export default function DealVoucherCreateScreen({
           style={styles.footerButton}
         />
       </View>
-
-      <Modal
-        visible={showPartySheet}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowPartySheet(false)}
-      >
-        <View style={styles.modalBackdrop}>
-          <Pressable style={StyleSheet.absoluteFillObject} onPress={() => setShowPartySheet(false)} />
-          <View style={styles.sheet}>
-            <View style={styles.sheetHandle} />
-            <Text style={styles.sheetTitle}>Select Party</Text>
-            <TextInput
-              value={partySearch}
-              onChangeText={setPartySearch}
-              placeholder="Search"
-              style={styles.sheetSearch}
-            />
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.sheetList}>
-              {visibleParties.map((party) => (
-                <Pressable
-                  key={party.id}
-                  style={styles.sheetRow}
-                  onPress={() => {
-                    setSelectedPartyId(party.id);
-                    setShowPartySheet(false);
-                  }}
-                >
-                  <Text style={styles.sheetRowTitle}>{party.partyName}</Text>
-                  <Text style={styles.sheetRowMeta}>{party.type}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-            <Pressable style={styles.sheetButton} onPress={() => setShowPartySheet(false)}>
-              <Text style={styles.sheetButtonText}>Add Record</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
 
       <Modal
         visible={showItemSheet}

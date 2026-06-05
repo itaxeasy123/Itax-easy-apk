@@ -18,9 +18,11 @@ export type AuthUser = {
 type AuthState = {
   user: AuthUser | null;
   token: string | null;
+  profileImage: string | null;
   isHydrated: boolean;
 
   setAuth: (user: AuthUser, token: string) => Promise<void>;
+  setProfileImage: (uri: string | null) => Promise<void>;
   loadAuth: () => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -28,6 +30,7 @@ type AuthState = {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
+  profileImage: null,
   isHydrated: false,
 
   // ✅ LOGIN / SET AUTH
@@ -39,6 +42,20 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user, token });
     } catch (e) {
       console.log("SET AUTH ERROR:", e);
+    }
+  },
+
+  // ✅ SET PROFILE IMAGE
+  setProfileImage: async (uri) => {
+    try {
+      if (uri) {
+        await AsyncStorage.setItem("profile_image", uri);
+      } else {
+        await AsyncStorage.removeItem("profile_image");
+      }
+      set({ profileImage: uri });
+    } catch (e) {
+      console.log("SET PROFILE IMAGE ERROR:", e);
     }
   },
 
@@ -79,9 +96,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         user = null;
       }
 
+      const imageStr = await AsyncStorage.getItem("profile_image");
+
       set({
         token,
         user,
+        profileImage: imageStr,
         isHydrated: true,
       });
     } catch (e) {
@@ -95,6 +115,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("user");
+      // Intentionally NOT removing "profile_image" so it persists locally
 
       set({ user: null, token: null });
     } catch (e) {

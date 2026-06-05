@@ -50,7 +50,11 @@ export default function ToolsScreen() {
                     if (item.title === "GSTR 2A") {
                       router.push("/gst/gstr2a");
                     } else if (item.title === "GSTR 2B") {
-                      router.push("/gst/gstr2b");
+                      if (item.subtitle === "Auto ITC Quarter") {
+                        router.push({ pathname: "/gst/gstr2b", params: { type: "quarterly" } });
+                      } else {
+                        router.push({ pathname: "/gst/gstr2b", params: { type: "monthly" } });
+                      }
                     }
                   }}
                 >

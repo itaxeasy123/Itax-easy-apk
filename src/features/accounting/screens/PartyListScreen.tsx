@@ -1,21 +1,21 @@
-import { useCallback, useMemo, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import {
   Alert,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
-  View,
-  Modal,
+  View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import CustomSearchBar from "../../../components/CustomSearchBar";
+import { accountingTheme } from "../../../theme/accounting";
 import { AccountingHeader, BottomNav, Card, EmptyState, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Ledger, Party } from "../types/accountingTypes";
-import { accountingTheme } from "../../../theme/accounting";
 
 const formatCurrency = (value: number) =>
   `Rs ${Math.abs(value || 0).toLocaleString("en-IN", {
@@ -139,16 +139,17 @@ export default function PartyListScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.searchRow}>
-          <View style={styles.searchBox}>
-            <Ionicons name="search" size={18} color={accountingTheme.colors.textMuted} />
-            <TextInput
-              value={search}
-              onChangeText={setSearch}
-              placeholder="Search"
-              placeholderTextColor={accountingTheme.colors.textMuted}
-              style={styles.searchInput}
-            />
-          </View>
+          {/* <CustomSearchBar value={search} onChangeText={setSearch} placeholder="Search" style={{ flex: 1, backgroundColor: accountingTheme.colors.card, borderColor: accountingTheme.colors.borderMedium }} /> */}
+          <CustomSearchBar
+  value={search}
+  onChangeText={setSearch}
+  placeholder="Search"
+  style={{ 
+    flex: 1, 
+    backgroundColor: accountingTheme.colors.card, 
+    borderColor: accountingTheme.colors.borderMedium 
+  }}
+/>
           <Pressable style={styles.filterButton} onPress={() => setShowFilterModal(true)}>
             <Ionicons name="filter-outline" size={18} color={accountingTheme.colors.textSecondary} />
           </Pressable>

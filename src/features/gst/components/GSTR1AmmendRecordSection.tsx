@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -13,106 +13,62 @@ import {
 
 import {
   router,
-  usePathname,
-  useLocalSearchParams,
 } from "expo-router";
 
 const invoiceSections = [
   {
-    title:
-      "9A - Amend Records b2b Invoices",
-
+    title: "9A Amended B2B Invoices",
     count: 0,
+    route: "/gst/amended-b2b-invoices",
   },
-
   {
-    title:
-      "9A - Amend Records b2c Large Invoices",
-
+    title: "9A Amended B2C(Large) Invoices",
     count: 0,
+    route: "/gst/amended-b2c-large-invoices",
   },
-
   {
-    title:
-      "9A - Amend Records Export Invoices",
-
+    title: "9A Amended Export Invoices",
     count: 0,
+    route: "/gst/amended-export-invoices",
   },
-
   {
-    title:
-      "9A - Amend credits/debits notes (Registered)",
-
+    title: "9A Amended Credit/Debit Notes(Registered)",
     count: 0,
+    route: "/gst/amended-credit-debit-notes",
   },
-   {
-    title:
-      "9A - Amend credits/debits notes (Registered)",
-
+  {
+    title: "9A Amended Credit/Debit Notes(Not Registered)",
     count: 0,
+    route: "/gst/amended-credit-debit-notes-unregistered",
   },
-   {
-    title:
-      "9A - Amend credits/debits notes (Registered)",
-
+  {
+    title: "Amended B2B (Other)",
     count: 0,
+    route: "/gst/amended-b2b-others",
   },
-   {
-    title:
-      "9A - Amend credits/debits notes (Registered)",
-
+  {
+    title: "Amended Tax Liability (Advances Received)",
     count: 0,
+    route: "/gst/amended-tax-liability-advances-received",
+  },
+  {
+    title: " 11A-Amended Tax Liability (Advances Received)",
+    count: 0,
+    route: "/gst/amended-advance-received",
+  },
+  {
+    title: " 11B-Amended of Adjustment of Advances",
+    count: 0,
+    route: "/gst/amended-adjustment-of-advances",
   },
 ];
 
 export default function GSTR1AmmendRecordSection() {
-  const pathname =
-    usePathname();
+  const [expanded, setExpanded] = useState(false);
 
-  const params =
-    useLocalSearchParams();
-
-  const expanded =
-    pathname ===
-    "/gst/gstr1-ammed";
-
-  const handleToggle =
-    () => {
-      const routeParams = {
-        assessmentYear:
-          params.assessmentYear,
-
-        quarter:
-          params.quarter,
-
-        month:
-          params.month,
-      };
-
-      /* CLOSE */
-
-      if (expanded) {
-        router.replace({
-          pathname:
-            "/gst/gstr1",
-
-          params:
-            routeParams,
-        });
-
-        return;
-      }
-
-      /* OPEN */
-
-      router.replace({
-        pathname:
-          "/gst/gstr1-ammed",
-
-        params:
-          routeParams,
-      });
-    };
+  const handleToggle = () => {
+    setExpanded(!expanded);
+  };
 
   return (
     <>
@@ -165,21 +121,7 @@ export default function GSTR1AmmendRecordSection() {
                 /* PAGE OPEN */
 
                 onPress={() =>
-                  router.push({
-                    pathname:
-                      "/gst/b2b-invoices",
-
-                    params: {
-                      assessmentYear:
-                        params.assessmentYear,
-
-                      quarter:
-                        params.quarter,
-
-                      month:
-                        params.month,
-                    },
-                  })
+                  router.push(item.route as any)
                 }
               >
                 {/* TOP */}

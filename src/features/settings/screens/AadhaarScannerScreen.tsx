@@ -1,29 +1,36 @@
-import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
   View,
+  Text,
+  Pressable,
+  Image,
   ActivityIndicator,
+  StyleSheet,
+  TextInput,
+  Platform,
+  ScrollView,
+  Alert
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import PanCamera from "../../../components/PanCamera";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { scanAadhaar } from "../../../services/aadhaarService";
 import { extractAadhaarDetails } from "../../../utils/aadhaarParser";
+import PanCamera from "../../../components/PanCamera";
+import CalculatorHeader from "../../calculators/components/CalculatorHeader";
+
+const AADHAAR_REGEX = /^\d{12}$/;
+const DOB_REGEX = /^\d{2}\/\d{2}\/\d{4}$/;
 
 export default function AadhaarScannerScreen() {
+  const router = useRouter();
+
   const [image, setImage] = useState<any>(null);
-  const [showCamera, setShowCamera] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter(); // ✅ ADD THIS
+  const [showCamera, setShowCamera] = useState(false);
+
   const [form, setForm] = useState({
     aadhaarNumber: "",
     name: "",
@@ -32,7 +39,56 @@ export default function AadhaarScannerScreen() {
     address: "",
   });
 
-  // 📁 Upload Image
+  const [errors, setErrors] = useState({
+    aadhaarNumber: "",
+    name: "",
+    dob: "",
+  });
+
+  const validateForm = (updatedForm = form) => {
+    let newErrors = { aadhaarNumber: "", name: "", dob: "" };
+    let isValid = true;
+
+    if (!updatedForm.aadhaarNumber) {
+      newErrors.aadhaarNumber = "Aadhaar Number is required.";
+      isValid = false;
+    } else {
+      const cleanAadhaar = updatedForm.aadhaarNumber.replace(/\s/g, "");
+      if (!AADHAAR_REGEX.test(cleanAadhaar)) {
+        newErrors.aadhaarNumber = "Aadhaar must be exactly 12 digits.";
+        isValid = false;
+      }
+    }
+    
+    if (!updatedForm.name || updatedForm.name.trim() === "") {
+      newErrors.name = "Full Name is required.";
+      isValid = false;
+    }
+
+    if (!updatedForm.dob) {
+      newErrors.dob = "DOB is required.";
+      isValid = false;
+    } else if (!DOB_REGEX.test(updatedForm.dob)) {
+      newErrors.dob = "Invalid DOB format. Use DD/MM/YYYY";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleFormChange = (key: string, value: string) => {
+    let updatedValue = value;
+    if (key === "aadhaarNumber") {
+      // Auto-format with spaces for readability? (Optional, but let's keep it simple or strip non-numeric)
+      updatedValue = value.replace(/[^0-9\s]/g, "");
+    }
+    
+    const updatedForm = { ...form, [key]: updatedValue };
+    setForm(updatedForm);
+    validateForm(updatedForm);
+  };
+
   const pickImage = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -44,243 +100,399 @@ export default function AadhaarScannerScreen() {
     }
   };
 
-  // 📸 Camera Capture
   const handleCapture = (photo: any) => {
     setImage(photo);
     setShowCamera(false);
   };
 
-  // 🔍 OCR Scan
-  const handleScan = async () => {
+  const processOCR = async () => {
     if (!image) return;
 
     try {
       setLoading(true);
-
       const data = await scanAadhaar(image);
-
-      console.log("OCR RESPONSE:", data);
-
       const parsed = extractAadhaarDetails(data);
-
-      setForm(parsed);
+      
+      const newForm = {
+        aadhaarNumber: parsed.aadhaarNumber || "",
+        name: parsed.name || "",
+        dob: parsed.dob || "",
+        gender: parsed.gender || "",
+        address: parsed.address || "",
+      };
+      
+      setForm(newForm);
+      validateForm(newForm);
     } catch (err) {
       console.log("OCR ERROR:", err);
+      if (Platform.OS === 'web') {
+        window.alert("Failed to scan Aadhaar. Please check the image and try again.");
+      } else {
+        Alert.alert("Scan Failed", "Failed to scan Aadhaar. Please check the image and try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // 📸 Camera UI
+  const handleSave = () => {
+    if (validateForm()) {
+      // You can add logic to save to a store here similar to PAN
+      if (Platform.OS === 'web') {
+        window.alert("Aadhaar Details saved successfully!");
+      } else {
+        Alert.alert("Success", "Aadhaar Details saved successfully!");
+      }
+      router.back();
+    } else {
+      if (Platform.OS === 'web') {
+        window.alert("Please fix the validation errors before saving.");
+      } else {
+        Alert.alert("Validation Error", "Please fix the validation errors before saving.");
+      }
+    }
+  };
+
   if (showCamera) {
     return <PanCamera onCapture={handleCapture} />;
   }
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
-          <Pressable
-            style={styles.backBtn}
-            onPress={() => router.replace("/dashboard")}
-          >
-            <Ionicons name="arrow-back" size={20} color="#0F172A" />
-          </Pressable>
+      <CalculatorHeader onBackPress={() => router.back()} title="Aadhaar Scanner" hideIcons={true} />
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
-          <Text style={styles.headerTitle}>Aadhaar Scanner</Text>
-        </View>
+        <Text style={styles.instructionText}>
+          Scan your Aadhaar card to automatically extract details, or enter them manually.
+        </Text>
 
-        <LinearGradient colors={["#0F172A", "#1E293B"]} style={styles.hero}>
-          <Text style={styles.heroTitle}>Smart OCR Scanner</Text>
-          <Text style={styles.heroSub}>
-            Auto extract Aadhaar details instantly
-          </Text>
-        </LinearGradient>
-        {/* IMAGE */}
-        <View style={styles.imageBox}>
+        {/* 📸 SCANNING AREA */}
+        <View style={styles.scannerBox}>
           {image ? (
-            <Image source={{ uri: image.uri }} style={styles.image} />
+            <Image source={{ uri: image.uri }} style={styles.image} resizeMode="contain" />
           ) : (
-            <Text style={styles.placeholder}>Upload or Capture Aadhaar</Text>
+            <View style={styles.scannerPlaceholder}>
+              <Ionicons name="scan-outline" size={48} color="#94A3B8" />
+              <Text style={styles.placeholderText}>Place your Aadhaar card within the frame</Text>
+            </View>
           )}
+
+          {/* Scanner Reticles (Corners) */}
+          <View style={[styles.reticle, styles.reticleTL]} />
+          <View style={[styles.reticle, styles.reticleTR]} />
+          <View style={[styles.reticle, styles.reticleBL]} />
+          <View style={[styles.reticle, styles.reticleBR]} />
         </View>
 
-        {/* BUTTONS */}
-        <View style={styles.row}>
-          <Pressable style={styles.uploadBtn} onPress={pickImage}>
-            <Text style={styles.btnText}>Upload</Text>
-          </Pressable>
+        {/* 🔘 ACTION BUTTONS */}
+        {image ? (
+          <View style={styles.row}>
+            <Pressable style={styles.secondaryBtn} onPress={() => setImage(null)}>
+              <Ionicons name="trash-outline" size={18} color="#64748B" />
+              <Text style={styles.secondaryBtnText}>Clear</Text>
+            </Pressable>
 
-          <Pressable
-            style={styles.cameraBtn}
-            onPress={() => setShowCamera(true)}
+            <Pressable
+              style={[styles.primaryBtn, { flex: 2 }]}
+              onPress={processOCR}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <>
+                  <Ionicons name="scan-circle-outline" size={20} color="#fff" />
+                  <Text style={styles.primaryBtnText}>Extract Details</Text>
+                </>
+              )}
+            </Pressable>
+          </View>
+        ) : (
+          <View style={styles.row}>
+            <Pressable style={styles.actionBtn} onPress={pickImage}>
+              <Ionicons name="image-outline" size={20} color="#3B82F6" />
+              <Text style={styles.actionBtnText}>Upload Photo</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.actionBtn}
+              onPress={() => {
+                if (Platform.OS === "web") {
+                  window.alert("Please upload a photo from your device.");
+                } else {
+                  setShowCamera(true);
+                }
+              }}
+            >
+              <Ionicons name="camera-outline" size={20} color="#3B82F6" />
+              <Text style={styles.actionBtnText}>Open Camera</Text>
+            </Pressable>
+          </View>
+        )}
+
+        {/* 💎 EDITABLE FORM */}
+        <View style={styles.formCard}>
+          <Text style={styles.formTitle}>Aadhaar Details</Text>
+
+          <ValidatedInput 
+            label="Aadhaar Number" 
+            value={form.aadhaarNumber} 
+            onChange={(text: string) => handleFormChange('aadhaarNumber', text)}
+            placeholder="1234 5678 9012"
+            error={errors.aadhaarNumber}
+            keyboardType="numeric"
+          />
+          <ValidatedInput 
+            label="Full Name *" 
+            value={form.name} 
+            onChange={(text: string) => handleFormChange('name', text)}
+            placeholder="Enter full name"
+            error={errors.name}
+          />
+          <ValidatedInput 
+            label="Date of Birth" 
+            value={form.dob} 
+            onChange={(text: string) => handleFormChange('dob', text)}
+            placeholder="DD/MM/YYYY"
+            error={errors.dob}
+          />
+          <ValidatedInput 
+            label="Gender" 
+            value={form.gender} 
+            onChange={(text: string) => handleFormChange('gender', text)}
+            placeholder="Male / Female"
+          />
+          <ValidatedInput 
+            label="Address" 
+            value={form.address} 
+            onChange={(text: string) => handleFormChange('address', text)}
+            placeholder="Enter full address"
+            multiline={true}
+          />
+
+          <Pressable 
+            style={[styles.saveBtn, (!form.aadhaarNumber || !form.name || !form.dob || !!errors.aadhaarNumber || !!errors.name || !!errors.dob) && styles.saveBtnDisabled]} 
+            onPress={handleSave}
+            disabled={!form.aadhaarNumber || !form.name || !form.dob || !!errors.aadhaarNumber || !!errors.name || !!errors.dob}
           >
-            <Text style={styles.btnText}>Camera</Text>
+            <Text style={styles.saveBtnText}>Save Details</Text>
           </Pressable>
-        </View>
-
-        {/* SCAN */}
-        <Pressable
-          style={[styles.scanBtn, !image && { opacity: 0.5 }]}
-          onPress={handleScan}
-          disabled={!image}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.btnText}>Scan Aadhaar</Text>
-          )}
-        </Pressable>
-
-        {/* FORM */}
-        <View style={styles.card}>
-          <Input
-            label="Aadhaar Number"
-            value={form.aadhaarNumber}
-            onChange={(v: string) => setForm({ ...form, aadhaarNumber: v })}
-          />
-
-          <Input
-            label="Name"
-            value={form.name}
-            onChange={(v: string) => setForm({ ...form, name: v })}
-          />
-
-          <Input
-            label="DOB"
-            value={form.dob}
-            onChange={(v: string) => setForm({ ...form, dob: v })}
-          />
-
-          <Input
-            label="Gender"
-            value={form.gender}
-            onChange={(v: string) => setForm({ ...form, gender: v })}
-          />
-
-          <Input
-            label="Address"
-            value={form.address}
-            onChange={(v: string) => setForm({ ...form, address: v })}
-            multiline
-          />
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-// 🔹 Input Component
-const Input = ({ label, value, onChange, multiline = false }: any) => (
-  <View style={{ marginBottom: 12 }}>
-    <Text style={{ fontSize: 12, color: "#64748B" }}>{label}</Text>
-    <TextInput
-      value={value}
-      onChangeText={onChange}
-      multiline={multiline}
-      style={{
-        borderWidth: 1,
-        borderColor: "#E2E8F0",
-        padding: 12,
-        borderRadius: 10,
-        backgroundColor: "#F8FAFC",
-      }}
-    />
+const ValidatedInput = ({ label, value, onChange, placeholder, error, keyboardType = "default", multiline = false }: any) => (
+  <View style={styles.inputBox}>
+    <Text style={styles.inputLabel}>{label}</Text>
+    <View style={[styles.inputContainer, error && styles.inputErrorBorder, multiline && { height: 64, paddingTop: 10, justifyContent: 'flex-start' }]}>
+      <TextInput 
+        value={value} 
+        onChangeText={onChange} 
+        placeholder={placeholder}
+        style={[styles.inputText, multiline && { textAlignVertical: 'top' }]} 
+        placeholderTextColor="#94A3B8"
+        keyboardType={keyboardType}
+        multiline={multiline}
+      />
+    </View>
+    {error ? <Text style={styles.errorText}>{error}</Text> : null}
   </View>
 );
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#F1F5F9" },
-  container: { padding: 16 },
-
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-
-  imageBox: {
-    height: 180,
-    backgroundColor: "#E2E8F0",
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-    overflow: "hidden",
-  },
-
-  image: { width: "100%", height: "100%" },
-
-  placeholder: { color: "#64748B" },
-
-  row: { flexDirection: "row", gap: 10 },
-
-  uploadBtn: {
+  safe: {
     flex: 1,
-    backgroundColor: "#2563EB",
-    padding: 12,
-    borderRadius: 12,
-    alignItems: "center",
+    backgroundColor: "#F8FAFC",
   },
-
-  cameraBtn: {
-    flex: 1,
-    backgroundColor: "#7C3AED",
-    padding: 12,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-
-  scanBtn: {
-    marginTop: 10,
-    backgroundColor: "#16A34A",
-    padding: 14,
-    borderRadius: 14,
-    alignItems: "center",
-  },
-
-  card: {
-    marginTop: 16,
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 16,
-    elevation: 4,
+  container: {
+    padding: 20,
+    paddingBottom: 40,
   },
   header: {
-    flexDirection: "row", // 🔥 main fix
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
-  },
-
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginLeft: 10, // arrow ke baad spacing
+    marginBottom: 8,
   },
   backBtn: {
     padding: 8,
-    borderRadius: 10,
-    backgroundColor: "#E2E8F0",
+    borderRadius: 12,
+    backgroundColor: "#fff",
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
-  btnText: { color: "#fff", fontWeight: "600" },
-
-  /* 🔥 HERO */
-  hero: {
-    borderRadius: 18,
-    padding: 18,
-    marginBottom: 16,
-  },
-
-  heroTitle: {
-    color: "#fff",
-    fontSize: 18,
+  headerTitle: {
+    fontSize: 22,
     fontWeight: "700",
+    color: "#0F172A",
+  },
+  instructionText: {
+    fontSize: 14,
+    color: "#64748B",
+    marginBottom: 20,
+    marginTop: 4,
+  },
+  
+  /* 📸 SCANNER AREA */
+  scannerBox: {
+    height: 220,
+    backgroundColor: "#EEF2FF",
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+    position: "relative",
+    borderWidth: 2,
+    borderColor: "#C7D2FE",
+    borderStyle: "dashed",
+    overflow: "hidden",
+  },
+  scannerPlaceholder: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  placeholderText: {
+    color: "#64748B",
+    fontSize: 14,
+    fontWeight: "500",
+    marginTop: 12,
+    textAlign: "center",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 14,
+  },
+  
+  /* Reticles */
+  reticle: {
+    position: "absolute",
+    width: 30,
+    height: 30,
+    borderColor: "#3B82F6",
+  },
+  reticleTL: { top: 10, left: 10, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 8 },
+  reticleTR: { top: 10, right: 10, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 8 },
+  reticleBL: { bottom: 10, left: 10, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 8 },
+  reticleBR: { bottom: 10, right: 10, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 8 },
+
+  /* 🔘 ACTION BUTTONS */
+  row: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 24,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    gap: 8,
+  },
+  actionBtnText: {
+    color: "#3B82F6",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  primaryBtn: {
+    flex: 1,
+    flexDirection: "row",
+    backgroundColor: "#3B82F6",
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  primaryBtnText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  secondaryBtn: {
+    flex: 1,
+    flexDirection: "row",
+    backgroundColor: "#F1F5F9",
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  secondaryBtnText: {
+    color: "#64748B",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+
+  /* 💎 FORM */
+  formCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  formTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0F172A",
+    marginBottom: 12,
+  },
+  inputBox: {
+    marginBottom: 12,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#475569",
     marginBottom: 4,
   },
-
-  heroSub: {
-    color: "#CBD5F5",
-    fontSize: 13,
+  inputContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    paddingHorizontal: 12,
+    height: 44,
+    justifyContent: "center",
+  },
+  inputErrorBorder: {
+    borderColor: "#EF4444",
+    borderWidth: 1.5,
+  },
+  inputText: {
+    fontSize: 14,
+    color: "#0F172A",
+    width: "100%",
+  },
+  errorText: {
+    color: "#EF4444",
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: "500",
+  },
+  saveBtn: {
+    backgroundColor: "#3B82F6",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  saveBtnDisabled: {
+    backgroundColor: "#94A3B8",
+  },
+  saveBtnText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
   },
 });

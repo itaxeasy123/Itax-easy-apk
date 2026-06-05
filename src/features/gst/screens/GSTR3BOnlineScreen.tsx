@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
+import { LinearGradient } from "expo-linear-gradient";
 
 import GSTBottomBar from "../components/GSTBottomBar";
 
@@ -82,61 +83,65 @@ export default function GSTR3BOnlineScreen() {
 
         <TouchableOpacity
           activeOpacity={0.9}
-          style={styles.profileCard}
           onPress={() => router.push("/gst/businessprofile")}
         >
-          <View style={styles.profileLeft}>
-            <Image
-              source={{
-                uri: "https://i.pravatar.cc/100",
-              }}
-              style={styles.avatar}
-            />
+          <LinearGradient
+            colors={["#C8F1BF", "#E1F3DD", "#DCF3D9"]}
+            style={styles.profileCard}
+          >
+            <View style={styles.profileLeft}>
+              <Image
+                source={{
+                  uri: "https://i.pravatar.cc/100",
+                }}
+                style={styles.avatar}
+              />
 
-            <View>
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>ID</Text>
+              <View>
+                <View style={styles.profileRow}>
+                  <Text style={styles.profileLabel}>ID</Text>
 
-                <Text style={styles.profileValue}>
-                  : {businessProfile?.id || "Shabaz Alam"}
-                </Text>
-              </View>
+                  <Text style={styles.profileValue}>
+                    : {businessProfile?.id || "N/A"}
+                  </Text>
+                </View>
 
-              <View style={styles.profileRow}>
-                <Text style={styles.profileLabel}>GSTIN</Text>
+                <View style={styles.profileRow}>
+                  <Text style={styles.profileLabel}>GSTIN</Text>
 
-                <Text style={styles.profileValue}>
-                  : {businessProfile?.gstin || "22AAAAA0000A1Z5"}
-                </Text>
-              </View>
+                  <Text style={styles.profileValue}>
+                    : {businessProfile?.gstin || "N/A"}
+                  </Text>
+                </View>
 
-              <View style={styles.profileRow}>
-                <Text
-                  style={[
-                    styles.profileLabel,
-                    {
-                      fontWeight: "600",
-                    },
-                  ]}
-                >
-                  Financial year
-                </Text>
+                <View style={styles.profileRow}>
+                  <Text
+                    style={[
+                      styles.profileLabel,
+                      {
+                        fontWeight: "600",
+                      },
+                    ]}
+                  >
+                    Financial year
+                  </Text>
 
-                <Text
-                  style={[
-                    styles.profileValue,
-                    {
-                      fontWeight: "600",
-                    },
-                  ]}
-                >
-                  : {businessProfile?.financialYear || "2024-25"}
-                </Text>
+                  <Text
+                    style={[
+                      styles.profileValue,
+                      {
+                        fontWeight: "600",
+                      },
+                    ]}
+                  >
+                    : {businessProfile?.financialYear || "2024-25"}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
 
-          <Ionicons name="chevron-forward" size={16} color="#666" />
+            <Ionicons name="chevron-forward" size={16} color="#666" />
+          </LinearGradient>
         </TouchableOpacity>
 
         {/* RETURN CARDS */}

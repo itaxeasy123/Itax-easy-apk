@@ -3,9 +3,11 @@ import { View, Text, Image, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "../../../theme/dashboardStyles";
 import { useRouter } from "expo-router";
+import { useAuthStore } from "../../../store/authStore";
 
 const DashboardHeader = ({ user, initials }: any) => {
   const router = useRouter();
+  const profileImage = useAuthStore((state) => state.profileImage);
 
   return (
     <View style={styles.header}>
@@ -27,8 +29,14 @@ const DashboardHeader = ({ user, initials }: any) => {
         </Pressable>
 
         <Pressable onPress={() => router.navigate("/profile")} hitSlop={8}>
-          <View style={styles.profileIconWrap}>
-            <Ionicons name="person" size={20} color="#111" />
+          <View style={[styles.profileIconWrap, profileImage && { padding: 0, overflow: 'hidden' }, !profileImage && { justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2FF' }]}>
+            {profileImage ? (
+              <Image source={{ uri: profileImage }} style={{ width: '100%', height: '100%' }} />
+            ) : initials ? (
+              <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#347BE5' }}>{initials}</Text>
+            ) : (
+              <Ionicons name="person" size={20} color="#347BE5" />
+            )}
           </View>
         </Pressable>
       </View>

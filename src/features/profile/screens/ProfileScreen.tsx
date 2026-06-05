@@ -1,4 +1,4 @@
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Modal from 'react-native-modal';
 import ScreenContainer from '../../../shared/components/ScreenContainer';
 import SurfaceCard from '../../../shared/components/SurfaceCard';
 import { AuthUser, useAuthStore } from '../../../store/authStore';
@@ -36,19 +36,16 @@ export default function ProfileScreen() {
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
+  const profileImage = useAuthStore((state) => state.profileImage);
+  const setProfileImage = useAuthStore((state) => state.setProfileImage);
 
-  const [image, setImage] = useState<string | null>(null);
+  const [isModalVisible, setModalVisible] = useState(false);
 
-  useEffect(() => {
-    loadImage();
-  }, []);
-
-  const loadImage = async () => {
-    const saved = await AsyncStorage.getItem(IMAGE_KEY);
-    if (saved) setImage(saved);
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
   };
 
-  const pickImage = async () => {
+  const pickFromLibrary = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
@@ -59,41 +56,38 @@ export default function ProfileScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.7,
-      allowsEditing: true,
-      aspect: [1, 1],
+      allowsEditing: false,
     });
 
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setImage(uri);
-      await AsyncStorage.setItem(IMAGE_KEY, uri);
+      setProfileImage(result.assets[0].uri);
     }
+    toggleModal();
   };
 
-  const removeImage = async () => {
-    Alert.alert('Remove Photo', 'Are you sure?', [
-      { text: 'Cancel' },
-      {
-        text: 'Remove',
-        onPress: async () => {
-          setImage(null);
-          await AsyncStorage.removeItem(IMAGE_KEY);
-        },
-        style: 'destructive',
-      },
-    ]);
+  const takePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert('Permission required', 'Allow camera access');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+      allowsEditing: false,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+    }
+    toggleModal();
   };
 
-  const handleAvatarPress = () => {
-    if (image) {
-      Alert.alert('Profile Photo', 'Choose option', [
-        { text: 'Change', onPress: pickImage },
-        { text: 'Remove', onPress: removeImage, style: 'destructive' },
-        { text: 'Cancel', style: 'cancel' },
-      ]);
-    } else {
-      pickImage();
-    }
+  const removePhoto = () => {
+    setProfileImage(null);
+    toggleModal();
   };
 
   const fullName = getFullName(user);
@@ -124,17 +118,22 @@ export default function ProfileScreen() {
 
         <SurfaceCard style={styles.profileCard}>
           
-          {/* ✅ Avatar (No UI change, just clickable) */}
-          <Pressable onPress={handleAvatarPress}>
-            <View style={styles.avatar}>
-              {image ? (
-                <Image
-                  source={{ uri: image }}
-                  style={{ width: 72, height: 72, borderRadius: 36 }}
-                />
-              ) : (
-                <Text style={styles.avatarText}>{initials}</Text>
-              )}
+          {/* ✅ Avatar with Edit Icon */}
+          <Pressable onPress={toggleModal}>
+            <View style={{ position: 'relative', marginBottom: 14 }}>
+              <View style={[styles.avatar, { marginBottom: 0 }]}>
+                {profileImage ? (
+                  <Image
+                    source={{ uri: profileImage }}
+                    style={{ width: 72, height: 72, borderRadius: 36 }}
+                  />
+                ) : (
+                  <Text style={styles.avatarText}>{initials}</Text>
+                )}
+              </View>
+              <View style={styles.editBadge}>
+                <Feather name="camera" size={12} color="#fff" />
+              </View>
             </View>
           </Pressable>
 
@@ -170,6 +169,35 @@ export default function ProfileScreen() {
             <Text style={styles.logoutText}>Logout</Text>
           </Pressable>
         </SurfaceCard>
+
+        {/* ✅ Bottom Sheet for Image Options */}
+        <Modal
+          isVisible={isModalVisible}
+          onBackdropPress={toggleModal}
+          onSwipeComplete={toggleModal}
+          swipeDirection={['down']}
+          style={styles.modal}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHandle} />
+            
+            <Pressable style={styles.modalOption} onPress={pickFromLibrary}>
+              <Ionicons name="images-outline" size={24} color={colors.text} />
+              <Text style={styles.modalOptionText}>Upload picture</Text>
+            </Pressable>
+
+            <Pressable style={styles.modalOption} onPress={takePhoto}>
+              <Ionicons name="camera-outline" size={24} color={colors.text} />
+              <Text style={styles.modalOptionText}>Take photo</Text>
+            </Pressable>
+
+            <Pressable style={styles.modalOption} onPress={removePhoto}>
+              <Ionicons name="trash-outline" size={24} color={colors.danger} />
+              <Text style={[styles.modalOptionText, { color: colors.danger }]}>Remove picture</Text>
+            </Pressable>
+          </View>
+        </Modal>
+
       </View>
     </ScreenContainer>
   );
@@ -271,5 +299,49 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: fontWeights.bold,
     textAlign: 'center',
+  },
+  editBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: colors.primary,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.surface,
+  },
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  modalContent: {
+    backgroundColor: colors.surface,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 24,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: colors.border,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    gap: 16,
+  },
+  modalOptionText: {
+    fontSize: fontSizes.md,
+    color: colors.text,
+    fontWeight: fontWeights.medium,
   },
 });

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -21,6 +21,7 @@ import {
 import { useAuthStore } from "../../../store/authStore";
 import styles from "../../../theme/dashboardStyles";
 import DashboardHeader from "../components/DashboardHeader";
+import CustomSearchBar from "../../../components/CustomSearchBar";
 type CalculatorRoute =
   | "/gst-calculator"
   | "/depreciation-calculator"
@@ -282,8 +283,10 @@ export default function DashboardScreen() {
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
+  const profileImage = useAuthStore((state) => state.profileImage);
   const [activeTab, setActiveTab] = useState<DashboardTab>("home");
-  const [searchQuery, setSearchQuery] = useState("");
+  // const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(
     null,
   );
@@ -410,7 +413,7 @@ export default function DashboardScreen() {
     // <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
      <SafeAreaView style={styles.container} edges={["top"]}>
       {/* <StatusBar backgroundColor="#F5F9FF" style="dark" /> */}
-      <DashboardHeader />
+      {activeTab !== "more" && <DashboardHeader user={user} initials={initials} />}
       {/* <View
         style={[styles.container, { paddingTop: Math.max(insets.top, 10) }]}
       > */}
@@ -429,23 +432,47 @@ export default function DashboardScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
       >
 
-          <View style={styles.searchBox}>
-            <Ionicons name="search" size={18} color="#666" />
-            <TextInput
+          {activeTab !== "more" && (
+            <>
+            {/* --- Global Custom Search Bar --- */}
+            <CustomSearchBar
+              placeholder="Search"
               onChangeText={(text) => {
                 setSearchQuery(text);
                 if (text.trim() && activeTab !== "home" && activeTab !== "tools" && activeTab !== "more") {
                   setActiveTab("home");
                 }
               }}
-              placeholder="Search"
-              placeholderTextColor="#999"
-              style={styles.searchInput}
               value={searchQuery}
+              style={{
+                marginHorizontal: 16,
+                marginTop: 10,
+                marginBottom: 10,
+              }}
             />
-          </View>
 
-          <MarqueeBanner onNavigate={(route) => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.navigate(route as any)); }} />
+            {/* --- आपका पुराना कस्टम Search Bar (Commented Out) --- */}
+            {/* 
+            <View style={styles.searchBox}>
+              <Ionicons name="search" size={18} color="#666" />
+              <TextInput
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  if (text.trim() && activeTab !== "home" && activeTab !== "tools" && activeTab !== "more") {
+                    setActiveTab("home");
+                  }
+                }}
+                placeholder="Search"
+                placeholderTextColor="#999"
+                style={styles.searchInput}
+                value={searchQuery}
+              />
+            </View>
+            */}
+
+              <MarqueeBanner onNavigate={(route) => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.navigate(route as any)); }} />
+            </>
+          )}
 
           {activeTab === "home" ? (
             <>
@@ -600,12 +627,16 @@ export default function DashboardScreen() {
 
           {activeTab === "more" ? (
             <View style={styles.moreContainer}>
-              <Text style={styles.moreHeader}>Settings and activity</Text>
+              <Text style={styles.moreHeader}>Settings</Text>
 
               {!normalizedQuery && (
                 <Pressable style={styles.moreProfileCard} onPress={() => { blurActiveElement(); globalThis.requestAnimationFrame(() => router.navigate('/profile')); }}>
-                  <View style={styles.moreProfileAvatar}>
-                    <Ionicons name="person" size={24} color="#347BE5" />
+                  <View style={[styles.moreProfileAvatar, profileImage && { padding: 0, overflow: 'hidden' }, !profileImage && { justifyContent: 'center', alignItems: 'center', backgroundColor: '#EEF2FF' }]}>
+                    {profileImage ? (
+                      <Image source={{ uri: profileImage }} style={{ width: '100%', height: '100%' }} />
+                    ) : (
+                      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#347BE5' }}>{initials}</Text>
+                    )}
                   </View>
                   <View style={styles.moreProfileInfo}>
                     <Text style={styles.moreProfileName}>{fullName}</Text>

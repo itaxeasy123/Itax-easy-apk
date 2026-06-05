@@ -6,6 +6,7 @@ import { calculatorStyles, calculatorTheme, colors } from '../../../theme';
 type CalculatorHeaderProps = {
   onBackPress: () => void;
   title: string;
+  hideIcons?: boolean;
 };
 
 function hexToRgb(hex: string) {
@@ -52,6 +53,7 @@ function HeaderGradient() {
 export default function CalculatorHeader({
   onBackPress,
   title,
+  hideIcons,
 }: CalculatorHeaderProps) {
   return (
     <View style={calculatorStyles.header}>
@@ -64,8 +66,12 @@ export default function CalculatorHeader({
       <Text style={calculatorStyles.headerTitle}>{title}</Text>
 
       <View style={calculatorStyles.headerRight}>
-        <Ionicons color={colors.white} name="share-social-outline" size={19} />
-        <Ionicons color={colors.white} name="download-outline" size={19} />
+        {!hideIcons && (
+          <>
+            <Ionicons color={colors.white} name="share-social-outline" size={19} />
+            <Ionicons color={colors.white} name="download-outline" size={19} />
+          </>
+        )}
       </View>
     </View>
   );

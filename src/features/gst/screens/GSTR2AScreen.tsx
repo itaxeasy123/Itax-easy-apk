@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { useWindowDimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useWindowDimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, Platform } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 import GSTBottomBar from "../components/GSTBottomBar";
 import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
 
@@ -68,6 +70,40 @@ export default function GSTR2AScreen() {
   const headerWidth = tableWidth * 0.32;
   const dataWidth = tableWidth * 0.34;
 
+  const handleDownloadCSV = async (item: string) => {
+    try {
+      // Create CSV string
+      const headers = tableRows.map(r => `"${r.label}"`).join(",");
+      const rows = b2bTableData.map(row => 
+        tableRows.map(h => `"${row[h.key as keyof typeof row] || ''}"`).join(",")
+      ).join("\n");
+      
+      const csvString = `${headers}\n${rows}`;
+      const filename = `${item.replace(/[^a-zA-Z0-9]/g, "_")}_Data.csv`;
+
+      if (Platform.OS === 'web') {
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const fileUri = `${FileSystem.documentDirectory}${filename}`;
+        await FileSystem.writeAsStringAsync(fileUri, csvString);
+        await Sharing.shareAsync(fileUri, {
+            mimeType: "text/csv",
+            dialogTitle: `Save or Share ${filename}`
+        });
+      }
+    } catch (error) {
+      console.error("Error generating CSV:", error);
+      Alert.alert("Error", "Failed to download CSV.");
+    }
+  };
+
   const renderPart = (title: string, items: string[]) => (
     <View style={styles.partContainer}>
       <View style={styles.partHeaderRow}>
@@ -94,30 +130,39 @@ export default function GSTR2AScreen() {
             </TouchableOpacity>
 
             {isExpanded && item === "B2B Invoices" && (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tableWrapper}>
-                <View style={styles.table}>
-                  {tableRows.map((row, rowIndex) => (
-                    <View key={rowIndex} style={styles.tableRow}>
-                      <View style={[styles.tableCell, styles.tableHeaderCell, { width: headerWidth }]}>
-                        <Text style={styles.tableHeaderText}>{row.label}</Text>
-                      </View>
-                      {b2bTableData.map((data, dataIndex) => (
-                        <View key={dataIndex} style={[styles.tableCell, { width: dataWidth }]}>
-                          {row.isLink ? (
-                            <TouchableOpacity>
-                              <Text style={styles.tableLinkText}>{data[row.key as keyof typeof data] || ""}</Text>
-                            </TouchableOpacity>
-                          ) : (
-                            <Text style={[styles.tableDataText, row.key === 'name' && styles.tableDataTextBold]}>
-                              {data[row.key as keyof typeof data] || ""}
-                            </Text>
-                          )}
+              <View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tableWrapper}>
+                  <View style={styles.table}>
+                    {tableRows.map((row, rowIndex) => (
+                      <View key={rowIndex} style={styles.tableRow}>
+                        <View style={[styles.tableCell, styles.tableHeaderCell, { width: headerWidth }]}>
+                          <Text style={styles.tableHeaderText}>{row.label}</Text>
                         </View>
-                      ))}
-                    </View>
-                  ))}
-                </View>
-              </ScrollView>
+                        {b2bTableData.map((data, dataIndex) => (
+                          <View key={dataIndex} style={[styles.tableCell, { width: dataWidth }]}>
+                            {row.isLink ? (
+                              <TouchableOpacity>
+                                <Text style={styles.tableLinkText}>{data[row.key as keyof typeof data] || ""}</Text>
+                              </TouchableOpacity>
+                            ) : (
+                              <Text style={[styles.tableDataText, row.key === 'name' && styles.tableDataTextBold]}>
+                                {data[row.key as keyof typeof data] || ""}
+                              </Text>
+                            )}
+                          </View>
+                        ))}
+                      </View>
+                    ))}
+                  </View>
+                </ScrollView>
+                <TouchableOpacity 
+                  activeOpacity={0.8} 
+                  style={[styles.downloadBtn, { marginTop: 16, borderTopLeftRadius: 8, borderTopRightRadius: 8 }]} 
+                  onPress={() => handleDownloadCSV(item)}
+                >
+                  <Text style={styles.downloadBtnText}>Download {item} (CSV)</Text>
+                </TouchableOpacity>
+              </View>
             )}
 
             {isExpanded && item !== "B2B Invoices" && (
@@ -136,7 +181,11 @@ export default function GSTR2AScreen() {
                   <Text style={styles.noDocText}>No document found for the provided Inputs.</Text>
                 </View>
                 
-                <TouchableOpacity activeOpacity={0.8} style={styles.downloadBtn}>
+                <TouchableOpacity 
+                  activeOpacity={0.8} 
+                  style={styles.downloadBtn}
+                  onPress={() => handleDownloadCSV(item)}
+                >
                   <Text style={styles.downloadBtnText}>Download Documents (CSV)</Text>
                 </TouchableOpacity>
               </View>
@@ -166,7 +215,7 @@ export default function GSTR2AScreen() {
       >
         {/* Profile Card */}
         <LinearGradient
-          colors={["#E8F5E9", "#F1F8E9"]}
+          colors={["#C8F1BF", "#E1F3DD", "#DCF3D9"]}
           style={styles.profileCard}
         >
           <View style={styles.profileContent}>

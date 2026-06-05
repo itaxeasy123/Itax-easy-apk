@@ -29,6 +29,7 @@ import type {
 } from '../types/accountingTypes';
 import CreateInvoiceSheet from '../components/CreateInvoiceSheet';
 import { AccountingHeader, Button } from '../components';
+import CustomSearchBar from "../../../components/CustomSearchBar";
 import { accountingTheme } from '../../../theme/accounting';
 
 type InvoiceListTypeFilter = 'all' | InvoiceType;
@@ -290,17 +291,12 @@ export default function InvoiceListScreen() {
           }
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.searchBox}>
-            <Ionicons color={colors.textLight} name="search-outline" size={18} />
-            <TextInput
-              autoCapitalize="characters"
-              onChangeText={setSearchInput}
-              placeholder="Search invoice no. or GST"
-              placeholderTextColor={colors.textLight}
-              style={styles.searchInput}
-              value={searchInput}
-            />
-          </View>
+          <CustomSearchBar
+            value={searchInput}
+            onChangeText={setSearchInput}
+            placeholder="Search invoice no. or GST"
+            style={{ marginHorizontal: 16, marginTop: 10, marginBottom: 10, backgroundColor: '#FFFFFF', borderColor: '#E2E8F0' }}
+          />
 
           <Text style={styles.filterLabel}>Type</Text>
           <ScrollView

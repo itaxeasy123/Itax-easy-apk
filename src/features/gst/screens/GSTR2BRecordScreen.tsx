@@ -1,8 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Platform } from "react-native";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
+import * as XLSX from "xlsx";
 import GSTBottomBar from "../components/GSTBottomBar";
+import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
+import { getAssessmentYears } from "../constants/gstData";
+import { previewGSTRPdf } from "../services/gstrPdf.service";
 
 const taxRows = [
   { id: 1, label: "Integrated Tax (₹)" },
@@ -14,9 +20,79 @@ const taxRows = [
 export default function GSTR2BRecordScreen() {
   const { part, title } = useLocalSearchParams<{ part: string; title: string }>();
   const [values, setValues] = useState<{ [key: number]: string }>({});
+  const { businessProfile } = useGSTBusinessProfileStore();
+  const currentYear = getAssessmentYears()[0];
 
   const handleValueChange = (id: number, text: string) => {
     setValues(prev => ({ ...prev, [id]: text }));
+  };
+
+  const handleDownloadExcel = async () => {
+    try {
+      const wsData = [
+        ["Sr. No", "Supplies", "Value (₹)"],
+        ...taxRows.map(row => [
+          `${row.id}.`,
+          row.label,
+          values[row.id] || "0"
+        ])
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      const colWidths = [
+        { wch: 8 },
+        { wch: 30 },
+        { wch: 15 }
+      ];
+      ws['!cols'] = colWidths;
+      
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Details");
+      
+      const filename = `GSTR2B_Details_${part?.replace(/[^a-zA-Z0-9]/g, "") || "Data"}.xlsx`;
+
+      if (Platform.OS === 'web') {
+        const wboutWeb = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+        const blob = new Blob([wboutWeb], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+        const fileUri = `${FileSystem.documentDirectory}${filename}`;
+        await FileSystem.writeAsStringAsync(fileUri, wbout, {
+          encoding: FileSystem.EncodingType.Base64
+        });
+        await Sharing.shareAsync(fileUri, {
+            mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            dialogTitle: `Save or Share ${filename}`
+        });
+      }
+    } catch (error) {
+      console.error("Error generating Excel:", error);
+      Alert.alert("Error", "Failed to download Excel file.");
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    const dataForPdf = taxRows.map(row => ({
+      id: row.id,
+      label: row.label,
+      value: values[row.id] || "0"
+    }));
+
+    await previewGSTRPdf({
+      type: "details",
+      title: `${part || "Part A(I)"} - ${title || "All other ITC"}`,
+      data: dataForPdf,
+      gstin: businessProfile?.gstin,
+      financialYear: businessProfile?.financialYear || currentYear,
+    });
   };
 
   return (
@@ -82,7 +158,7 @@ export default function GSTR2BRecordScreen() {
             </View>
           </View>
 
-          <TouchableOpacity activeOpacity={0.8} style={styles.downloadBtn}>
+          <TouchableOpacity activeOpacity={0.8} style={styles.downloadBtn} onPress={handleDownloadExcel}>
             <Text style={styles.downloadBtnText}>Download GSTR-2B Details (Excel)</Text>
           </TouchableOpacity>
         </View>

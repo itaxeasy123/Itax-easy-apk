@@ -265,10 +265,11 @@ export default function ITRForm16Screen() {
 
       if (parsed.assessmentYear && parsed.assessmentYear !== "2025-26") {
         Alert.alert(
-          "Assessment Year Mismatch",
-          `This Form 16 appears to be for AY ${parsed.assessmentYear}. The JSON generated will be strictly validated against AY 2025-26 format. Proceed with caution.`,
+          "Unsupported Assessment Year",
+          `This Form 16 appears to be for AY ${parsed.assessmentYear}. Our system currently only supports AY 2025-26. The import has been rejected.`,
           [{ text: "OK" }],
         );
+        return;
       }
 
       importParsedResult(parsed, asset.name, asset.uri);

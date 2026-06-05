@@ -7,6 +7,7 @@ import {
   Text,
   View,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 
 import { router } from "expo-router";
@@ -19,7 +20,11 @@ import useGSTDashboard from "../hooks/useGSTDashboard";
 
 import theme from "../theme";
 
+import { Ionicons } from "@expo/vector-icons";
+import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
+
 export default function GSTDashboardScreen() {
+  const { businessProfile, setBusinessProfile } = useGSTBusinessProfileStore();
   const {
     assessmentYears,
     quarterData,
@@ -50,6 +55,11 @@ export default function GSTDashboardScreen() {
       return;
     }
 
+    setBusinessProfile({
+      ...businessProfile,
+      financialYear: assessmentYear,
+    });
+
     router.push({
        pathname: "/gst/returns",
 
@@ -63,6 +73,11 @@ export default function GSTDashboardScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+      </View>
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
@@ -130,7 +145,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F7F9FC",
   },
-
+  header: {
+    paddingHorizontal: 22,
+    paddingTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backButton: {
+    padding: 4,
+    marginLeft: -4,
+  },
   container: {
     paddingHorizontal: 22,
     paddingVertical: 32,

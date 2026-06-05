@@ -1,22 +1,16 @@
 import React, { memo } from "react";
-
 import {
   Text,
   TouchableOpacity,
   View,
+  StyleSheet,
 } from "react-native";
-
-import {
-  Ionicons,
-} from "@expo/vector-icons";
-
-import {
-  GSTBusinessProfile,
-} from "../types/gstProfile.types";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { GSTBusinessProfile } from "../types/gstProfile.types";
 
 interface GSTBusinessProfileCardProps {
   profile: GSTBusinessProfile;
-
   onPress?: () => void;
 }
 
@@ -28,154 +22,124 @@ const GSTBusinessProfileCard = ({
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={onPress}
-      className="
-        mx-4
-        mt-4
-        rounded-[24px]
-        bg-[#DDE9D8]
-        p-4
-      "
+      style={styles.touchable}
     >
-      <View
-        className="
-          flex-row
-          items-center
-          justify-between
-        "
+      <LinearGradient
+        colors={["#C8F1BF", "#E1F3DD", "#DCF3D9"]}
+        style={styles.card}
       >
-        {/* LEFT SECTION */}
-
-        <View
-          className="
-            flex-1
-            flex-row
-            items-center
-          "
-        >
-          {/* PROFILE ICON */}
-
-          <View
-            className="
-              h-[72px]
-              w-[72px]
-              items-center
-              justify-center
-              rounded-full
-              bg-[#3E7BFA]
-            "
-          >
-            <Ionicons
-              name="person"
-              size={34}
-              color="#FFFFFF"
-            />
-          </View>
-
-          {/* PROFILE CONTENT */}
-
-          <View className="ml-4 flex-1">
-            {/* ID */}
-
-            <View
-              className="
-                mb-1
-                flex-row
-                items-center
-              "
-            >
-              <Text
-                className="
-                  w-[80px]
-                  text-[18px]
-                  font-bold
-                  text-[#1F2937]
-                "
-              >
-                ID
-              </Text>
-
-              <Text
-                numberOfLines={1}
-                className="
-                  flex-1
-                  text-[18px]
-                  font-semibold
-                  text-[#374151]
-                "
-              >
-                : {profile?.id || "N/A"}
-              </Text>
+        <View style={styles.content}>
+          {/* LEFT SECTION */}
+          <View style={styles.leftSection}>
+            {/* PROFILE ICON */}
+            <View style={styles.avatar}>
+              <Ionicons name="person" size={34} color="#FFFFFF" />
             </View>
 
-            {/* GSTIN */}
+            {/* PROFILE CONTENT */}
+            <View style={styles.detailsContainer}>
+              {/* ID */}
+              <View style={styles.row}>
+                <Text style={styles.label}>ID</Text>
+                <Text numberOfLines={1} style={styles.value}>
+                  : {profile?.id || "N/A"}
+                </Text>
+              </View>
 
-            <View
-              className="
-                mb-2
-                flex-row
-                items-center
-              "
-            >
-              <Text
-                className="
-                  w-[80px]
-                  text-[18px]
-                  font-bold
-                  text-[#1F2937]
-                "
-              >
-                GSTIN
-              </Text>
+              {/* GSTIN */}
+              <View style={styles.rowMb}>
+                <Text style={styles.label}>GSTIN</Text>
+                <Text numberOfLines={1} style={styles.value}>
+                  : {profile?.gstin || "N/A"}
+                </Text>
+              </View>
 
-              <Text
-                numberOfLines={1}
-                className="
-                  flex-1
-                  text-[18px]
-                  font-semibold
-                  text-[#374151]
-                "
-              >
-                : {profile?.gstin || "N/A"}
+              {/* FINANCIAL YEAR */}
+              <Text style={styles.fyText}>
+                Financial year :{" "}
+                <Text style={styles.fyValue}>
+                  {profile?.financialYear || "N/A"}
+                </Text>
               </Text>
             </View>
-
-            {/* FINANCIAL YEAR */}
-
-            <Text
-              className="
-                text-[18px]
-                font-bold
-                text-[#1F2937]
-              "
-            >
-              Financial year :
-              <Text
-                className="
-                  font-semibold
-                  text-[#374151]
-                "
-              >
-                {" "}
-                {profile?.financialYear ||
-                  "N/A"}
-              </Text>
-            </Text>
           </View>
+
+          {/* RIGHT ARROW */}
+          <Ionicons name="chevron-forward" size={28} color="#111827" />
         </View>
-
-        {/* RIGHT ARROW */}
-
-        <Ionicons
-          name="chevron-forward"
-          size={28}
-          color="#111827"
-        />
-      </View>
+      </LinearGradient>
     </TouchableOpacity>
   );
 };
 
-export default memo(
-  GSTBusinessProfileCard
-);
+const styles = StyleSheet.create({
+  touchable: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  card: {
+    borderRadius: 24,
+    padding: 16,
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  leftSection: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  avatar: {
+    height: 72,
+    width: 72,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 36,
+    backgroundColor: "#3E7BFA",
+  },
+  detailsContainer: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  row: {
+    marginBottom: 4,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  rowMb: {
+    marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  label: {
+    width: 80,
+    fontSize: 16, // using 16px instead of 18px so it fits well
+    fontWeight: "bold",
+    color: "#1F2937",
+  },
+  value: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  fyText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1F2937",
+  },
+  fyValue: {
+    fontWeight: "600",
+    color: "#374151",
+  },
+});
+
+export default memo(GSTBusinessProfileCard);

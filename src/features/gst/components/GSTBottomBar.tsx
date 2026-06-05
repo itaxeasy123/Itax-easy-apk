@@ -19,6 +19,7 @@ import {
   router,
   usePathname,
 } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const blogItems = [
   {
@@ -53,8 +54,8 @@ const blogItems = [
 ];
 
 export default function GSTBottomBar() {
-  const pathname =
-    usePathname();
+  const pathname = usePathname();
+  const insets = useSafeAreaInsets();
 
   const [blogModal, setBlogModal] =
     useState(false);
@@ -236,24 +237,19 @@ export default function GSTBottomBar() {
 
       {/* BOTTOM BAR */}
 
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 8), height: 66 + Math.max(insets.bottom, 8) }]}>
         {/* HOME */}
 
         <TouchableOpacity
           activeOpacity={0.8}
           style={styles.item}
-          onPress={() =>
-            router.push(
-              "/gst/dashboard" as any
-            )
-          }
+          onPress={() => router.push("/gst/returns")}
         >
           <Ionicons
             name="home"
             size={18}
             color={
-              pathname ===
-              "/gst/dashboard"
+              pathname.startsWith("/gst") && pathname !== "/gst/tools"
                 ? "#4C7DFF"
                 : iconColor
             }
@@ -262,11 +258,8 @@ export default function GSTBottomBar() {
           <Text
             style={[
               styles.label,
-
-              pathname ===
-                "/gst/dashboard" && {
-                color:
-                  "#4C7DFF",
+              pathname.startsWith("/gst") && pathname !== "/gst/tools" && {
+                color: "#4C7DFF",
               },
             ]}
           >
@@ -308,30 +301,19 @@ export default function GSTBottomBar() {
         <TouchableOpacity
           activeOpacity={0.8}
           style={styles.item}
-          onPress={() =>
-            setBlogModal(true)
-          }
+          onPress={() => setBlogModal(true)}
         >
-          <View
-            style={
-              styles.activeIcon
-            }
-          >
+          <View style={{ alignItems: "center", justifyContent: "center", width: 28, height: 28 }}>
             <Ionicons
               name="newspaper"
               size={18}
-              color="#4C7DFF"
+              color={iconColor}
             />
           </View>
 
           <Text
             style={[
               styles.label,
-
-              {
-                color:
-                  "#4C7DFF",
-              },
             ]}
           >
             Blogs
@@ -363,23 +345,12 @@ export default function GSTBottomBar() {
 
 const styles = StyleSheet.create({
   container: {
-    height: 74,
-
-    backgroundColor:
-      "#FFFFFF",
-
+    backgroundColor: "#FFFFFF",
     flexDirection: "row",
-
     alignItems: "center",
-
-    justifyContent:
-      "space-evenly",
-
+    justifyContent: "space-evenly",
     borderTopWidth: 1,
-
     borderColor: "#ECECEC",
-
-    paddingBottom: 8,
   },
 
   item: {

@@ -21,6 +21,7 @@ import {
 } from "../components";
 import { accountingService } from "../services/accountingService";
 import { accountingTheme } from "../../../theme/accounting";
+import CustomSearchBar from "../../../components/CustomSearchBar";
 
 type ItemFilterKey = "all" | "instock" | "outofstock";
 
@@ -126,14 +127,12 @@ export default function ItemsScreen() {
               ))}
             </View>
 
-            <View style={styles.searchBoxTop}>
-              <Ionicons name="search" size={18} color={accountingTheme.colors.textSecondary} />
-              <TextInput
+            <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, gap: 8, marginTop: 10 }}>
+              <CustomSearchBar
                 value={search}
                 onChangeText={setSearch}
                 placeholder="Search items"
-                placeholderTextColor={accountingTheme.colors.textMuted}
-                style={styles.searchInput}
+                style={{ flex: 1, backgroundColor: accountingTheme.colors.card, borderColor: accountingTheme.colors.borderMedium }}
               />
               <Pressable style={styles.filterIcon}>
                 <Ionicons name="filter" size={18} color={accountingTheme.colors.text} />

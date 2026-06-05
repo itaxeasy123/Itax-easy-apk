@@ -1,11 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { useWindowDimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import GSTBottomBar from "../components/GSTBottomBar";
 import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
 import { getAssessmentYears } from "../constants/gstData";
+import { previewGSTRPdf } from "../services/gstrPdf.service";
 
 const tableRows = [
   { sr: "Part A", nature: "ITC Available - Credit may be claimed in relevant heading in GSTR - 3B", table: "", view: false, isHeader: true, group: "A" },
@@ -43,6 +44,9 @@ const dummyDocumentData = [
 ];
 
 export default function GSTR2BScreen() {
+  const { type } = useLocalSearchParams<{ type?: string }>();
+  const isQuarterly = type === "quarterly";
+
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"Summary" | "All Tables">("Summary");
   const { businessProfile } = useGSTBusinessProfileStore();
@@ -51,7 +55,17 @@ export default function GSTR2BScreen() {
   
   const tableWidth = width - 32;
 
-  const renderTable = (data: any[]) => (
+  const handleDownloadPdf = async (title: string, dataToDownload: any[]) => {
+    await previewGSTRPdf({
+      type: "summary",
+      title: `${title} Summary`,
+      data: dataToDownload,
+      gstin: businessProfile?.gstin,
+      financialYear: businessProfile?.financialYear || currentYear,
+    });
+  };
+
+  const renderTable = (data: any[], title: string) => (
     <View style={styles.expandedContent}>
       <View style={styles.tableWrapper}>
         <View style={styles.table}>
@@ -111,13 +125,13 @@ export default function GSTR2BScreen() {
         </View>
       </View>
 
-      <TouchableOpacity activeOpacity={0.8} style={styles.downloadBtn}>
+      <TouchableOpacity activeOpacity={0.8} style={styles.downloadBtn} onPress={() => handleDownloadPdf(title, data)}>
         <Text style={styles.downloadBtnText}>Download GSTR-2B Summary (PDF)</Text>
       </TouchableOpacity>
     </View>
   );
 
-  const renderListTable = (data: any[], colName: string, type: string) => (
+  const renderListTable = (data: any[], colName: string, typeVal: string) => (
     <View style={styles.expandedContent}>
       <View style={styles.tableWrapper}>
         <View style={styles.table}>
@@ -150,7 +164,7 @@ export default function GSTR2BScreen() {
                       pathname: "/gst/gstr2b-supplier-record",
                       params: {
                         name: row.name,
-                        type: type
+                        type: typeVal
                       }
                     });
                   }}
@@ -181,7 +195,7 @@ export default function GSTR2BScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>GSTR-2B (Month)</Text>
+        <Text style={styles.headerTitle}>GSTR-2B ({isQuarterly ? "Quarter" : "Month"})</Text>
       </View>
 
       <ScrollView
@@ -190,7 +204,7 @@ export default function GSTR2BScreen() {
       >
         {/* Profile Card */}
         <LinearGradient
-          colors={["#E8F5E9", "#F1F8E9"]}
+          colors={["#C8F1BF", "#E1F3DD", "#DCF3D9"]}
           style={styles.profileCard}
         >
           <View style={styles.profileContent}>
@@ -218,7 +232,6 @@ export default function GSTR2BScreen() {
         </LinearGradient>
         <View style={styles.divider} />
 
-        {/* Content */}
         <View style={styles.partContainer}>
           {!expandedItem ? (
             <>
@@ -269,8 +282,8 @@ export default function GSTR2BScreen() {
                   />
                 </TouchableOpacity>
 
-                {isExpanded && item === "ITC Available" && renderTable(tableRows)}
-                {isExpanded && item === "ITC Not Available" && renderTable(notAvailableTableRows)}
+                {isExpanded && item === "ITC Available" && renderTable(tableRows, "ITC Available")}
+                {isExpanded && item === "ITC Not Available" && renderTable(notAvailableTableRows, "ITC Not Available")}
                 {isExpanded && item === "Supplier wise Details" && renderListTable(dummySupplierData, "Trade/legal name", "supplier")}
                 {isExpanded && item === "Document Details" && renderListTable(dummySupplierData, "Trade/legal name", "supplier")}
               </View>

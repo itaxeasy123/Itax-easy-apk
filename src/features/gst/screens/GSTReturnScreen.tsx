@@ -12,6 +12,7 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import {
   Ionicons,
@@ -181,12 +182,15 @@ const {
 
 <TouchableOpacity
   activeOpacity={0.9}
-  style={styles.profileCard}
   onPress={() =>
     router.push(
       "/gst/businessprofile" as any
     )
   }
+>
+<LinearGradient
+  colors={["#C8F1BF", "#E1F3DD", "#DCF3D9"]}
+  style={styles.profileCard}
 >
   <View
     style={
@@ -278,6 +282,7 @@ const {
     size={24}
     color="#222"
   />
+</LinearGradient>
 </TouchableOpacity>
         {/* ACTIONS */}
 
