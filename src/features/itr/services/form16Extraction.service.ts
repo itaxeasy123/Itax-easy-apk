@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Platform } from "react-native";
+import { OCR_API_URL } from "../../../config/env";
 
 import type { Form16ImportData } from "../../../store/itrStore";
 
@@ -33,7 +34,7 @@ type Form16NormalizedResponse = Omit<
   otherDeductions?: number;
 };
 
-const OCR_API_URL = "https://ocr.itaxeasy.com/api/parse_form16";
+const FORM16_OCR_URL = `${OCR_API_URL}/parse_form16`;
 
 function normalizeText(text: string) {
   return text
@@ -762,7 +763,7 @@ async function postForm16Pdf(asset: { uri: string; name: string; mimeType?: stri
   }
 
   try {
-    const response = await axios.post(OCR_API_URL, formData, {
+    const response = await axios.post(FORM16_OCR_URL, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
         accept: "application/json",

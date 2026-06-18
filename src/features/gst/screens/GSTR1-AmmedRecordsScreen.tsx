@@ -1,4 +1,5 @@
 import React from "react";
+import GSTHeader from "../components/GSTHeader";
 import {
   View,
   Text,
@@ -10,8 +11,9 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import GSTBottomBar from "../components/GSTBottomBar";
+import GSTBottomBar from "../components/GSTBottomBar";;
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const invoiceSections = [
   {
     title: "9A Amended B2B Invoices",
@@ -77,13 +79,7 @@ export default function GSTR1AmendRecordsScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       {/* HEADER */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.replace("/gst/gstr1")}>
-          <Ionicons name="arrow-back" size={22} color="#FFF" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>GSTR-1 / IFF</Text>
-      </View>
+      <GSTHeader title="GSTR-1 / IFF" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -212,9 +208,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: "#FFF",
 
-    fontSize: 16,
+    fontSize: fontSizes.lg,
 
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
 
     marginLeft: 12,
   },
@@ -264,15 +260,15 @@ const styles = StyleSheet.create({
   label: {
     width: 52,
 
-    fontSize: 12,
+    fontSize: fontSizes.sm,
 
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
 
     color: "#222",
   },
 
   value: {
-    fontSize: 12,
+    fontSize: fontSizes.sm,
 
     color: "#222",
   },
@@ -280,7 +276,7 @@ const styles = StyleSheet.create({
   yearText: {
     marginTop: 2,
 
-    fontSize: 12,
+    fontSize: fontSizes.sm,
 
     color: "#222",
   },
@@ -306,11 +302,11 @@ const styles = StyleSheet.create({
   },
 
   dropdownText: {
-    fontSize: 13,
+    fontSize: fontSizes.md,
 
     color: "#444",
 
-    fontWeight: "500",
+    fontWeight: fontWeights.medium,
   },
 
   invoiceCard: {
@@ -340,7 +336,7 @@ const styles = StyleSheet.create({
   },
 
   invoiceTitle: {
-    fontSize: 12,
+    fontSize: fontSizes.sm,
 
     color: "#333",
 
@@ -366,7 +362,7 @@ const styles = StyleSheet.create({
   invoiceCount: {
     marginLeft: 6,
 
-    fontSize: 12,
+    fontSize: fontSizes.sm,
 
     color: "#444",
   },
@@ -398,9 +394,9 @@ const styles = StyleSheet.create({
   actionText: {
     color: "#FFF",
 
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
 
-    fontSize: 13,
+    fontSize: fontSizes.md,
   },
 
   bottomWrap: {

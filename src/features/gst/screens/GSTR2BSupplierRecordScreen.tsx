@@ -1,9 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
+import GSTHeader from "../components/GSTHeader";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import GSTBottomBar from "../components/GSTBottomBar";
+import GSTBottomBar from "../components/GSTBottomBar";;
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 export default function GSTR2BSupplierRecordScreen() {
   const { name, type } = useLocalSearchParams<{ name: string, type: string }>();
   const tradeName = name || "INTERGLOBE AVIATION LIMITED";
@@ -48,15 +50,7 @@ export default function GSTR2BSupplierRecordScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#FFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>GSTR 2B</Text>
-      </View>
+      <GSTHeader title="GSTR 2B" />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -88,7 +82,7 @@ export default function GSTR2BSupplierRecordScreen() {
                   </View>
                   <View style={[styles.tableCell, { flex: 5, borderRightWidth: 0, justifyContent: 'center', alignItems: 'flex-start' }]}>
                     {row.key === 'name' ? (
-                      <Text style={[styles.tableDataText, { fontWeight: '600' }]}>{tradeName}</Text>
+                      <Text style={[styles.tableDataText, { fontWeight: fontWeights.semibold }]}>{tradeName}</Text>
                     ) : (
                       <View style={styles.inputContainer}>
                         <TextInput
@@ -134,8 +128,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.semibold,
     color: "#FFF",
   },
   scrollContent: {
@@ -145,12 +139,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   pageTitle: {
-    fontSize: 14,
+    fontSize: fontSizes.md,
     marginBottom: 24,
     lineHeight: 20,
   },
   pageTitleBold: {
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
     color: "#1F2937",
   },
   pageTitleBlue: {
@@ -185,13 +179,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   tableHeaderSubText: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.semibold,
     color: "#FFF",
     textAlign: "center",
   },
   tableDataText: {
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     color: "#374151",
     textAlign: "left",
   },
@@ -201,9 +195,9 @@ const styles = StyleSheet.create({
   input: {
     paddingVertical: 4,
     paddingHorizontal: 8,
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     color: "#374151",
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
   floatingActionRow: {
     position: "absolute",
@@ -220,7 +214,7 @@ const styles = StyleSheet.create({
   },
   bottomBackBtnText: {
     color: "#3574E2",
-    fontWeight: "600",
-    fontSize: 14,
+    fontWeight: fontWeights.semibold,
+    fontSize: fontSizes.md,
   },
 });

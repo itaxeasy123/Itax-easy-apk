@@ -72,8 +72,11 @@ export const buildMonthlySalesSeriesFromInvoices = (
   return MONTH_LABELS.map((label, monthIndex) => {
     const amount = invoices
       .filter((invoice) => {
-        if (!invoice.invoiceDate) return false;
-        const date = new Date(invoice.invoiceDate);
+        // invoices created without an explicit invoiceDate still belong in
+        // the month they were recorded — fall back to createdAt
+        const rawDate = invoice.invoiceDate ?? (invoice as any).createdAt;
+        if (!rawDate) return false;
+        const date = new Date(rawDate);
         return !Number.isNaN(date.getTime()) && date.getFullYear() === year && date.getMonth() === monthIndex;
       })
       .filter((invoice) => SALES_INVOICE_TYPES.includes(invoice.type))

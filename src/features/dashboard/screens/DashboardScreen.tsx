@@ -439,6 +439,7 @@ export default function DashboardScreen() {
               placeholder="Search"
               onChangeText={(text) => {
                 setSearchQuery(text);
+                // @ts-ignore
                 if (text.trim() && activeTab !== "home" && activeTab !== "tools" && activeTab !== "more") {
                   setActiveTab("home");
                 }

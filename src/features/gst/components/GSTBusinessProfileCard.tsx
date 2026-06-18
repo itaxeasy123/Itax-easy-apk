@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { GSTBusinessProfile } from "../types/gstProfile.types";
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 interface GSTBusinessProfileCardProps {
   profile: GSTBusinessProfile;
   onPress?: () => void;
@@ -121,23 +122,23 @@ const styles = StyleSheet.create({
   },
   label: {
     width: 80,
-    fontSize: 16, // using 16px instead of 18px so it fits well
-    fontWeight: "bold",
+    fontSize: fontSizes.lg, // using 16px instead of 18px so it fits well
+    fontWeight: fontWeights.bold,
     color: "#1F2937",
   },
   value: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.semibold,
     color: "#374151",
   },
   fyText: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.bold,
     color: "#1F2937",
   },
   fyValue: {
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
     color: "#374151",
   },
 });

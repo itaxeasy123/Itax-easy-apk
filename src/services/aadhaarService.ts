@@ -1,6 +1,7 @@
 import axios from "axios";
+import { OCR_API_URL } from "../config/env";
 
-const API_URL = "https://ocr.itaxeasy.com/api/aadhar";
+const API_URL = `${OCR_API_URL}/aadhar`;
 
 export const scanAadhaar = async (image: any) => {
   const formData = new FormData();

@@ -32,6 +32,7 @@ export const fontSizes = {
   lg: 16,
   xl: 18,
   xxl: 22,
+  display: 24,
 } as const;
 
 export const fontWeights = {
@@ -39,6 +40,7 @@ export const fontWeights = {
   medium: "500",
   semibold: "600",
   bold: "700",
+  extraBold: "800",
 } as const;
 
 export const typography = {

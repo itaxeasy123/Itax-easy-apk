@@ -1,4 +1,5 @@
 import { useState } from "react";
+import GSTHeader from "../components/GSTHeader";
 import {
   Alert,
   Modal,
@@ -12,8 +13,9 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import GSTBottomBar from "../components/GSTBottomBar";
+import GSTBottomBar from "../components/GSTBottomBar";;
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const defaultRows = [
   {
     id: 1,
@@ -97,15 +99,7 @@ const openDetails = (row: any) => {
     <View style={styles.container}>
       {/* HEADER */}
 
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push("/gst/gstr3b-online")}>
-          <Ionicons name="chevron-back" size={18} color="#FFF" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>
-          GSTR 3B - 3.1 (Outward And Reverse Charge Inward)
-        </Text>
-      </View>
+      <GSTHeader title="GSTR 3B - 3.1 (Outward And Reverse Charge Inward)" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -228,8 +222,8 @@ const openDetails = (row: any) => {
               <Text
                 style={{
                   color: "#FFF",
-                  fontWeight: "600",
-                  fontSize: 14,
+                  fontWeight: fontWeights.semibold,
+                  fontSize: fontSizes.md,
                 }}
               >
                 Supply Details
@@ -243,7 +237,7 @@ const openDetails = (row: any) => {
             >
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: fontSizes.sm,
                   marginBottom: 8,
                 }}
               >
@@ -282,7 +276,7 @@ const openDetails = (row: any) => {
                 <Text
                   style={{
                     color: "#FFF",
-                    fontWeight: "600",
+                    fontWeight: fontWeights.semibold,
                   }}
                 >
                   Cancel
@@ -302,7 +296,7 @@ const openDetails = (row: any) => {
                 <Text
                   style={{
                     color: "#FFF",
-                    fontWeight: "600",
+                    fontWeight: fontWeights.semibold,
                   }}
                 >
                   Confirm
@@ -335,10 +329,10 @@ const styles = StyleSheet.create({
 
 headerTitle: {
   color: "#FFF",
-  fontSize: 13, // 11 se 13
+  fontSize: fontSizes.md, // 11 se 13
   marginLeft: 6,
   flex: 1,
-  fontWeight: "600",
+  fontWeight: fontWeights.semibold,
 },
 
   description: {
@@ -348,7 +342,7 @@ headerTitle: {
   },
 
 descriptionText: {
-  fontSize: 12, // 11 se 12
+  fontSize: fontSizes.sm, // 11 se 12
   color: "#222",
   lineHeight: 18,
 },
@@ -370,15 +364,15 @@ descriptionText: {
 
 headerCell: {
   color: "#FFF",
-  fontSize: 11,
-  fontWeight: "600",
+  fontSize: fontSizes.sm,
+  fontWeight: fontWeights.semibold,
   textAlign: "center",
 },
 
 viewHeader: {
   color: "#FFF",
-  fontSize: 11,
-  fontWeight: "600",
+  fontSize: fontSizes.sm,
+  fontWeight: fontWeights.semibold,
   textAlign: "center",
 },
 
@@ -413,7 +407,7 @@ viewHeader: {
   },
 
   rowText: {
-    fontSize: 11,
+    fontSize: fontSizes.sm,
     color: "#444",
     lineHeight: 16,
   },
@@ -425,7 +419,7 @@ viewHeader: {
     borderColor: "#BDBDBD",
     borderRadius: 2,
     backgroundColor: "#FFF",
-    fontSize: 11,
+    fontSize: fontSizes.sm,
     paddingHorizontal: 6,
     textAlign: "left",
   },
@@ -457,8 +451,8 @@ viewHeader: {
 
   buttonText: {
     color: "#FFF",
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.semibold,
   },
 
   overlay: {
@@ -476,19 +470,19 @@ viewHeader: {
   },
 
   modalTitle: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.semibold,
     color: "#FFF",
   },
 
   modalText: {
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     color: "#333",
   },
 
   modalValue: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.semibold,
   },
 
   closeButton: {
@@ -502,6 +496,6 @@ viewHeader: {
 
   closeText: {
     color: "#FFF",
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
 });

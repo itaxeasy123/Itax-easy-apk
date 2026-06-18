@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-import { AccountingHeader, Button, Card, Loading } from "../components";
+import { AccountingHeader, Button, Card, DateField, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { invoiceService } from "../../invoice/services/invoiceService";
 import { voucherService } from "../services/voucherService";
@@ -657,7 +657,7 @@ export default function DebitNoteCreateScreen() {
             <Text style={styles.sheetTitle}>Edit Invoice Date & Number</Text>
             <View style={styles.sheetField}>
               <Text style={styles.fieldLabel}>Select Date</Text>
-              <TextInput value={invoiceDate} onChangeText={setInvoiceDate} style={styles.sheetInput} />
+              <DateField value={invoiceDate} onChange={setInvoiceDate} placeholder="Select invoice date" />
             </View>
             <View style={styles.sheetField}>
               <Text style={styles.fieldLabel}>Invoice Number</Text>
@@ -665,7 +665,7 @@ export default function DebitNoteCreateScreen() {
             </View>
             <View style={styles.sheetField}>
               <Text style={styles.fieldLabel}>Due Date</Text>
-              <TextInput value={dueDate} onChangeText={setDueDate} style={styles.sheetInput} />
+              <DateField value={dueDate} onChange={setDueDate} placeholder="Select due date" />
             </View>
             <Pressable style={styles.sheetButton} onPress={() => setShowInvoiceEditSheet(false)}>
               <Text style={styles.sheetButtonText}>Save</Text>

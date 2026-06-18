@@ -1,45 +1,65 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import React, { useCallback, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AccountingHeader } from "../components";
+import { useFocusEffect } from "expo-router";
+import { AccountingHeader, FiscalYearBar } from "../components";
 import { Ionicons } from "@expo/vector-icons";
-import { accountingService } from "../services/accountingService";
+import { billshieldUiService, FiscalYearInfo } from "../services/billshieldUiService";
 import { accountingTheme } from "../../../theme/accounting";
+import { exportCsv, exportExcel, exportPdf, buildPdfHtml } from "../utils/exportFile";
 
 const format = (value: number | undefined) => {
   if (value === undefined || isNaN(value)) return "₹ 0.00";
   return `₹ ${value.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 };
 
+type TbRow = { ledgerId: string; ledgerName: string; groupName: string; debit: number; credit: number };
+
 export default function TrialBalanceScreen() {
     const insets = useSafeAreaInsets();
-  const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [report, setReport] = useState<any>(null);
+  const [rows, setRows] = useState<TbRow[]>([]);
+  const [totals, setTotals] = useState({ debit: 0, credit: 0 });
+  const [asOf, setAsOf] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadTrialBalance() {
-      try {
-        setLoading(true);
-        setError(null);
-        // Replace with actual trial balance report endpoint
-        const response = await accountingService.getProfitAndLossReport(year, month);
-        if (response.success && response.data) {
-          setReport(response.data);
-        } else {
-          setError("Unable to load trial balance report.");
-        }
-      } catch {
-        setError("Unable to load trial balance report.");
-      } finally {
-        setLoading(false);
-      }
+  const loadTrialBalance = useCallback(async (asOfDate?: string) => {
+    setLoading(true);
+    setError(null);
+    const response = await billshieldUiService.getTrialBalance(asOfDate);
+    if (response.success) {
+      setRows(response.data.ledgers);
+      setTotals(response.data.totals);
+    } else {
+      setError(response.message ?? "Unable to load trial balance report.");
     }
-    loadTrialBalance();
-  }, [month, year]);
+    setLoading(false);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadTrialBalance(asOf);
+    }, [loadTrialBalance, asOf])
+  );
+
+  const handleFyChange = (fy: FiscalYearInfo) => {
+    setAsOf(fy.endDate);
+  };
+
+  // ---- export menu (3-dot) ----
+  const [showExport, setShowExport] = useState(false);
+  const exportRows = (): (string | number)[][] => [
+    ["Ledger", "Group", "Debit", "Credit"],
+    ...rows.map((r) => [r.ledgerName, r.groupName, r.debit, r.credit]),
+    ["TOTAL", "", totals.debit, totals.credit],
+  ];
+  const handleExport = async (format: "PDF" | "CSV" | "Excel") => {
+    setShowExport(false);
+    const data = exportRows();
+    if (format === "CSV") await exportCsv("trial-balance", data);
+    else if (format === "Excel") await exportExcel("trial-balance", "Trial Balance", data);
+    else await exportPdf("trial-balance", buildPdfHtml("Trial Balance", "Exported from iTaxEasy", data));
+  };
 
   return (
     <View style={styles.container}>
@@ -47,24 +67,14 @@ export default function TrialBalanceScreen() {
         title="Trial Balance"
         showBackButton
         rightContent={
-          <Pressable>
+          <Pressable onPress={() => setShowExport(true)}>
             <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </Pressable>
         }
       />
 
-      {/* Financial Year Bar */}
-      <View style={styles.periodBar}>
-        <View style={styles.periodLeft}>
-          <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
-          <Text style={styles.periodText}>
-            Financial Year <Text style={styles.periodSubText}>(1 Apr 24 to 31 Mar 25)</Text>
-          </Text>
-        </View>
-        <Pressable>
-          <Text style={styles.changeText}>Change</Text>
-        </Pressable>
-      </View>
+      {/* Financial Year Bar — real fiscal years, selectable */}
+      <FiscalYearBar onChange={handleFyChange} />
 
       {/* Table Header */}
       <View style={styles.tableHeader}>
@@ -80,58 +90,20 @@ export default function TrialBalanceScreen() {
           </View>
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
+        ) : rows.length === 0 ? (
+          <Text style={styles.errorText}>No ledger balances yet — post a voucher first.</Text>
         ) : (
           <View style={styles.tableCard}>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Cash in-hand</Text>
-              <Text style={styles.amount}>{format(report?.cashInHandDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.cashInHandCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Bank A/c</Text>
-              <Text style={styles.amount}>{format(report?.bankDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.bankCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Sales A/c</Text>
-              <Text style={styles.amount}>{format(report?.salesDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.salesCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Purchase A/c</Text>
-              <Text style={styles.amount}>{format(report?.purchaseDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.purchaseCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Debit Note</Text>
-              <Text style={styles.amount}>{format(report?.debitNoteDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.debitNoteCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Credit Note</Text>
-              <Text style={styles.amount}>{format(report?.creditNoteDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.creditNoteCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Capital</Text>
-              <Text style={styles.amount}>{format(report?.capitalDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.capitalCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Assets</Text>
-              <Text style={styles.amount}>{format(report?.assetsDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.assetsCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Liabilities</Text>
-              <Text style={styles.amount}>{format(report?.liabilitiesDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.liabilitiesCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>OpeningStock</Text>
-              <Text style={styles.amount}>{format(report?.openingStockDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.openingStockCredit)}</Text>
-            </View>
+            {rows.map((row) => (
+              <View key={row.ledgerId} style={styles.row}>
+                <View style={{ flex: 2 }}>
+                  <Text style={styles.particular}>{row.ledgerName}</Text>
+                  <Text style={styles.groupName}>{row.groupName}</Text>
+                </View>
+                <Text style={styles.amount}>{row.debit > 0 ? format(row.debit) : ""}</Text>
+                <Text style={styles.amount}>{row.credit > 0 ? format(row.credit) : ""}</Text>
+              </View>
+            ))}
           </View>
         )}
       </ScrollView>
@@ -139,10 +111,29 @@ export default function TrialBalanceScreen() {
       {/* Footer Totals */}
       <View style={styles.footer}>
         <Text style={[styles.footerLabel, { flex: 2 }]}>Total</Text>
-        <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalDebit)}</Text>
-        <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalCredit)}</Text>
+        <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(totals.debit)}</Text>
+        <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(totals.credit)}</Text>
       </View>
       <View style={{ backgroundColor: accountingTheme.colors.card, height: Math.max(insets.bottom, 0) }} />
+
+      {/* Export menu */}
+      <Modal visible={showExport} transparent animationType="slide" onRequestClose={() => setShowExport(false)}>
+        <View style={styles.exportBackdrop}>
+          <Pressable style={{ flex: 1 }} onPress={() => setShowExport(false)} />
+          <View style={styles.exportSheet}>
+            {(["PDF", "Excel", "CSV"] as const).map((fmt) => (
+              <Pressable key={fmt} style={styles.exportRow} onPress={() => handleExport(fmt)}>
+                <Ionicons
+                  name={fmt === "PDF" ? "document-outline" : fmt === "Excel" ? "document-text-outline" : "grid-outline"}
+                  size={18}
+                  color="#475569"
+                />
+                <Text style={styles.exportText}>Download ({fmt})</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -215,10 +206,38 @@ const styles = StyleSheet.create({
     borderBottomColor: accountingTheme.colors.borderLight,
   },
   particular: {
-    flex: 2,
     fontSize: accountingTheme.fontSizes.sm,
     color: "#475569",
     fontWeight: accountingTheme.fontWeights.medium,
+  },
+  groupName: {
+    fontSize: 10,
+    color: accountingTheme.colors.textMuted,
+    marginTop: 1,
+  },
+  exportBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(15, 23, 42, 0.45)",
+    justifyContent: "flex-end",
+  },
+  exportSheet: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingVertical: 12,
+    paddingBottom: 32,
+  },
+  exportRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+  },
+  exportText: {
+    fontSize: accountingTheme.fontSizes.lg,
+    color: "#111827",
+    fontWeight: accountingTheme.fontWeights.semiBold,
   },
   amount: {
     flex: 1.5,

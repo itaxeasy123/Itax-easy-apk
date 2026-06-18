@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import GSTHeader from "../components/GSTHeader";
 import {
   View,
   Text,
@@ -9,8 +10,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import GSTBottomBar from "../components/GSTBottomBar";
+import GSTBottomBar from "../components/GSTBottomBar";;
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const initialRows = [
   { id: 1, label: "(A) ITC Available (whether in full or part)", value: "" },
   { id: 2, label: "(1) Import of goods", value: "0.0" },
@@ -67,15 +69,7 @@ export default function GSTR3B4Screen() {
     <View style={styles.container}>
       {/* HEADER */}
 
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push("/gst/gstr3b-online")}>
-          <Ionicons name="chevron-back" size={22} color="#FFF" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>
-          GSTR 3B -4
-        </Text>
-      </View>
+      <GSTHeader title="GSTR 3B -4" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -163,9 +157,9 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     color: "#FFF",
-    fontSize: 13,
+    fontSize: fontSizes.md,
     marginLeft: 8,
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
     flex: 1,
     lineHeight: 18,
   },
@@ -176,11 +170,11 @@ const styles = StyleSheet.create({
   },
 
 descriptionText: {
-  fontSize: 13,
+  fontSize: fontSizes.md,
   textAlign: "left",
   color: "#333",
   lineHeight: 18,
-  fontWeight: "500",
+  fontWeight: fontWeights.medium,
   paddingLeft: 4,
 },
 
@@ -200,28 +194,28 @@ descriptionText: {
   headerCell: {
     flex: 1,
     color: "#FFF",
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     textAlign: "center",
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
     paddingTop: 18,
   },
 
   valueHeader: {
     width: 100,
     color: "#FFF",
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     textAlign: "center",
     paddingTop: 12,
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
   },
 
   viewHeader: {
     width: 60,
     color: "#FFF",
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     textAlign: "center",
     paddingTop: 18,
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
   },
 
 tableRow: {
@@ -255,7 +249,7 @@ natureColumn: {
   },
 
   rowText: {
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     lineHeight: 18,
     color: "#333",
   },
@@ -265,7 +259,7 @@ natureColumn: {
     borderColor: "#CFCFCF",
     backgroundColor: "#F7F7F7",
     height: 42,
-    fontSize: 13,
+    fontSize: fontSizes.md,
     paddingHorizontal: 8,
   },
 
@@ -296,7 +290,7 @@ natureColumn: {
 
   buttonText: {
     color: "#FFF",
-    fontWeight: "600",
-    fontSize: 12,
+    fontWeight: fontWeights.semibold,
+    fontSize: fontSizes.sm,
   },
 });

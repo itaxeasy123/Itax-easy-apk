@@ -8,6 +8,7 @@ import {
 
 import theme from "../theme";
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 export default function GSTHeroCard() {
   return (
     <View style={styles.container}>
@@ -32,8 +33,8 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 34,
-    fontWeight: "800",
+    fontSize: fontSizes.display,
+    fontWeight: fontWeights.extraBold,
     color: theme.colors.primary,
   },
 
@@ -43,7 +44,7 @@ highlight: {
 
   subtitle: {
     marginTop: 8,
-    fontSize: 14,
+    fontSize: fontSizes.md,
     color: "#666",
   },
 });

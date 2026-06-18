@@ -23,6 +23,7 @@ import theme from "../theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 export default function GSTDashboardScreen() {
   const { businessProfile, setBusinessProfile } = useGSTBusinessProfileStore();
   const {
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
 
   profile: {
     fontSize: 32,
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
     color: "#333",
     textAlign: "center",
     marginBottom: 28,

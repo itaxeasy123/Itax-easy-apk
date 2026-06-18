@@ -1,7 +1,8 @@
 import axios from "axios";
 import { Platform } from "react-native";
+import { OCR_API_URL } from "../config/env";
 
-const API_URL = "https://ocr.itaxeasy.com/api";
+const API_URL = OCR_API_URL;
 
 export const scanPAN = async (file: any) => {
   const formData = new FormData();

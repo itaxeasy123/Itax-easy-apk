@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import {
   View,
@@ -14,16 +14,22 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { router, useLocalSearchParams } from "expo-router";
 
+
 import GSTBottomBar from "../components/GSTBottomBar";
 import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
+import useGSTDashboard from "../hooks/useGSTDashboard";
 
 import GSTR1RecordSection from "../components/GSTR1RecordSection";
 import GSTR1AmmendRecordSection from "../components/GSTR1AmmendRecordSection";
 import GSTR1EInvoiceSection from "../components/GSTR1EInvoiceSection";
+import GSTHeader from "../components/GSTHeader";
+import { fontSizes, fontWeights } from "../../../theme/typography";
 export default function GSTR1Screen() {
+  const [activeSection, setActiveSection] = useState<string | null>(null);
   const { businessProfile } = useGSTBusinessProfileStore();
+  const { assessmentYear: defaultYear } = useGSTDashboard();
 
-  const assessmentYear = businessProfile?.financialYear || "2024-25";
+  const assessmentYear = businessProfile?.financialYear || defaultYear;
 
   const profile = {
     name: businessProfile?.id || "N/A",
@@ -34,13 +40,7 @@ export default function GSTR1Screen() {
     <SafeAreaView style={styles.safe}>
       {/* HEADER */}
 
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={22} color="#FFF" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>GSTR-1 / IFF</Text>
-      </View>
+      <GSTHeader title="GSTR-1 / IFF" />
 
       {/* BODY */}
 
@@ -85,13 +85,22 @@ export default function GSTR1Screen() {
 
         {/* RECORD SECTION */}
 
-        <GSTR1RecordSection />
+        <GSTR1RecordSection
+          isExpanded={activeSection === 'record'}
+          onToggle={() => setActiveSection(activeSection === 'record' ? null : 'record')}
+        />
 
-        <GSTR1AmmendRecordSection />
+        <GSTR1AmmendRecordSection
+          isExpanded={activeSection === 'ammend'}
+          onToggle={() => setActiveSection(activeSection === 'ammend' ? null : 'ammend')}
+        />
 
         {/* OTHER DROPDOWNS */}
 
-        <GSTR1EInvoiceSection />
+        <GSTR1EInvoiceSection
+          isExpanded={activeSection === 'einvoice'}
+          onToggle={() => setActiveSection(activeSection === 'einvoice' ? null : 'einvoice')}
+        />
 
         {/* BUTTONS */}
 
@@ -137,9 +146,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: "#FFF",
 
-    fontSize: 16,
+    fontSize: fontSizes.lg,
 
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
 
     marginLeft: 12,
   },
@@ -189,15 +198,15 @@ const styles = StyleSheet.create({
   label: {
     width: 52,
 
-    fontSize: 12,
+    fontSize: fontSizes.sm,
 
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
 
     color: "#222",
   },
 
   value: {
-    fontSize: 12,
+    fontSize: fontSizes.sm,
 
     color: "#222",
   },
@@ -205,7 +214,7 @@ const styles = StyleSheet.create({
   yearText: {
     marginTop: 2,
 
-    fontSize: 12,
+    fontSize: fontSizes.sm,
 
     color: "#222",
   },
@@ -231,11 +240,11 @@ const styles = StyleSheet.create({
   },
 
   dropdownText: {
-    fontSize: 13,
+    fontSize: fontSizes.md,
 
     color: "#444",
 
-    fontWeight: "500",
+    fontWeight: fontWeights.medium,
   },
 
   btnRow: {
@@ -265,9 +274,9 @@ const styles = StyleSheet.create({
   actionText: {
     color: "#FFF",
 
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
 
-    fontSize: 13,
+    fontSize: fontSizes.md,
   },
 
   bottomWrap: {

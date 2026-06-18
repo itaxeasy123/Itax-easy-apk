@@ -1,447 +1,364 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import { CalendarIcon } from '../../../components/ui/icon';
+import GSTHeader from "../components/GSTHeader";
+import { useExportStore } from "../../../store/exportStore";
 import {
   View,
   Text,
+  TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  TouchableOpacity,
-  ScrollView,
   TextInput,
+  Platform,
+  ScrollView,
+  Alert,
   Modal,
-  FlatList,
+  Dimensions,
+  StatusBar,
+  KeyboardAvoidingView,
 } from "react-native";
-
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
 import GSTBottomBar from "../components/GSTBottomBar";
+import { FormControl, FormControlLabel, FormControlLabelText } from "../../../components/ui/form-control";
+import { Input, InputField, InputSlot } from "../../../components/ui/input";
+import { Datepicker } from '@ui-kitten/components';;
 
-const states = [
-    "Andhra Pradesh",
-  "Arunachal Pradesh",
-  "Assam",
-  "Bihar",
-  "Chhattisgarh",
-  "Delhi",
-  "Goa",
-  "Gujarat",
-  "Haryana",
-  "Jharkhand",
-  "Karnataka",
-  "Kerala",
-  "Madhya Pradesh",
-  "Maharashtra",
-  "Punjab",
-  "Rajasthan",
-  "Tamil Nadu",
-  "Telangana",
-  "Uttar Pradesh",
-  "West Bengal",
-];
+import { fontSizes, fontWeights } from "../../../theme/typography";
+const { height } = Dimensions.get("window");
 
-const gstRates = ["5%", "12%", "18%", "28%"];
+const STATE_OPTIONS = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Delhi","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Punjab","Rajasthan","Tamil Nadu","Uttar Pradesh","Uttarakhand","West Bengal"];
+const RATE_OPTIONS = ["0%","0.1%","0.25%","1%","1.5%","3%","5%","12%","18%","28%"];
+const SUPPLY_OPTIONS = ["Interstate","Intrastate"];
+
+
+
+
 
 export default function AddExportInvoiceScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const editId = params.editId ? Number(params.editId) : null;
+  
+  const { addRecord, updateFullRecord, records } = useExportStore();
 
-  const [pos, setPos] =
-    useState("Select State");
+  const [exportType, setExportType] = useState("");
+  const [invoiceNo, setInvoiceNo] = useState("");
+  const [portCode, setPortCode] = useState("");
+  const [shippingBillNo, setShippingBillNo] = useState("");
+  const [shippingBillDate, setShippingBillDate] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState("");
+  const [invoiceValue, setInvoiceValue] = useState("");
+  const [totalInvoiceValue, setTotalInvoiceValue] = useState("");
+  const [taxRate, setTaxRate] = useState("");
 
-  const [invoiceNo, setInvoiceNo] =
-    useState("");
+  const [exportTypeModalVisible, setExportTypeModalVisible] = useState(false);
+  const [rateModalVisible, setRateModalVisible] = useState(false);
 
-  const [supplyType, setSupplyType] =
-    useState("");
 
-  const [invoiceDate, setInvoiceDate] =
-    useState("");
 
-  const [invoiceValue, setInvoiceValue] =
-    useState("");
 
-  const [totalInvoiceValue, setTotalInvoiceValue] =
-    useState("");
 
-  const [gst, setGst] = useState("5%");
+  useEffect(() => {
+    if (editId) {
+      const recordToEdit = records.find(r => r.id === editId);
+      if (recordToEdit) {
+        setExportType(recordToEdit.exportType || "");
+        setInvoiceNo(recordToEdit.invoiceNo || "");
+        setPortCode(recordToEdit.portCode || "");
+        setShippingBillNo(recordToEdit.shippingBillNo || "");
+        setShippingBillDate(recordToEdit.shippingBillDate || "");
+        setInvoiceDate(recordToEdit.invoiceDate || "");
+        setInvoiceValue(recordToEdit.invoiceValue || "");
+        setTotalInvoiceValue(recordToEdit.totalInvoiceValue || "");
+        setTaxRate(recordToEdit.taxRate || "");
+      }
+    }
+  }, [editId, records]);
 
-  const [posModal, setPosModal] =
-    useState(false);
+  const handleSave = () => {
+    let val = 0;
+    // @ts-ignore
+    try { if (typeof invoiceValue !== 'undefined') val = parseFloat(invoiceValue) || 0; } catch(e){}
+    // @ts-ignore
+    try { if (typeof totalTaxable !== 'undefined') val = parseFloat(totalTaxable) || 0; } catch(e){}
+    // @ts-ignore
+    try { if (typeof noteValue !== 'undefined') val = parseFloat(noteValue) || 0; } catch(e){}
+    // @ts-ignore
+    try { if (typeof grossAdvance !== 'undefined') val = parseFloat(grossAdvance) || 0; } catch(e){}
+    
+    let r = 0;
+    // @ts-ignore
+    try { if (typeof rate !== 'undefined') r = parseFloat(rate) || 0; } catch(e){}
+    // @ts-ignore
+    try { if (typeof taxRate !== 'undefined') r = parseFloat(taxRate) || 0; } catch(e){}
+    // @ts-ignore
+    try { if (typeof gst !== 'undefined') r = parseFloat(gst) || 0; } catch(e){}
+    
+    let taxAmt = (val * r) / 100;
+    let cgst = 0, sgst = 0, igst = 0;
+    
+    let st = "";
+    // @ts-ignore
+    try { if (typeof state !== 'undefined') st = state; } catch(e){}
+    // @ts-ignore
+    try { if (typeof place !== 'undefined') st = place; } catch(e){}
+    
+    if (!st || st.toLowerCase().includes("delhi")) {
+      cgst = taxAmt / 2;
+      sgst = taxAmt / 2;
+    } else {
+      igst = taxAmt;
+    }
 
-  const [gstModal, setGstModal] =
-    useState(false);
+    const payload = {
+      exportType,
+      invoiceNo,
+      portCode,
+      shippingBillNo,
+      shippingBillDate,
+      invoiceDate,
+      invoiceValue,
+      totalInvoiceValue,
+      taxRate,
+      totalTaxable: val.toFixed(2),
+      centralTax: cgst.toFixed(2),
+      stateTax: sgst.toFixed(2),
+      integrated: igst.toFixed(2),
+      integratedTax: igst.toFixed(2),
+    };
+if (editId) {
+      updateFullRecord(editId, payload);
+      if (Platform.OS === 'web') {
+        window.alert("Record Updated Successfully!");
+      } else {
+        Alert.alert("Success", "Record Updated Successfully!");
+      }
+      router.back();
+    } else {
+      // @ts-ignore
+    addRecord({
+        id: Date.now(),
+        ...payload
+      });
+      
+      // Clear fields after adding
+      setExportType("");
+      setInvoiceNo("");
+      setPortCode("");
+      setShippingBillNo("");
+      setShippingBillDate("");
+      setInvoiceDate("");
+      setInvoiceValue("");
+      setTotalInvoiceValue("");
+      setTaxRate("");
+
+      if (Platform.OS === 'web') {
+        window.alert("Record Added! You can add another or go back.");
+      } else {
+        Alert.alert("Success", "Record Added! You can add another or go back.");
+      }
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* HEADER */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() =>
-            router.push(
-              "/gst/export-invoices" as any
-            )
-          }
-          style={styles.backButton}
-        >
-          <Ionicons
-            name="arrow-back"
-            size={18}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.container}>
+        <GSTHeader title="6A-Export Invoices" />
 
-        <Text style={styles.headerTitle}>
-          6A-Export Invoices
-        </Text>
-      </View>
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
+          <View style={styles.card}>
+            {/* Title from Figma */}
+            <Text style={styles.cardSubtitle}>Outward and Reverse charge Inward</Text>
+            <Text style={styles.srNoText}>Sr. No 1</Text>
+            
+            <FormControl style={{ marginBottom: 16 }}>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => setExportTypeModalVisible(true)}>
+                <Input style={styles.inputBox} pointerEvents="none">
+                  <InputField value={exportType} editable={false} placeholder="Export Type (WPAY/WOPAY)" placeholderTextColor="#9b9b9b" style={styles.inputText} />
+                  <InputSlot>
+                    <Ionicons name="chevron-down" size={20} color="#7d7d7d" />
+                  </InputSlot>
+                </Input>
+              </TouchableOpacity>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={invoiceNo} onChangeText={setInvoiceNo} placeholder="Invoice No." placeholderTextColor="#9b9b9b" style={styles.inputText} />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={portCode} onChangeText={setPortCode} placeholder="Port Code (e.g. INBOM4)" placeholderTextColor="#9b9b9b" style={styles.inputText} maxLength={6} autoCapitalize="characters" />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={shippingBillNo} onChangeText={setShippingBillNo} placeholder="Shipping Bill No." placeholderTextColor="#9b9b9b" style={styles.inputText} />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              {Platform.OS === 'web' ? (
+                <View>
+                  <Text style={{ fontSize: fontSizes.sm, color: '#666', marginBottom: 6, marginLeft: 4, fontWeight: fontWeights.medium }}>
+                    Shipping Bill Date
+                  </Text>
+                  {/* @ts-ignore */}
+                  <input
+                    type="date"
+                    value={shippingBillDate ? shippingBillDate : ''}
+                    onChange={(e: any) => setShippingBillDate(e.target.value)}
+                    style={{ height: 48, width: '100%', borderColor: '#B0B5C1', borderWidth: 1, borderRadius: 8, padding: '0 12px', boxSizing: 'border-box', backgroundColor: '#FFFFFF', color: '#333', fontSize: fontSizes.md, fontFamily: 'sans-serif', outline: 'none' }}
+                  />
+                </View>
+              ) : (
+                <Datepicker
+                  date={shippingBillDate ? new Date(shippingBillDate) : undefined}
+                  onSelect={nextDate => setShippingBillDate(nextDate.toISOString().split('T')[0])}
+                  placeholder="Shipping Bill Date"
+                  style={{ height: 48, backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#B0B5C1' }}
+                 min={new Date(1990, 0, 1)} max={new Date(2050, 11, 31)} accessoryRight={() => (<View style={{ paddingRight: 8 }}><CalendarIcon size={20} color="#64748b" /></View>)} />
+              )}
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              {Platform.OS === 'web' ? (
+                <View>
+                  <Text style={{ fontSize: fontSizes.sm, color: '#666', marginBottom: 6, marginLeft: 4, fontWeight: fontWeights.medium }}>
+                    Invoices Date
+                  </Text>
+                  {/* @ts-ignore */}
+                  <input
+                    type="date"
+                    value={invoiceDate ? invoiceDate : ''}
+                    onChange={(e: any) => setInvoiceDate(e.target.value)}
+                    style={{ height: 48, width: '100%', borderColor: '#B0B5C1', borderWidth: 1, borderRadius: 8, padding: '0 12px', boxSizing: 'border-box', backgroundColor: '#FFFFFF', color: '#333', fontSize: fontSizes.md, fontFamily: 'sans-serif', outline: 'none' }}
+                  />
+                </View>
+              ) : (
+                <Datepicker
+                  date={invoiceDate ? new Date(invoiceDate) : undefined}
+                  onSelect={nextDate => setInvoiceDate(nextDate.toISOString().split('T')[0])}
+                  placeholder="Invoices Date"
+                  style={{ height: 48, backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#B0B5C1' }}
+                 min={new Date(1990, 0, 1)} max={new Date(2050, 11, 31)} accessoryRight={() => (<View style={{ paddingRight: 8 }}><CalendarIcon size={20} color="#64748b" /></View>)} />
+              )}
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={invoiceValue} onChangeText={setInvoiceValue} placeholder="Invoices Value" placeholderTextColor="#9b9b9b" style={styles.inputText} />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={totalInvoiceValue} onChangeText={setTotalInvoiceValue} placeholder="Total Invoices val" placeholderTextColor="#9b9b9b" style={styles.inputText} />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <FormControlLabel>
+                <FormControlLabelText>GST</FormControlLabelText>
+              </FormControlLabel>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => setRateModalVisible(true)}>
+                <Input style={styles.inputBox} pointerEvents="none">
+                  <InputField value={taxRate} editable={false} placeholder="Select Rate" placeholderTextColor="#9b9b9b" style={styles.inputText} />
+                  <InputSlot>
+                    <Ionicons name="chevron-down" size={20} color="#7d7d7d" />
+                  </InputSlot>
+                </Input>
+              </TouchableOpacity>
+            </FormControl>
+          </View>
 
-      {/* BODY */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* TITLE */}
-        <Text style={styles.title}>
-          Outward and Reverse charge Inward
-        </Text>
+          
 
-        {/* SUB TITLE */}
-        <Text style={styles.subTitle}>
-          Sr. No 1
-        </Text>
+          {/* Buttons placed inside ScrollView at the bottom so they flow naturally and don't overlap */}
+          <View style={styles.bottomButtons}>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => router.back()}>
+              <Text style={styles.btnText}>Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn} onPress={handleSave}>
+              <Text style={styles.btnText}>{editId ? "Save" : "Add"}</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
 
-        {/* POS */}
-        <Text style={styles.label}>POS</Text>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.selectBox}
-          onPress={() => setPosModal(true)}
-        >
-          <Text
-            style={[
-              styles.selectText,
-              pos === "Select State" && {
-                color: "#7B8190",
-              },
-            ]}
-          >
-            {pos}
-          </Text>
-
-          <Ionicons
-            name="chevron-down"
-            size={16}
-            color="#6B7280"
-          />
-        </TouchableOpacity>
-
-        {/* INVOICE NO */}
-        <TextInput
-          placeholder="Invoices No."
-          placeholderTextColor="#7B8190"
-          value={invoiceNo}
-          onChangeText={setInvoiceNo}
-          style={styles.input}
-        />
-
-        {/* SUPPLY TYPE */}
-        <TextInput
-          placeholder="Supply Type"
-          placeholderTextColor="#7B8190"
-          value={supplyType}
-          onChangeText={setSupplyType}
-          style={styles.input}
-        />
-
-        {/* INVOICE DATE */}
-        <TextInput
-          placeholder="Invoices Data"
-          placeholderTextColor="#7B8190"
-          value={invoiceDate}
-          onChangeText={setInvoiceDate}
-          style={styles.input}
-        />
-
-        {/* INVOICE VALUE */}
-        <TextInput
-          placeholder="Invoices Value"
-          placeholderTextColor="#7B8190"
-          value={invoiceValue}
-          onChangeText={setInvoiceValue}
-          style={styles.input}
-        />
-
-        {/* TOTAL INVOICE VALUE */}
-        <TextInput
-          placeholder="Total Invoices val"
-          placeholderTextColor="#7B8190"
-          value={totalInvoiceValue}
-          onChangeText={
-            setTotalInvoiceValue
-          }
-          style={styles.input}
-        />
-
-        {/* GST */}
-        <Text style={styles.label}>GST</Text>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.selectBox}
-          onPress={() => setGstModal(true)}
-        >
-          <Text style={styles.selectText}>
-            {gst}
-          </Text>
-
-          <Ionicons
-            name="chevron-down"
-            size={16}
-            color="#6B7280"
-          />
-        </TouchableOpacity>
-
-        {/* BUTTONS */}
-        <View style={styles.buttonRow}>
-          {/* BACK */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.backBtn}
-            onPress={() =>
-              router.push(
-                "/gst/export-invoices" as any
-              )
-            }
-          >
-            <Text style={styles.buttonText}>
-              Back
-            </Text>
+        <Modal visible={exportTypeModalVisible} transparent animationType="fade">
+          <TouchableOpacity activeOpacity={1} style={styles.modalOverlay} onPress={() => setExportTypeModalVisible(false)}>
+            <View style={styles.dropdownBox}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {["WPAY (With Payment)", "WOPAY (Without Payment)"].map((item, idx) => (
+                  <TouchableOpacity key={idx} activeOpacity={0.8} style={styles.dropdownItem} onPress={() => { setExportType(item); setExportTypeModalVisible(false); }}>
+                    <Text style={styles.dropdownText}>{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
           </TouchableOpacity>
+        </Modal>
 
-          {/* ADD */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.addBtn}
-          >
-            <Text style={styles.buttonText}>
-              Add
-            </Text>
+        <Modal visible={rateModalVisible} transparent animationType="fade">
+          <TouchableOpacity activeOpacity={1} style={styles.modalOverlay} onPress={() => setRateModalVisible(false)}>
+            <View style={styles.dropdownBox}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {RATE_OPTIONS.map((item, idx) => (
+                  <TouchableOpacity key={idx} activeOpacity={0.8} style={styles.dropdownItem} onPress={() => { setTaxRate(item); setRateModalVisible(false); }}>
+                    <Text style={styles.dropdownText}>{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
           </TouchableOpacity>
+        </Modal>
+
+
+
+
+
+
+
+
+
+
+
+        <View style={styles.bottomNavWrapper}>
+          <GSTBottomBar />
         </View>
-      </ScrollView>
-
-      {/* POS MODAL */}
-      <Modal
-        visible={posModal}
-        transparent
-        animationType="fade"
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          style={styles.modalOverlay}
-          onPress={() => setPosModal(false)}
-        >
-          <View style={styles.modalBox}>
-            <FlatList
-              data={states}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.optionItem}
-                  onPress={() => {
-                    setPos(item);
-                    setPosModal(false);
-                  }}
-                >
-                  <Text style={styles.optionText}>
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      {/* GST MODAL */}
-      <Modal
-        visible={gstModal}
-        transparent
-        animationType="fade"
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          style={styles.modalOverlay}
-          onPress={() => setGstModal(false)}
-        >
-          <View style={styles.modalBox}>
-            <FlatList
-              data={gstRates}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.optionItem}
-                  onPress={() => {
-                    setGst(item);
-                    setGstModal(false);
-                  }}
-                >
-                  <Text style={styles.optionText}>
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      {/* BOTTOM BAR */}
-      <GSTBottomBar />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F3F4F6",
+  safeArea: { flex: 1, backgroundColor: "#f0f2f5" },
+  container: { flex: 1 },
+  header: { 
+    backgroundColor: "#3D7BEA", 
+    flexDirection: "row", 
+    alignItems: "center", 
+    paddingHorizontal: 14, 
+    paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 45) : 45, 
+    paddingBottom: 16 
   },
-
-  header: {
-    height: 58,
-    backgroundColor: "#3B82F6",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-  },
-
-  backButton: {
-    marginRight: 10,
-  },
-
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  scrollContent: {
-    paddingHorizontal: 14,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-
-  title: {
-    fontSize: 13,
-    color: "#374151",
-    fontWeight: "500",
-    marginBottom: 10,
-  },
-
-  subTitle: {
-    fontSize: 11,
-    color: "#2563EB",
-    marginBottom: 10,
-    fontWeight: "500",
-  },
-
-  label: {
-    fontSize: 11,
-    color: "#374151",
-    marginBottom: 6,
-    marginLeft: 2,
-  },
-
-  /* SAME INPUT UI */
-  selectBox: {
-    height: 42,
-    borderWidth: 1,
-    borderColor: "#C9D2E3",
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-
-  selectText: {
-    fontSize: 11,
-    color: "#111827",
-  },
-
-  input: {
-    height: 42,
-    borderWidth: 1,
-    borderColor: "#C9D2E3",
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 12,
-    fontSize: 11,
-    color: "#111827",
-    marginBottom: 12,
-  },
-
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-
-  backBtn: {
-    flex: 1,
-    height: 42,
-    backgroundColor: "#4B83F5",
-    borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 8,
-  },
-
-  addBtn: {
-    flex: 1,
-    height: 42,
-    backgroundColor: "#4B83F5",
-    borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 8,
-  },
-
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-
-  /* MODAL */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.10)",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-
-  modalBox: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    overflow: "hidden",
-    maxHeight: 220,
-  },
-
-  optionItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-
-  optionText: {
-    fontSize: 13,
-    color: "#111827",
-  },
+  backButton: { marginRight: 8 },
+  headerTitle: { color: "#fff", fontSize: fontSizes.lg, fontWeight: fontWeights.semibold },
+  scrollContent: { padding: 16, paddingBottom: 40 }, // Breathing room below buttons
+  card: { backgroundColor: "#fff", borderRadius: 8, padding: 16, marginBottom: 24, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
+  cardSubtitle: { fontSize: fontSizes.md, color: "#333", fontWeight: fontWeights.semibold, marginBottom: 8, textAlign: "center" },
+  srNoText: { fontSize: fontSizes.md, color: "#3D7BEA", fontWeight: fontWeights.semibold, marginBottom: 16 },
+  cardTitle: { fontSize: fontSizes.lg, color: "#333", fontWeight: fontWeights.semibold, marginBottom: 16 },
+  
+  // Figma input field styles
+  inputBox: { height: 48, borderWidth: 1, borderColor: "#B0B5C1", borderRadius: 8, paddingHorizontal: 0, marginBottom: 0, backgroundColor: "#fff" },
+  inputText: { fontSize: fontSizes.md, color: "#333", height: "100%", paddingHorizontal: 14 },
+  
+  // Blue View and Download style buttons from Figma
+  bottomButtons: { flexDirection: "row", justifyContent: "space-between", gap: 16 },
+  actionBtn: { flex: 1, height: 48, backgroundColor: "#3D7BEA", borderRadius: 8, justifyContent: "center", alignItems: "center" },
+  btnText: { color: "#fff", fontSize: fontSizes.lg, fontWeight: fontWeights.semibold },
+  
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingTop: height * 0.3 },
+  dropdownBox: { width: "100%", maxHeight: height * 0.4, backgroundColor: "#fff", borderRadius: 12, overflow: "hidden", elevation: 5 },
+  dropdownItem: { padding: 16, borderBottomWidth: 1, borderBottomColor: "#f3f4f6" },
+  dropdownText: { fontSize: fontSizes.md, color: "#333" },
+  
+  bottomNavWrapper: { backgroundColor: "#fff" }
 });

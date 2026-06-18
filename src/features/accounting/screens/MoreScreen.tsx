@@ -26,6 +26,9 @@ export default function MoreScreen() {
     icon: NonNullable<MenuIconName>;
   }[] = [
     { id: 'vouchers', title: 'Vouchers', subtitle: 'Record journal entries', icon: 'albums' },
+    { id: 'companies', title: 'Companies & Fiscal Years', subtitle: 'Switch books, close the year', icon: 'briefcase' },
+    { id: 'chart-of-accounts', title: 'Chart of Accounts', subtitle: 'Groups, sub-groups and ledgers tree', icon: 'git-branch' },
+    { id: 'bankbook', title: 'Bankbook & Reconciliation', subtitle: 'Bank entries, cheque clearing', icon: 'business' },
     { id: 'payments', title: 'Payments', subtitle: 'View payment transactions', icon: 'card' },
     { id: 'bank-tools', title: 'Bank Tools', subtitle: 'IFSC lookup and account verify', icon: 'business' },
     {
@@ -107,6 +110,18 @@ export default function MoreScreen() {
     }
     if (itemId === 'company-create') {
       router.navigate('/accounting/company-create');
+      return;
+    }
+    if (itemId === 'companies') {
+      router.navigate('/accounting/companies');
+      return;
+    }
+    if (itemId === 'chart-of-accounts') {
+      router.navigate('/accounting/chart-of-accounts');
+      return;
+    }
+    if (itemId === 'bankbook') {
+      router.navigate('/accounting/bankbook');
       return;
     }
 

@@ -1,600 +1,274 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import GSTHeader from "../components/GSTHeader";
+import { useHSNStore } from "../../../store/hsnStore";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
   TextInput,
   Platform,
+  ScrollView,
+  Alert,
   Modal,
+  Dimensions,
+  StatusBar,
+  KeyboardAvoidingView,
 } from "react-native";
-
-import { useRouter } from "expo-router";
-
-import {
-  Ionicons,
-  MaterialIcons,
-  Feather,
-} from "@expo/vector-icons";
-
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import GSTBottomBar from "../components/GSTBottomBar";
+import { FormControl, FormControlLabel, FormControlLabelText } from "../../../components/ui/form-control";
+import { Input, InputField, InputSlot } from "../../../components/ui/input";;
 
-const states = [
-  "Andhra Pradesh",
-  "Arunachal Pradesh",
-  "Assam",
-  "Bihar",
-  "Chhattisgarh",
-  "Delhi",
-  "Goa",
-];
+import { fontSizes, fontWeights } from "../../../theme/typography";
+const { height } = Dimensions.get("window");
 
-const rates = [
-  "5%",
-  "12%",
-  "18%",
-  "28%",
-];
+const UQC_OPTIONS = ["BGS - BAGS", "BAL - BALE", "BOU - BILLION OF UNITS", "BOX - BOX", "BTL - BOTTLES", "BUN - BUNCHES", "CAN - CANS", "CBM - CUBIC METERS", "CCM - CUBIC CENTIMETERS", "CMS - CENTIMETERS", "CTN - CARTONS", "DOZ - DOZENS", "DRM - DRUMS", "GGK - GREAT GROSS", "GMS - GRAMS", "GRS - GROSS", "GYD - GROSS YARDS", "KGS - KILOGRAMS", "KLR - KILOLITRE", "KME - KILOMETRE", "MLT - MILLILITRE", "MTR - METERS", "NOS - NUMBERS", "PAC - PACKS", "PCS - PIECES", "PRS - PAIRS", "QTL - QUINTAL", "ROL - ROLLS", "SET - SETS", "SQF - SQUARE FEET", "SQM - SQUARE METERS", "SQY - SQUARE YARDS", "TBS - TABLETS", "TGM - TEN GROSS", "THD - THOUSANDS", "TON - TONNES", "TUB - TUBES", "UGS - US GALLONS", "YDS - YARDS", "OTH - OTHERS"];
 
-const GSTR1HSNSummaryAddScreen =
-  () => {
-    const router = useRouter();
 
-    const [state, setState] =
-      useState("");
 
-    const [rate, setRate] =
-      useState("5%");
 
-    const [
-      invoiceValue,
-      setInvoiceValue,
-    ] = useState("");
 
-    const [
-      supplyType,
-      setSupplyType,
-    ] = useState("");
 
-    const [cess, setCess] =
-      useState("");
+export default function GSTR1HSNSummaryAddScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const editId = params.editId ? Number(params.editId) : null;
+  
+  const { addRecord, updateFullRecord, records } = useHSNStore();
 
-    const [
-      stateModal,
-      setStateModal,
-    ] = useState(false);
+  const [hsnCode, setHsnCode] = useState("");
+  const [description, setDescription] = useState("");
+  const [uqc, setUqc] = useState("");
+  const [totalQuantity, setTotalQuantity] = useState("");
+  const [totalValue, setTotalValue] = useState("");
+  const [taxableValue, setTaxableValue] = useState("");
+  const [integratedTax, setIntegratedTax] = useState("");
+  const [centralTax, setCentralTax] = useState("");
+  const [stateTax, setStateTax] = useState("");
+  const [cess, setCess] = useState("");
 
-    const [
-      rateModal,
-      setRateModal,
-    ] = useState(false);
+  const [uqcModalVisible, setUqcModalVisible] = useState(false);
 
-    return (
-      <SafeAreaView
-        style={styles.safeArea}
-      >
-        <View style={styles.container}>
-          {/* HEADER */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() =>
-                router.push(
-                  "/gst/gstr1-hsn-summary"
-                )
-              }
-            >
-              <Ionicons
-                name="chevron-back"
-                size={20}
-                color="#fff"
-              />
-            </TouchableOpacity>
 
-            <Text
-              style={styles.headerTitle}
-            >
-              12-HSN-wise summary of outward
-              {"\n"}
-              supplies
-            </Text>
-          </View>
 
-          {/* BODY */}
-          <ScrollView
-            showsVerticalScrollIndicator={
-              false
-            }
-            contentContainerStyle={{
-              paddingBottom: 170,
-            }}
-          >
-            <View style={styles.body}>
-              <Text style={styles.title}>
-                Outward and Reverse charge
-                Inward
-              </Text>
 
-              <Text style={styles.srNo}>
-                Sr. No 1
-              </Text>
 
-              {/* SELECT STATE */}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.inputBox}
-                onPress={() =>
-                  setStateModal(true)
-                }
-              >
-                <Text
-                  style={[
-                    styles.inputText,
-                    !state && {
-                      color: "#9b9b9b",
-                    },
-                  ]}
-                >
-                  {state ||
-                    "Select State"}
-                </Text>
 
-                <Ionicons
-                  name="chevron-down"
-                  size={18}
-                  color="#7d7d7d"
-                />
-              </TouchableOpacity>
+  useEffect(() => {
+    if (editId) {
+      const recordToEdit = records.find(r => r.id === editId);
+      if (recordToEdit) {
+        setHsnCode(recordToEdit.hsnCode || "");
+        setDescription(recordToEdit.description || "");
+        setUqc(recordToEdit.uqc || "");
+        setTotalQuantity(recordToEdit.totalQuantity || "");
+        setTotalValue(recordToEdit.totalValue || "");
+        setTaxableValue(recordToEdit.taxableValue || "");
+        setIntegratedTax(recordToEdit.integratedTax || "");
+        setCentralTax(recordToEdit.centralTax || "");
+        setStateTax(recordToEdit.stateTax || "");
+        setCess(recordToEdit.cess || "");
+      }
+    }
+  }, [editId, records]);
 
-              {/* INVOICE VALUE */}
-              <TextInput
-                value={invoiceValue}
-                onChangeText={
-                  setInvoiceValue
-                }
-                placeholder="Invoices Value"
-                placeholderTextColor="#9b9b9b"
-                style={styles.inputBox}
-              />
+  const handleSave = () => {
+    const payload = {
+      hsnCode,
+      description,
+      uqc,
+      totalQuantity,
+      totalValue,
+      taxableValue,
+      integratedTax,
+      centralTax,
+      stateTax,
+      cess,
+    };
 
-              {/* RATE */}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.inputBox}
-                onPress={() =>
-                  setRateModal(true)
-                }
-              >
-                <Text
-                  style={styles.inputText}
-                >
-                  {rate}
-                </Text>
+    if (editId) {
+      updateFullRecord(editId, payload);
+      if (Platform.OS === 'web') {
+        window.alert("Record Updated Successfully!");
+      } else {
+        Alert.alert("Success", "Record Updated Successfully!");
+      }
+      router.back();
+    } else {
+      // @ts-ignore
+    addRecord({
+        id: Date.now(),
+        ...payload
+      });
+      
+      // Clear fields after adding
+      setHsnCode("");
+      setDescription("");
+      setUqc("");
+      setTotalQuantity("");
+      setTotalValue("");
+      setTaxableValue("");
+      setIntegratedTax("");
+      setCentralTax("");
+      setStateTax("");
+      setCess("");
 
-                <Ionicons
-                  name="chevron-down"
-                  size={18}
-                  color="#7d7d7d"
-                />
-              </TouchableOpacity>
-
-              {/* SUPPLY TYPE */}
-              <TextInput
-                value={supplyType}
-                onChangeText={
-                  setSupplyType
-                }
-                placeholder="Supply Type"
-                placeholderTextColor="#9b9b9b"
-                style={styles.inputBox}
-              />
-
-              {/* CESS */}
-              <TextInput
-                value={cess}
-                onChangeText={setCess}
-                placeholder="Cess"
-                placeholderTextColor="#9b9b9b"
-                style={styles.inputBox}
-              />
-
-              {/* ACTION BUTTONS */}
-              <View style={styles.actionRow}>
-                {/* DELETE */}
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  style={
-                    styles.actionButton
-                  }
-                >
-                  <MaterialIcons
-                    name="delete-outline"
-                    size={17}
-                    color="#2962ff"
-                  />
-                </TouchableOpacity>
-
-                {/* EDIT */}
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  style={
-                    styles.actionButton
-                  }
-                >
-                  <Feather
-                    name="edit-2"
-                    size={14}
-                    color="#ff3b30"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </ScrollView>
-
-          {/* BOTTOM BUTTONS */}
-          <View
-            style={styles.bottomButtons}
-          >
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.bottomButton}
-              onPress={() =>
-                router.push(
-                  "/gst/gstr1-hsn-summary"
-                )
-              }
-            >
-              <Text
-                style={
-                  styles.bottomButtonText
-                }
-              >
-                Back
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.bottomButton}
-            >
-              <Text
-                style={
-                  styles.bottomButtonText
-                }
-              >
-                Add
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* STATE DROPDOWN */}
-          <Modal
-            visible={stateModal}
-            transparent
-            animationType="fade"
-          >
-            <TouchableOpacity
-              activeOpacity={1}
-              style={styles.modalOverlay}
-              onPress={() =>
-                setStateModal(false)
-              }
-            >
-              <View
-                style={styles.dropdownBox}
-              >
-                <ScrollView
-                  showsVerticalScrollIndicator={
-                    false
-                  }
-                >
-                  {states.map(
-                    (item, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={
-                          styles.dropdownItem
-                        }
-                        onPress={() => {
-                          setState(item);
-
-                          setStateModal(
-                            false
-                          );
-                        }}
-                      >
-                        <Text
-                          style={
-                            styles.dropdownText
-                          }
-                        >
-                          {item}
-                        </Text>
-                      </TouchableOpacity>
-                    )
-                  )}
-                </ScrollView>
-              </View>
-            </TouchableOpacity>
-          </Modal>
-
-          {/* RATE DROPDOWN */}
-          <Modal
-            visible={rateModal}
-            transparent
-            animationType="fade"
-          >
-            <TouchableOpacity
-              activeOpacity={1}
-              style={styles.modalOverlay}
-              onPress={() =>
-                setRateModal(false)
-              }
-            >
-              <View
-                style={styles.dropdownBox}
-              >
-                {rates.map(
-                  (item, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={
-                        styles.dropdownItem
-                      }
-                      onPress={() => {
-                        setRate(item);
-
-                        setRateModal(
-                          false
-                        );
-                      }}
-                    >
-                      <Text
-                        style={
-                          styles.dropdownText
-                        }
-                      >
-                        {item}
-                      </Text>
-                    </TouchableOpacity>
-                  )
-                )}
-              </View>
-            </TouchableOpacity>
-          </Modal>
-
-          {/* BOTTOM BAR */}
-          <GSTBottomBar />
-        </View>
-      </SafeAreaView>
-    );
+      if (Platform.OS === 'web') {
+        window.alert("Record Added! You can add another or go back.");
+      } else {
+        Alert.alert("Success", "Record Added! You can add another or go back.");
+      }
+    }
   };
 
-export default
-  GSTR1HSNSummaryAddScreen;
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.container}>
+        <GSTHeader title="12-HSN-wise summary of outward supplies" />
+
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
+          <View style={styles.card}>
+            {/* Title from Figma */}
+            <Text style={styles.cardSubtitle}>Outward and Reverse charge Inward</Text>
+            <Text style={styles.srNoText}>Sr. No 1</Text>
+            
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={hsnCode} onChangeText={setHsnCode} placeholder="HSN/SAC Code" placeholderTextColor="#9b9b9b" style={styles.inputText} />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={description} onChangeText={setDescription} placeholder="Description" placeholderTextColor="#9b9b9b" style={styles.inputText} />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => setUqcModalVisible(true)}>
+                <Input style={styles.inputBox} pointerEvents="none">
+                  <InputField value={uqc} editable={false} placeholder="Select UQC" placeholderTextColor="#9b9b9b" style={styles.inputText} />
+                  <InputSlot>
+                    <Ionicons name="chevron-down" size="sm" color="#7d7d7d" />
+                  </InputSlot>
+                </Input>
+              </TouchableOpacity>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={totalQuantity} onChangeText={setTotalQuantity} placeholder="Total Quantity" placeholderTextColor="#9b9b9b" style={styles.inputText} keyboardType="numeric" />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={totalValue} onChangeText={setTotalValue} placeholder="Total Value (₹)" placeholderTextColor="#9b9b9b" style={styles.inputText} keyboardType="numeric" />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={taxableValue} onChangeText={setTaxableValue} placeholder="Total Taxable Value (₹)" placeholderTextColor="#9b9b9b" style={styles.inputText} keyboardType="numeric" />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={integratedTax} onChangeText={setIntegratedTax} placeholder="Integrated Tax (₹)" placeholderTextColor="#9b9b9b" style={styles.inputText} keyboardType="numeric" />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={centralTax} onChangeText={setCentralTax} placeholder="Central Tax (₹)" placeholderTextColor="#9b9b9b" style={styles.inputText} keyboardType="numeric" />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={stateTax} onChangeText={setStateTax} placeholder="State/UT Tax (₹)" placeholderTextColor="#9b9b9b" style={styles.inputText} keyboardType="numeric" />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={cess} onChangeText={setCess} placeholder="Cess (₹)" placeholderTextColor="#9b9b9b" style={styles.inputText} keyboardType="numeric" />
+              </Input>
+            </FormControl>
+          </View>
+
+          
+
+          {/* Buttons placed inside ScrollView at the bottom so they flow naturally and don't overlap */}
+          <View style={styles.bottomButtons}>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => router.back()}>
+              <Text style={styles.btnText}>Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn} onPress={handleSave}>
+              <Text style={styles.btnText}>{editId ? "Save" : "Add"}</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+
+        <Modal visible={uqcModalVisible} transparent animationType="fade">
+          <TouchableOpacity activeOpacity={1} style={styles.modalOverlay} onPress={() => setUqcModalVisible(false)}>
+            <View style={styles.dropdownBox}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {UQC_OPTIONS.map((item, idx) => (
+                  <TouchableOpacity key={idx} activeOpacity={0.8} style={styles.dropdownItem} onPress={() => { setUqc(item); setUqcModalVisible(false); }}>
+                    <Text style={styles.dropdownText}>{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+
+
+
+
+
+
+
+
+
+
+        <View style={styles.bottomNavWrapper}>
+          <GSTBottomBar />
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f3f3f3",
+  safeArea: { flex: 1, backgroundColor: "#f0f2f5" },
+  container: { flex: 1 },
+  header: { 
+    backgroundColor: "#3D7BEA", 
+    flexDirection: "row", 
+    alignItems: "center", 
+    paddingHorizontal: 14, 
+    paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 45) : 45, 
+    paddingBottom: 16 
   },
-
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-
-  /* HEADER */
-  header: {
-    backgroundColor: "#4B7BE5",
-
-    flexDirection: "row",
-
-    alignItems: "flex-start",
-
-    paddingHorizontal: 14,
-
-    paddingTop:
-      Platform.OS === "android"
-        ? 18
-        : 12,
-
-    paddingBottom: 22,
-  },
-
-  headerTitle: {
-    color: "#fff",
-
-    fontSize: 13,
-
-    fontWeight: "600",
-
-    marginLeft: 8,
-
-    lineHeight: 18,
-  },
-
-  /* BODY */
-  body: {
-    paddingHorizontal: 14,
-    paddingTop: 14,
-  },
-
-  title: {
-    fontSize: 13,
-
-    color: "#222",
-
-    fontWeight: "500",
-  },
-
-  srNo: {
-    marginTop: 10,
-
-    marginBottom: 12,
-
-    fontSize: 12,
-
-    color: "#222",
-  },
-
-  /* INPUT */
-  inputBox: {
-    width: "100%",
-
-    height: 46,
-
-    borderWidth: 1,
-
-    borderColor: "#cfd5df",
-
-    borderRadius: 8,
-
-    backgroundColor: "#fff",
-
-    paddingHorizontal: 12,
-
-    marginBottom: 12,
-
-    fontSize: 13,
-
-    color: "#222",
-
-    flexDirection: "row",
-
-    alignItems: "center",
-
-    justifyContent: "space-between",
-  },
-
-  inputText: {
-    fontSize: 13,
-
-    color: "#222",
-  },
-
-  /* ACTIONS */
-  actionRow: {
-    flexDirection: "row",
-
-    alignItems: "center",
-
-    gap: 12,
-
-    marginTop: 14,
-  },
-
-  actionButton: {
-    width: 34,
-
-    height: 34,
-
-    borderRadius: 100,
-
-    backgroundColor: "#fff",
-
-    justifyContent: "center",
-
-    alignItems: "center",
-
-    borderWidth: 1,
-
-    borderColor: "#ececec",
-
-    shadowColor: "#000",
-
-    shadowOpacity: 0.08,
-
-    shadowRadius: 3,
-
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-
-    elevation: 2,
-  },
-
-  /* BOTTOM BUTTONS */
-  bottomButtons: {
-    position: "absolute",
-
-    left: 14,
-    right: 14,
-
-    bottom: 92,
-
-    flexDirection: "row",
-
-    gap: 12,
-  },
-
-  bottomButton: {
-    flex: 1,
-
-    height: 42,
-
-    borderRadius: 5,
-
-    backgroundColor: "#4B7BE5",
-
-    justifyContent: "center",
-
-    alignItems: "center",
-  },
-
-  bottomButtonText: {
-    color: "#fff",
-
-    fontSize: 14,
-
-    fontWeight: "600",
-  },
-
-  /* DROPDOWN */
-  modalOverlay: {
-    flex: 1,
-
-    backgroundColor:
-      "rgba(0,0,0,0.05)",
-
-    paddingHorizontal: 14,
-
-    paddingTop: 180,
-  },
-
-  dropdownBox: {
-    backgroundColor: "#fff",
-
-    borderRadius: 10,
-
-    overflow: "hidden",
-
-    borderWidth: 1,
-
-    borderColor: "#e5e5e5",
-
-    maxHeight: 250,
-  },
-
-  dropdownItem: {
-    height: 46,
-
-    justifyContent: "center",
-
-    paddingHorizontal: 16,
-
-    borderBottomWidth: 1,
-
-    borderBottomColor: "#f1f1f1",
-  },
-
-  dropdownText: {
-    fontSize: 13,
-
-    color: "#222",
-  },
+  backButton: { marginRight: 8 },
+  headerTitle: { color: "#fff", fontSize: fontSizes.lg, fontWeight: fontWeights.semibold },
+  scrollContent: { padding: 16, paddingBottom: 40 }, // Breathing room below buttons
+  card: { backgroundColor: "#fff", borderRadius: 8, padding: 16, marginBottom: 24, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
+  cardSubtitle: { fontSize: fontSizes.md, color: "#333", fontWeight: fontWeights.semibold, marginBottom: 8, textAlign: "center" },
+  srNoText: { fontSize: fontSizes.md, color: "#3D7BEA", fontWeight: fontWeights.semibold, marginBottom: 16 },
+  cardTitle: { fontSize: fontSizes.lg, color: "#333", fontWeight: fontWeights.semibold, marginBottom: 16 },
+  
+  // Figma input field styles
+  inputBox: { height: 48, borderWidth: 1, borderColor: "#B0B5C1", borderRadius: 8, paddingHorizontal: 0, marginBottom: 0, backgroundColor: "#fff" },
+  inputText: { fontSize: fontSizes.md, color: "#333", height: "100%", paddingHorizontal: 14 },
+  
+  // Blue View and Download style buttons from Figma
+  bottomButtons: { flexDirection: "row", justifyContent: "space-between", gap: 16 },
+  actionBtn: { flex: 1, height: 48, backgroundColor: "#3D7BEA", borderRadius: 8, justifyContent: "center", alignItems: "center" },
+  btnText: { color: "#fff", fontSize: fontSizes.lg, fontWeight: fontWeights.semibold },
+  
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingTop: height * 0.3 },
+  dropdownBox: { width: "100%", maxHeight: height * 0.4, backgroundColor: "#fff", borderRadius: 12, overflow: "hidden", elevation: 5 },
+  dropdownItem: { padding: 16, borderBottomWidth: 1, borderBottomColor: "#f3f4f6" },
+  dropdownText: { fontSize: fontSizes.md, color: "#333" },
+  
+  bottomNavWrapper: { backgroundColor: "#fff" }
 });

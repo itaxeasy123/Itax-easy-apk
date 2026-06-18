@@ -11,6 +11,7 @@ import {
   Ionicons,
 } from "@expo/vector-icons";
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 import {
   router,
 } from "expo-router";
@@ -63,11 +64,15 @@ const invoiceSections = [
   },
 ];
 
-export default function GSTR1AmmendRecordSection() {
-  const [expanded, setExpanded] = useState(false);
+interface GSTR1AmmendRecordSectionProps {
+  isExpanded?: boolean;
+  onToggle?: () => void;
+}
+
+export default function GSTR1AmmendRecordSection({ isExpanded, onToggle }: GSTR1AmmendRecordSectionProps) {
 
   const handleToggle = () => {
-    setExpanded(!expanded);
+    if (onToggle) onToggle();
   };
 
   return (
@@ -91,7 +96,7 @@ export default function GSTR1AmmendRecordSection() {
 
         <Ionicons
           name={
-            expanded
+            isExpanded
               ? "chevron-up"
               : "chevron-forward"
           }
@@ -102,7 +107,7 @@ export default function GSTR1AmmendRecordSection() {
 
       {/* OPENED FORM */}
 
-      {expanded && (
+      {isExpanded && (
         <View>
           {invoiceSections.map(
             (
@@ -205,11 +210,11 @@ const styles =
     },
 
     dropdownText: {
-      fontSize: 13,
+      fontSize: fontSizes.md,
 
       color: "#444",
 
-      fontWeight: "500",
+      fontWeight: fontWeights.medium,
     },
 
     invoiceCard: {
@@ -241,12 +246,10 @@ const styles =
     },
 
     invoiceTitle: {
-      fontSize: 12,
-
-      color: "#333",
-
+      fontSize: fontSizes.sm,
+      color: "#3D7BEA",
+      fontWeight: fontWeights.bold,
       flex: 1,
-
       paddingRight: 8,
     },
 
@@ -267,7 +270,7 @@ const styles =
     invoiceCount: {
       marginLeft: 6,
 
-      fontSize: 12,
+      fontSize: fontSizes.sm,
 
       color: "#444",
     },

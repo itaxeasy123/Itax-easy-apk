@@ -1,21 +1,131 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Modal } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Modal, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { AccountingHeader } from "../components";
+import { AccountingHeader, Loading } from "../components";
 import { accountingTheme } from "../../../theme/accounting";
+import { accountingService } from "../services/accountingService";
+import { exportPdf, buildPdfHtml } from "../utils/exportFile";
 
 const format = (value: number) =>
   `₹ ${value.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
+const DAY_MS = 86400000;
+
+const formatDate = (iso: string | null) => {
+  if (!iso) return "No activity yet";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "No activity yet";
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+type InactiveCustomer = {
+  id: string;
+  name: string;
+  initial: string;
+  phone?: string;
+  receivables: number;
+  lastActivity: string | null;
+  daysInactive: number | null;
+};
+
 export default function InactiveCustomersReportScreen() {
-  const router = useRouter();
   const [search, setSearch] = useState("");
-  const [inactiveCustomers, setInactiveCustomers] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<InactiveCustomer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showSortModal, setShowSortModal] = useState(false);
   const [sortBy, setSortBy] = useState("All");
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [partiesRes, ledgersRes, dayBookRes] = await Promise.all([
+          accountingService.getParties(),
+          accountingService.getLedgers(),
+          accountingService.getDayBook(),
+        ]);
+
+        const parties = (partiesRes.data ?? []).filter((p) => p.type === "customer");
+        const ledgers = ledgersRes.data ?? [];
+        const dayBook = dayBookRes.data ?? [];
+
+        // Last transaction date per ledgerId
+        const lastByLedger = new Map<string, number>();
+        for (const row of dayBook) {
+          const t = new Date(row.transactionDate).getTime();
+          if (Number.isNaN(t)) continue;
+          const prev = lastByLedger.get(row.ledgerId);
+          if (prev === undefined || t > prev) lastByLedger.set(row.ledgerId, t);
+        }
+
+        const now = Date.now();
+        const result: InactiveCustomer[] = parties.map((party) => {
+          const partyLedgers = ledgers.filter((l) => l.partyId === party.id);
+          const receivables = partyLedgers.reduce((sum, l) => sum + (l.balance || 0), 0);
+          let last: number | null = null;
+          for (const l of partyLedgers) {
+            const t = lastByLedger.get(l.id);
+            if (t !== undefined && (last === null || t > last)) last = t;
+          }
+          return {
+            id: party.id,
+            name: party.partyName,
+            initial: (party.partyName || "?").trim().charAt(0).toUpperCase() || "?",
+            phone: party.phone,
+            receivables,
+            lastActivity: last !== null ? new Date(last).toISOString() : null,
+            daysInactive: last !== null ? Math.floor((now - last) / DAY_MS) : null,
+          };
+        });
+
+        if (!cancelled) setCustomers(result);
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message ?? "Failed to load inactive customers");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const inactiveCustomers = useMemo(() => {
+    const threshold = sortBy === "All" ? 0 : parseInt(sortBy, 10) || 0;
+    return customers
+      .filter((c) => {
+        if (search.trim() && !c.name.toLowerCase().includes(search.trim().toLowerCase())) return false;
+        if (threshold === 0) return true;
+        // Never-active customers always count as inactive
+        return c.daysInactive === null || c.daysInactive >= threshold;
+      })
+      .sort((a, b) => (b.daysInactive ?? Infinity) - (a.daysInactive ?? Infinity) || a.name.localeCompare(b.name));
+  }, [customers, search, sortBy]);
+
   const totalReceivables = inactiveCustomers.reduce((sum, item) => sum + item.receivables, 0);
+
+  const handleExportPdf = () => {
+    const rows: (string | number)[][] = [
+      ["Customer", "Phone", "Last Activity", "Days Inactive"],
+      ...inactiveCustomers.map((c) => [
+        c.name,
+        c.phone ?? "-",
+        formatDate(c.lastActivity),
+        c.daysInactive === null ? "No activity yet" : c.daysInactive,
+      ]),
+    ];
+    exportPdf(
+      "inactive-customers",
+      buildPdfHtml("Inactive Customers", `Filter: ${sortBy} • Generated ${formatDate(new Date().toISOString())}`, rows)
+    );
+  };
+
+  const handleCall = (phone: string) => {
+    Linking.openURL(`tel:${phone}`);
+  };
 
   return (
     <View style={styles.container}>
@@ -23,7 +133,7 @@ export default function InactiveCustomersReportScreen() {
         title="Inactive Customers"
         showBackButton
         rightContent={
-          <Pressable style={styles.pdfBtn}>
+          <Pressable style={styles.pdfBtn} onPress={handleExportPdf}>
             <Ionicons name="document-text" size={16} color={accountingTheme.colors.error} />
           </Pressable>
         }
@@ -58,40 +168,50 @@ export default function InactiveCustomersReportScreen() {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
-        {inactiveCustomers.map((customer) => (
-          <View key={customer.id} style={styles.card}>
-            <View style={styles.cardTop}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{customer.initial}</Text>
+      {loading ? (
+        <Loading fullScreen text="Loading customers..." />
+      ) : error ? (
+        <Text style={styles.errorText}>{error}</Text>
+      ) : (
+        <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
+          {inactiveCustomers.map((customer) => (
+            <View key={customer.id} style={styles.card}>
+              <View style={styles.cardTop}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>{customer.initial}</Text>
+                </View>
+                <Text style={styles.name}>{customer.name}</Text>
+                {!!customer.phone && (
+                  <Pressable style={styles.callBtn} onPress={() => handleCall(customer.phone!)}>
+                    <Ionicons name="call-outline" size={14} color="#3B82F6" />
+                    <Text style={styles.callText}>Call</Text>
+                  </Pressable>
+                )}
               </View>
-              <Text style={styles.name}>{customer.name}</Text>
-              <Pressable style={styles.callBtn}>
-                <Ionicons name="call-outline" size={14} color="#3B82F6" />
-                <Text style={styles.callText}>Call</Text>
-              </Pressable>
-            </View>
 
-            <View style={styles.cardBottom}>
-              <View style={styles.infoCol}>
-                <Text style={styles.infoLabel}>Receivables</Text>
-                <Text style={styles.infoValue}>{format(customer.receivables)}</Text>
-              </View>
-              <View style={styles.infoCol}>
-                <Text style={styles.infoLabel}>Last Sales Date</Text>
-                <Text style={styles.infoValue}>{customer.lastSales}</Text>
-              </View>
-              <View style={[styles.infoCol, { alignItems: "flex-end" }]}>
-                <Text style={styles.infoLabel}>Inactive Since</Text>
-                <Text style={styles.dangerValue}>{customer.inactiveSince} Days</Text>
+              <View style={styles.cardBottom}>
+                <View style={styles.infoCol}>
+                  <Text style={styles.infoLabel}>Receivables</Text>
+                  <Text style={styles.infoValue}>{format(customer.receivables)}</Text>
+                </View>
+                <View style={styles.infoCol}>
+                  <Text style={styles.infoLabel}>Last Activity</Text>
+                  <Text style={styles.infoValue}>{formatDate(customer.lastActivity)}</Text>
+                </View>
+                <View style={[styles.infoCol, { alignItems: "flex-end" }]}>
+                  <Text style={styles.infoLabel}>Inactive Since</Text>
+                  <Text style={styles.dangerValue}>
+                    {customer.daysInactive === null ? "No activity yet" : `${customer.daysInactive} Days`}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-        ))}
-        {inactiveCustomers.length === 0 && (
-          <Text style={styles.emptyText}>No inactive customers found</Text>
-        )}
-      </ScrollView>
+          ))}
+          {inactiveCustomers.length === 0 && (
+            <Text style={styles.emptyText}>No inactive customers found</Text>
+          )}
+        </ScrollView>
+      )}
 
       {/* Sort By Modal */}
       <Modal
@@ -289,6 +409,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: accountingTheme.spacing.xxl,
     color: accountingTheme.colors.textSecondary,
+  },
+  errorText: {
+    textAlign: "center",
+    marginTop: accountingTheme.spacing.xxl,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    color: accountingTheme.colors.error,
   },
   modalBackdrop: {
     flex: 1,

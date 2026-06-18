@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Modal, TextInput } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Modal, TextInput, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AccountingHeader } from "../components";
+import { AccountingHeader, DateField, FiscalYearBar, isValidIsoDate } from "../components";
+import { FiscalYearInfo } from "../services/billshieldUiService";
 import { Ionicons } from "@expo/vector-icons";
-import { accountingService } from "../services/accountingService";
+import { billshieldUiService } from "../services/billshieldUiService";
 import { accountingTheme } from "../../../theme/accounting";
+import { exportCsv, exportExcel, exportPdf, buildPdfHtml } from "../utils/exportFile";
 
 const format = (value: number | undefined) => {
   if (value === undefined || isNaN(value)) return "₹ 0.00";
@@ -37,26 +39,87 @@ export default function BalanceSheetReportScreen() {
     }
   }, [showEntryModal, tab]);
 
-  useEffect(() => {
-    async function loadBalanceSheet() {
-      try {
-        setLoading(true);
-        setError(null);
-        // Replace with actual balance sheet report endpoint
-        const response = await accountingService.getProfitAndLossReport(year, month);
-        if (response.success && response.data) {
-          setReport(response.data);
-        } else {
-          setError("Unable to load balance sheet report.");
-        }
-      } catch {
-        setError("Unable to load balance sheet report.");
-      } finally {
-        setLoading(false);
+  const [asOf, setAsOf] = useState<string | undefined>(undefined);
+
+  const loadBalanceSheet = useCallback(async (asOfDate?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await billshieldUiService.getBalanceSheet(asOfDate);
+      if (response.success) {
+        setReport(response.data);
+      } else {
+        setError(response.message ?? "Unable to load balance sheet report.");
       }
+    } catch {
+      setError("Unable to load balance sheet report.");
+    } finally {
+      setLoading(false);
     }
-    loadBalanceSheet();
-  }, [month, year]);
+  }, []);
+
+  useEffect(() => {
+    loadBalanceSheet(asOf);
+  }, [loadBalanceSheet, asOf, month, year]);
+
+  const handleFyChange = (fy: FiscalYearInfo) => {
+    setAsOf(fy.endDate);
+  };
+
+  // ---- export menu (3-dot) ----
+  const [showExport, setShowExport] = useState(false);
+  const exportRows = (): (string | number)[][] => [
+    ["Side", "Group", "Amount"],
+    ...(report?.assets ?? []).map((r: any) => ["Asset", r.group, r.amount]),
+    ...(report?.liabilities ?? []).map((r: any) => ["Liability", r.group, r.amount]),
+    ["", "TOTAL ASSETS", report?.totals?.assets ?? 0],
+    ["", "TOTAL LIABILITIES", report?.totals?.liabilities ?? 0],
+  ];
+  const handleExport = async (format: "PDF" | "CSV" | "Excel") => {
+    setShowExport(false);
+    const data = exportRows();
+    if (format === "CSV") await exportCsv("balance-sheet", data);
+    else if (format === "Excel") await exportExcel("balance-sheet", "Balance Sheet", data);
+    else await exportPdf("balance-sheet", buildPdfHtml("Balance Sheet", "Exported from iTaxEasy", data));
+  };
+
+  const [savingEntry, setSavingEntry] = useState(false);
+
+  const handleSaveEntry = async () => {
+    const amount = Number(entryAmount);
+    if (!entryCategory) {
+      Alert.alert("Missing category", "Please choose a category.");
+      return;
+    }
+    if (!entryDate || !isValidIsoDate(entryDate)) {
+      Alert.alert("Invalid date", "Please pick a date from the calendar.");
+      return;
+    }
+    if (!amount || amount <= 0 || Number.isNaN(amount)) {
+      Alert.alert("Invalid amount", "Please enter an amount greater than zero.");
+      return;
+    }
+    setSavingEntry(true);
+    const result = await billshieldUiService.addBalanceSheetEntry({
+      category: entryCategory,
+      side: tab,
+      date: entryDate,
+      amount,
+    });
+    setSavingEntry(false);
+    if (result.success) {
+      setShowEntryModal(false);
+      setEntryAmount("");
+      setEntryDate("");
+      Alert.alert(
+        "Entry posted",
+        `Booked as journal voucher ${result.data?.voucherNo ?? ""} — the other side sits in Suspense A/c until you classify it.`
+      );
+      void loadBalanceSheet();
+    } else {
+      Alert.alert("Could not save", result.message ?? "Please try again.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -64,7 +127,7 @@ export default function BalanceSheetReportScreen() {
         title="Balance Sheet"
         showBackButton
         rightContent={
-          <Pressable>
+          <Pressable onPress={() => setShowExport(true)}>
             <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </Pressable>
         }
@@ -86,18 +149,8 @@ export default function BalanceSheetReportScreen() {
         }
       />
 
-      {/* Financial Year Bar */}
-      <View style={styles.periodBar}>
-        <View style={styles.periodLeft}>
-          <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
-          <Text style={styles.periodText}>
-            Financial Year <Text style={styles.periodSubText}>(1 Apr 24 to 31 Mar 25)</Text>
-          </Text>
-        </View>
-        <Pressable>
-          <Text style={styles.changeText}>Change</Text>
-        </Pressable>
-      </View>
+      {/* Financial Year Bar — real fiscal years, selectable */}
+      <FiscalYearBar onChange={handleFyChange} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {loading ? (
@@ -108,69 +161,20 @@ export default function BalanceSheetReportScreen() {
           <Text style={styles.errorText}>{error}</Text>
         ) : (
           <View style={styles.tableCard}>
-            {tab === "assets" ? (
-              <>
-                <View style={styles.row}>
+            {(tab === "assets" ? report?.assets ?? [] : report?.liabilities ?? []).map(
+              (row: { group: string; amount: number }) => (
+                <View key={row.group} style={styles.row}>
                   <View style={styles.labelWrap}>
-                    <Text style={styles.label}>Current Assets</Text>
+                    <Text style={styles.label}>{row.group}</Text>
                     <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
                   </View>
-                  <Text style={styles.value}>{format(report?.currentAssets)}</Text>
+                  <Text style={styles.value}>{format(row.amount)}</Text>
                 </View>
-                <View style={styles.row}>
-                  <View style={styles.labelWrap}>
-                    <Text style={styles.label}>Fixed Assets</Text>
-                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
-                  </View>
-                  <Text style={styles.value}>{format(report?.fixedAssets)}</Text>
-                </View>
-                <View style={styles.row}>
-                  <View style={styles.labelWrap}>
-                    <Text style={styles.label}>Investments</Text>
-                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
-                  </View>
-                  <Text style={styles.value}>{format(report?.investments)}</Text>
-                </View>
-                <View style={styles.row}>
-                  <View style={styles.labelWrap}>
-                    <Text style={styles.label}>Loan Advances</Text>
-                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
-                  </View>
-                  <Text style={styles.value}>{format(report?.loanAdvances)}</Text>
-                </View>
-              </>
-            ) : (
-              <>
-                <View style={styles.row}>
-                  <View style={styles.labelWrap}>
-                    <Text style={styles.label}>Capital</Text>
-                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
-                  </View>
-                  <Text style={styles.value}>{format(report?.capital)}</Text>
-                </View>
-                <View style={styles.row}>
-                  <View style={styles.labelWrap}>
-                    <Text style={styles.label}>Current Liability</Text>
-                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
-                  </View>
-                  <Text style={styles.value}>{format(report?.currentLiability)}</Text>
-                </View>
-                <View style={styles.row}>
-                  <View style={styles.labelWrap}>
-                    <Text style={styles.label}>Loan</Text>
-                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
-                  </View>
-                  <Text style={styles.value}>{format(report?.loan)}</Text>
-                </View>
-                <View style={styles.row}>
-                  <View style={styles.labelWrap}>
-                    <Text style={styles.label}>Net Income</Text>
-                    <Ionicons name="information-circle-outline" size={14} color={accountingTheme.colors.textMuted} />
-                  </View>
-                  <Text style={styles.value}>{format(report?.netIncome)}</Text>
-                </View>
-              </>
+              )
             )}
+            {(tab === "assets" ? report?.assets : report?.liabilities)?.length === 0 ? (
+              <Text style={styles.errorText}>Nothing here yet — post a voucher first.</Text>
+            ) : null}
           </View>
         )}
       </ScrollView>
@@ -187,10 +191,34 @@ export default function BalanceSheetReportScreen() {
           {tab === "assets" ? "Total Assets" : "Total Liabilities"}
         </Text>
         <Text style={styles.footerValue}>
-          {format(tab === "assets" ? report?.totalAssets : report?.totalLiabilities)}
+          {format(tab === "assets" ? report?.totals?.assets : report?.totals?.liabilities)}
         </Text>
       </View>
       <View style={{ backgroundColor: accountingTheme.colors.card, height: Math.max(insets.bottom, 0) }} />
+
+      {/* Export menu (3-dot) */}
+      <Modal visible={showExport} transparent animationType="slide" onRequestClose={() => setShowExport(false)}>
+        <View style={styles.modalBackdrop}>
+          <Pressable style={styles.modalDismiss} onPress={() => setShowExport(false)} />
+          <View style={styles.bottomSheet}>
+            <View style={styles.sheetHandleWrap}>
+              <View style={styles.sheetHandle} />
+            </View>
+            <View style={styles.sheetContent}>
+              {(["PDF", "Excel", "CSV"] as const).map((fmt) => (
+                <Pressable key={fmt} style={styles.exportRow} onPress={() => handleExport(fmt)}>
+                  <Ionicons
+                    name={fmt === "PDF" ? "document-outline" : fmt === "Excel" ? "document-text-outline" : "grid-outline"}
+                    size={18}
+                    color="#475569"
+                  />
+                  <Text style={styles.exportText}>Download ({fmt})</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Add Entry Bottom Sheet Modal */}
       <Modal
@@ -222,16 +250,7 @@ export default function BalanceSheetReportScreen() {
                 </Pressable>
               </View>
 
-              <View style={styles.inputWrap}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Select Date"
-                  value={entryDate}
-                  onChangeText={setEntryDate}
-                  placeholderTextColor={accountingTheme.colors.textMuted}
-                />
-                <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.textMuted} style={styles.inputIcon} />
-              </View>
+              <DateField value={entryDate} onChange={setEntryDate} placeholder="Select date" style={{ marginBottom: 16 }} />
 
               <View style={styles.inputWrap}>
                 <TextInput
@@ -245,10 +264,11 @@ export default function BalanceSheetReportScreen() {
               </View>
 
               <Pressable
-                style={styles.saveBtn}
-                onPress={() => setShowEntryModal(false)}
+                style={[styles.saveBtn, savingEntry && { opacity: 0.6 }]}
+                onPress={handleSaveEntry}
+                disabled={savingEntry}
               >
-                <Text style={styles.saveBtnText}>Save</Text>
+                <Text style={styles.saveBtnText}>{savingEntry ? "Posting..." : "Save"}</Text>
               </Pressable>
             </View>
           </View>
@@ -556,6 +576,17 @@ const styles = StyleSheet.create({
   },
   categoryItemTextActive: {
     color: accountingTheme.colors.text,
+    fontWeight: accountingTheme.fontWeights.semiBold,
+  },
+  exportRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 14,
+  },
+  exportText: {
+    fontSize: accountingTheme.fontSizes.lg,
+    color: "#111827",
     fontWeight: accountingTheme.fontWeights.semiBold,
   },
 });

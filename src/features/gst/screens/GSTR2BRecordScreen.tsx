@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import GSTHeader from "../components/GSTHeader";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Platform } from "react-native";
@@ -8,8 +9,9 @@ import * as XLSX from "xlsx";
 import GSTBottomBar from "../components/GSTBottomBar";
 import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
 import { getAssessmentYears } from "../constants/gstData";
-import { previewGSTRPdf } from "../services/gstrPdf.service";
+import { previewGSTRPdf } from "../services/gstrPdf.service";;
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const taxRows = [
   { id: 1, label: "Integrated Tax (₹)" },
   { id: 2, label: "Central Tax (₹)" },
@@ -98,15 +100,7 @@ export default function GSTR2BRecordScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#FFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>GSTR 2B</Text>
-      </View>
+      <GSTHeader title="GSTR 2B" />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -192,8 +186,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.semibold,
     color: "#FFF",
   },
   scrollContent: {
@@ -203,12 +197,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   pageTitle: {
-    fontSize: 14,
+    fontSize: fontSizes.md,
     marginBottom: 24,
     lineHeight: 20,
   },
   pageTitleBold: {
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
     color: "#1F2937",
   },
   pageTitleBlue: {
@@ -242,13 +236,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   tableHeaderSubText: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.semibold,
     color: "#FFF",
     textAlign: "center",
   },
   tableDataText: {
-    fontSize: 13,
+    fontSize: fontSizes.md,
     color: "#374151",
     textAlign: "center",
   },
@@ -267,7 +261,7 @@ const styles = StyleSheet.create({
   input: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    fontSize: 13,
+    fontSize: fontSizes.md,
     color: "#3574E2", // The text in the input seems to be blue
   },
   downloadBtn: {
@@ -278,8 +272,8 @@ const styles = StyleSheet.create({
   },
   downloadBtnText: {
     color: "#FFF",
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.semibold,
   },
   floatingActionRow: {
     position: "absolute",
@@ -296,7 +290,7 @@ const styles = StyleSheet.create({
   },
   bottomBackBtnText: {
     color: "#3574E2",
-    fontWeight: "600",
-    fontSize: 14,
+    fontWeight: fontWeights.semibold,
+    fontSize: fontSizes.md,
   },
 });

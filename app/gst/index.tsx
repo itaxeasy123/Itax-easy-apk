@@ -1,7 +1,6 @@
 import React from "react";
-
-import GSTDashboardScreen from "../../src/features/gst/screens/GSTDashboardScreen";
+import { Redirect } from "expo-router";
 
 export default function GSTPage() {
-  return <GSTDashboardScreen />;
+  return <Redirect href="/gst/returns" />;
 }

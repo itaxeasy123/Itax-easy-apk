@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import GSTHeader from "../components/GSTHeader";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -8,8 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import GSTBottomBar from "../components/GSTBottomBar";
+import GSTBottomBar from "../components/GSTBottomBar";;
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const returnItems = [
   { id: 1, title: "GSTR 1", subtitle: "Outward Supplies" },
   { id: 2, title: "GSTR 2B", subtitle: "Auto ITC" },
@@ -22,15 +24,7 @@ export default function ToolsScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#FFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Regular</Text>
-      </View>
+      <GSTHeader title="Regular" />
 
       {/* Body */}
       <ScrollView
@@ -91,8 +85,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.semibold,
     color: "#FFF",
   },
   scrollContent: {
@@ -120,18 +114,18 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   cardTitle: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.bold,
     color: "#374151",
     marginBottom: 4,
     textAlign: "center",
   },
   cardSubtitle: {
-    fontSize: 11,
+    fontSize: fontSizes.sm,
     color: "#4B5563",
     marginBottom: 16,
     textAlign: "center",
-    fontWeight: "500",
+    fontWeight: fontWeights.medium,
   },
   buttonRow: {
     flexDirection: "row",
@@ -148,7 +142,7 @@ const styles = StyleSheet.create({
   },
   actionBtnText: {
     color: "#FFFFFF",
-    fontSize: 11,
-    fontWeight: "600",
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.semibold,
   },
 });

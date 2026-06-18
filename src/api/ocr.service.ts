@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Platform } from "react-native";
+import { OCR_API_URL } from "../config/env";
 
 /* =========================
    PAN OCR
@@ -47,7 +48,7 @@ export const scanPAN = async (
     }
 
     const res = await axios.post(
-      "https://ocr.itaxeasy.com/api/pan",
+      `${OCR_API_URL}/pan`,
       formData,
       {
         headers: {
@@ -120,7 +121,7 @@ export const scanAadhaar =
 
       const res =
         await axios.post(
-          "https://ocr.itaxeasy.com/api/aadhar",
+          `${OCR_API_URL}/aadhar`,
           formData,
           {
             headers: {
@@ -192,7 +193,7 @@ export const uploadBankStatementOCR =
 
       const response =
         await axios.post(
-          "https://ocr.itaxeasy.com/api/process-bank-statement",
+          `${OCR_API_URL}/process-bank-statement`,
           formData,
           {
             headers: {
@@ -255,7 +256,7 @@ export const uploadBankStatementOCR =
 
       const response =
         await axios.post(
-          'https://ocr.itaxeasy.com/api/driving_licence',
+          `${OCR_API_URL}/driving_licence`,
           formData,
           {
             headers: {
@@ -321,7 +322,7 @@ export const uploadInvoiceOCR =
       }
 
       const response = await axios.post(
-        'https://ocr.itaxeasy.com/api/invoice',
+        `${OCR_API_URL}/invoice`,
         formData,
         {
           headers: {
@@ -393,7 +394,7 @@ export const uploadGSTOCR =
 
       const response =
         await axios.post(
-          'https://ocr.itaxeasy.com/api/process-gst',
+          `${OCR_API_URL}/process-gst`,
           formData,
           {
             headers: {

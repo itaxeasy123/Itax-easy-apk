@@ -9,12 +9,15 @@ import {
   StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import GSTHeader from "../components/GSTHeader";
 import { router } from "expo-router";
 import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
+import useGSTDashboard from "../hooks/useGSTDashboard";
 import { LinearGradient } from "expo-linear-gradient";
 
 import GSTBottomBar from "../components/GSTBottomBar";
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const sections = [
 {
     id: "3.1",
@@ -57,20 +60,16 @@ const sections = [
 
 export default function GSTR3BOnlineScreen() {
   const { businessProfile } = useGSTBusinessProfileStore();
+  const { assessmentYear: defaultYear } = useGSTDashboard();
+
+  const assessmentYear = businessProfile?.financialYear || defaultYear;
 
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#3F7BF3" barStyle="light-content" />
 
       {/* HEADER */}
-
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push("/gst/returns")}>
-          <Ionicons name="chevron-back" size={18} color="#FFFFFF" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>GSTR-3B Monthly Return</Text>
-      </View>
+      <GSTHeader title="GSTR-3B Monthly Return" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -90,12 +89,9 @@ export default function GSTR3BOnlineScreen() {
             style={styles.profileCard}
           >
             <View style={styles.profileLeft}>
-              <Image
-                source={{
-                  uri: "https://i.pravatar.cc/100",
-                }}
-                style={styles.avatar}
-              />
+              <View style={[styles.avatar, { backgroundColor: "#3D7BEA", justifyContent: "center", alignItems: "center" }]}>
+                <Ionicons name="person" size="sm" color="#FFF" />
+              </View>
 
               <View>
                 <View style={styles.profileRow}>
@@ -119,7 +115,7 @@ export default function GSTR3BOnlineScreen() {
                     style={[
                       styles.profileLabel,
                       {
-                        fontWeight: "600",
+                        fontWeight: fontWeights.semibold,
                       },
                     ]}
                   >
@@ -130,11 +126,11 @@ export default function GSTR3BOnlineScreen() {
                     style={[
                       styles.profileValue,
                       {
-                        fontWeight: "600",
+                        fontWeight: fontWeights.semibold,
                       },
                     ]}
                   >
-                    : {businessProfile?.financialYear || "2024-25"}
+                    : {assessmentYear}
                   </Text>
                 </View>
               </View>
@@ -235,8 +231,8 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.medium,
     marginLeft: 8,
   },
 
@@ -269,13 +265,13 @@ const styles = StyleSheet.create({
   },
 
   profileLabel: {
-    width: 58,
-    fontSize: 10,
+    width: 80,
+    fontSize: fontSizes.xs,
     color: "#222",
   },
 
   profileValue: {
-    fontSize: 10,
+    fontSize: fontSizes.xs,
     color: "#333",
     flexShrink: 1,
   },
@@ -308,7 +304,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     flex: 1,
     color: "#333",
-    fontSize: 10,
+    fontSize: fontSizes.xs,
     lineHeight: 14,
     paddingRight: 10,
   },
@@ -331,12 +327,12 @@ const styles = StyleSheet.create({
   },
 
   taxLabel: {
-    fontSize: 10,
+    fontSize: fontSizes.xs,
     color: "#444",
   },
 
   taxAmount: {
-    fontSize: 10,
+    fontSize: fontSizes.xs,
     color: "#222",
     marginTop: 2,
   },
@@ -361,7 +357,7 @@ const styles = StyleSheet.create({
 
   btnText: {
     color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "600",
+    fontSize: fontSizes.xs,
+    fontWeight: fontWeights.semibold,
   },
 });

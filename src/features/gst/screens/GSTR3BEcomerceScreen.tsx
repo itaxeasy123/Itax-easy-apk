@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import GSTBottomBar from "../components/GSTBottomBar";
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const initialRows = [
   {
     id: 1,
@@ -257,9 +258,9 @@ const styles =
 
    headerTitle: {
   color: "#FFF",
-  fontSize: 13,
+  fontSize: fontSizes.md,
   marginLeft: 8,
-  fontWeight: "600",
+  fontWeight: fontWeights.semibold,
   flex: 1,
   lineHeight: 18,
 },
@@ -271,7 +272,7 @@ const styles =
     },
 
 descriptionText: {
-  fontSize: 13,
+  fontSize: fontSizes.md,
   textAlign: "center",
   color: "#333",
   lineHeight: 18,
@@ -295,28 +296,28 @@ descriptionText: {
 headerCell: {
   flex: 1,
   color: "#FFF",
-  fontSize: 12,
+  fontSize: fontSizes.sm,
   textAlign: "center",
-  fontWeight: "700",
+  fontWeight: fontWeights.bold,
   paddingTop: 18,
 },
 
 valueHeader: {
   width: 100,
   color: "#FFF",
-  fontSize: 12,
+  fontSize: fontSizes.sm,
   textAlign: "center",
   paddingTop: 12,
-  fontWeight: "700",
+  fontWeight: fontWeights.bold,
 },
 
 viewHeader: {
   width: 60,
   color: "#FFF",
-  fontSize: 12,
+  fontSize: fontSizes.sm,
   textAlign: "center",
   paddingTop: 18,
-  fontWeight: "700",
+  fontWeight: fontWeights.bold,
 },
 
 tableRow: {
@@ -349,7 +350,7 @@ viewColumn: {
 },
 
 rowText: {
-  fontSize: 12,
+  fontSize: fontSizes.sm,
   lineHeight: 18,
   color: "#333",
 },
@@ -359,7 +360,7 @@ valueInput: {
   borderColor: "#CFCFCF",
   backgroundColor: "#F7F7F7",
   height: 42,
-  fontSize: 13,
+  fontSize: fontSizes.md,
   paddingHorizontal: 8,
 },
 
@@ -394,7 +395,7 @@ valueInput: {
 
     buttonText: {
       color: "#FFF",
-      fontWeight: "600",
-      fontSize: 12,
+      fontWeight: fontWeights.semibold,
+      fontSize: fontSizes.sm,
     },
   });

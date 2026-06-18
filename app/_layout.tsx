@@ -3,6 +3,9 @@ import { useEffect } from 'react';
 import { LogBox, Platform } from 'react-native';
 import { useAuthStore } from '../src/store/authStore';
 
+import * as eva from '@eva-design/eva';
+import { ApplicationProvider } from '@ui-kitten/components';
+
 // ... existing ignore warnings ...
 if (Platform.OS === 'web') {
   const originalWarn = console.warn;
@@ -58,7 +61,12 @@ export default function RootLayout() {
     if (!isHydrated) return;
 
     const segment = segments[0] as string | undefined;
-    const inAuthGroup = segment === 'login' || segment === 'signup' || segment === 'verify-otp' || segment === 'forgot-password';
+    const inAuthGroup =
+      segment === 'login' ||
+      segment === 'signup' ||
+      segment === 'otp' ||
+      segment === 'otp-success' ||
+      segment === 'forgot-password';
 
     if (!token && !inAuthGroup && segments[0] !== undefined) {
       // We use a small timeout to let navigation mount fully
@@ -74,5 +82,9 @@ export default function RootLayout() {
   }
 
   // Ek baar load ho gaya, tabhi screens render karo
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <ApplicationProvider {...eva} theme={eva.light}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </ApplicationProvider>
+  );
 }

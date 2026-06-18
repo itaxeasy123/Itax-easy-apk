@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Modal } from "react-native";
-import { AccountingHeader } from "../components";
+import { AccountingHeader, FiscalYearBar } from "../components";
 import { Ionicons } from "@expo/vector-icons";
-import { accountingService } from "../services/accountingService";
-import { ProfitAndLossReport } from "../types/accountingTypes";
+import { billshieldUiService, FiscalYearInfo } from "../services/billshieldUiService";
 import { accountingTheme } from "../../../theme/accounting";
+import { exportCsv, exportExcel, exportPdf, buildPdfHtml } from "../utils/exportFile";
 
 const format = (value: number | undefined) => {
   if (value === undefined || isNaN(value)) return "₹ 0.00";
@@ -20,25 +20,50 @@ export default function ProfitLossReportScreen() {
   const [error, setError] = useState<string | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
 
-  useEffect(() => {
-    async function loadProfitLoss() {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await accountingService.getProfitAndLossReport(year, month);
-        if (response.success && response.data) {
-          setReport(response.data);
-        } else {
-          setError("Unable to load profit and loss report.");
-        }
-      } catch {
-        setError("Unable to load profit and loss report.");
-      } finally {
-        setLoading(false);
+  const [range, setRange] = useState<{ from?: string; to?: string }>({});
+
+  const loadProfitLoss = useCallback(async (from?: string, to?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await billshieldUiService.getProfitAndLoss(from, to);
+      if (response.success && response.data) {
+        setReport(response.data);
+      } else {
+        setError(response.message ?? "Unable to load profit and loss report.");
       }
+    } catch {
+      setError("Unable to load profit and loss report.");
+    } finally {
+      setLoading(false);
     }
-    loadProfitLoss();
-  }, [month, year]);
+  }, []);
+
+  useEffect(() => {
+    loadProfitLoss(range.from, range.to);
+  }, [loadProfitLoss, range, month, year]);
+
+  const handleFyChange = (fy: FiscalYearInfo) => {
+    setRange({ from: fy.startDate, to: fy.endDate });
+  };
+
+  // ---- export (3-dot menu) ----
+  const exportRows = (): (string | number)[][] => [
+    ["Particular", "Amount"],
+    ["Sales Accounts", report?.salesAccounts ?? 0],
+    ["Purchase Accounts", report?.purchaseAccounts ?? 0],
+    ["Gross Profit", report?.grossProfit ?? 0],
+    ["Other Income", report?.otherIncome ?? 0],
+    ["Other Expenses", report?.otherExpenses ?? 0],
+    ["Net Profit", report?.netProfit ?? 0],
+  ];
+  const handleExport = async (format: "PDF" | "CSV" | "Excel") => {
+    setShowActionModal(false);
+    const data = exportRows();
+    if (format === "CSV") await exportCsv("profit-loss", data);
+    else if (format === "Excel") await exportExcel("profit-loss", "Profit & Loss", data);
+    else await exportPdf("profit-loss", buildPdfHtml("Profit & Loss", "Exported from iTaxEasy", data));
+  };
 
   return (
     <View style={styles.container}>
@@ -53,18 +78,8 @@ export default function ProfitLossReportScreen() {
       />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-        {/* Financial Year Bar */}
-        <View style={styles.periodBar}>
-          <View style={styles.periodLeft}>
-            <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
-            <Text style={styles.periodText}>
-              Financial Year <Text style={styles.periodSubText}>(1 Apr 24 to 31 Mar 25)</Text>
-            </Text>
-          </View>
-          <Pressable>
-            <Text style={styles.changeText}>Change</Text>
-          </Pressable>
-        </View>
+        {/* Financial Year Bar — real fiscal years, selectable */}
+        <FiscalYearBar onChange={handleFyChange} />
 
         {loading ? (
           <View style={styles.loaderWrap}>
@@ -136,17 +151,17 @@ export default function ProfitLossReportScreen() {
             </View>
 
             <View style={styles.sheetOptions}>
-              <Pressable style={styles.optionRow} onPress={() => setShowActionModal(false)}>
+              <Pressable style={styles.optionRow} onPress={() => handleExport("PDF")}>
                 <Ionicons name="document-outline" size={18} color="#475569" style={styles.optionIcon} />
                 <Text style={styles.optionText}>Download (PDF)</Text>
               </Pressable>
 
-              <Pressable style={styles.optionRow} onPress={() => setShowActionModal(false)}>
+              <Pressable style={styles.optionRow} onPress={() => handleExport("Excel")}>
                 <Ionicons name="document-text-outline" size={18} color="#475569" style={styles.optionIcon} />
                 <Text style={styles.optionText}>Download (Excel)</Text>
               </Pressable>
 
-              <Pressable style={styles.optionRow} onPress={() => setShowActionModal(false)}>
+              <Pressable style={styles.optionRow} onPress={() => handleExport("CSV")}>
                 <Ionicons name="grid-outline" size={18} color="#475569" style={styles.optionIcon} />
                 <Text style={styles.optionText}>Download (CSV)</Text>
               </Pressable>

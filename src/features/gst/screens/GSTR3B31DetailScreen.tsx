@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import GSTHeader from "../components/GSTHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -12,8 +13,9 @@ import {
   View,
 } from "react-native";
 
-import GSTBottomBar from "../components/GSTBottomBar";
+import GSTBottomBar from "../components/GSTBottomBar";;
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 type DetailRow = {
   id: number;
   label: string;
@@ -123,19 +125,7 @@ export default function GSTR3B31DetailScreen() {
     <View style={styles.container}>
       {/* Header */}
 
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons
-            name="chevron-back"
-            size={22}
-            color="#FFF"
-          />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>
-          GSTR 3B - 3.1
-        </Text>
-      </View>
+      <GSTHeader title="GSTR 3B - 3.1" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -244,8 +234,8 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     color: "#FFF",
-    fontSize: 13,
-    fontWeight: "600",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.semibold,
     marginLeft: 8,
   },
 
@@ -255,7 +245,7 @@ const styles = StyleSheet.create({
 
   title: {
     color: "#356EE8",
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     lineHeight: 18,
   },
 
@@ -274,8 +264,8 @@ const styles = StyleSheet.create({
 
   headerText: {
     color: "#FFF",
-    fontSize: 11,
-    fontWeight: "600",
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.semibold,
   },
 
   srColumn: {
@@ -308,7 +298,7 @@ const styles = StyleSheet.create({
   },
 
   rowText: {
-    fontSize: 11,
+    fontSize: fontSizes.sm,
     color: "#333",
   },
 
@@ -319,7 +309,7 @@ const styles = StyleSheet.create({
     borderColor: "#C7C7C7",
     borderRadius: 2,
     paddingHorizontal: 6,
-    fontSize: 11,
+    fontSize: fontSizes.sm,
     backgroundColor: "#FFF",
   },
 
@@ -350,7 +340,7 @@ const styles = StyleSheet.create({
 
   btnText: {
     color: "#FFF",
-    fontWeight: "600",
-    fontSize: 13,
+    fontWeight: fontWeights.semibold,
+    fontSize: fontSizes.md,
   },
 });

@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import theme from "../theme";
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 interface Props {
   label: string;
   value: string;
@@ -95,9 +96,9 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    fontSize: 18,
+    fontSize: fontSizes.xl,
     color: "#667085",
-    fontWeight: "500",
+    fontWeight: fontWeights.medium,
   },
 
   overlay: {
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
   },
 
   optionText: {
-    fontSize: 18,
+    fontSize: fontSizes.xl,
     color: "#111827",
   },
 });

@@ -1,513 +1,298 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import GSTHeader from "../components/GSTHeader";
+import { useB2COthersStore } from "../../../store/b2cOthersStore";
 import {
   View,
   Text,
+  TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  TouchableOpacity,
-  ScrollView,
   TextInput,
+  Platform,
+  ScrollView,
+  Alert,
   Modal,
-  FlatList,
+  Dimensions,
+  StatusBar,
+  KeyboardAvoidingView,
 } from "react-native";
-
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
 import GSTBottomBar from "../components/GSTBottomBar";
+import { FormControl, FormControlLabel, FormControlLabelText } from "../../../components/ui/form-control";
+import { Input, InputField, InputSlot } from "../../../components/ui/input";
+import { Datepicker } from '@ui-kitten/components';;
 
-const states = [
-   "Andhra Pradesh",
-  "Arunachal Pradesh",
-  "Assam",
-  "Bihar",
-  "Chhattisgarh",
-  "Delhi",
-  "Goa",
-  "Gujarat",
-  "Haryana",
-  "Jharkhand",
-  "Karnataka",
-  "Kerala",
-  "Madhya Pradesh",
-  "Maharashtra",
-  "Punjab",
-  "Rajasthan",
-  "Tamil Nadu",
-  "Telangana",
-  "Uttar Pradesh",
-  "West Bengal",
-];
+import { fontSizes, fontWeights } from "../../../theme/typography";
+const { height } = Dimensions.get("window");
 
-const rates = ["5%", "12%", "18%", "28%"];
+const STATE_OPTIONS = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Delhi","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Punjab","Rajasthan","Tamil Nadu","Uttar Pradesh","Uttarakhand","West Bengal"];
+const RATE_OPTIONS = ["0%","0.1%","0.25%","1%","1.5%","3%","5%","12%","18%","28%"];
+
+
+
+
+
 
 export default function AddB2COthersScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const editId = params.editId ? Number(params.editId) : null;
+  
+  const { addRecord, updateFullRecord, records } = useB2COthersStore();
 
-  const [selectedState, setSelectedState] =
-    useState("Select State");
-
-  const [invoiceValue, setInvoiceValue] =
-    useState("");
-
-  const [selectedRate, setSelectedRate] =
-    useState("5%");
-
-  const [supplyType, setSupplyType] =
-    useState("");
-
+  const [state, setState] = useState("");
+  const [invoiceValue, setInvoiceValue] = useState("");
+  const [rate, setRate] = useState("");
+  const [supplyTypeInput, setSupplyTypeInput] = useState("");
   const [cess, setCess] = useState("");
 
-  const [stateModal, setStateModal] =
-    useState(false);
+  const [stateModalVisible, setStateModalVisible] = useState(false);
+  const [rateModalVisible, setRateModalVisible] = useState(false);
 
-  const [rateModal, setRateModal] =
-    useState(false);
 
-  const [records, setRecords] = useState([
-    {
-      id: "1",
-      state: selectedState,
+
+
+
+
+  useEffect(() => {
+    if (editId) {
+      const recordToEdit = records.find(r => r.id === editId);
+      if (recordToEdit) {
+        setState(recordToEdit.state || "");
+        setInvoiceValue(recordToEdit.invoiceValue || "");
+        setRate(recordToEdit.rate || "");
+        setSupplyTypeInput(recordToEdit.supplyTypeInput || "");
+        setCess(recordToEdit.cess || "");
+      }
+    }
+  }, [editId, records]);
+
+  const handleSave = () => {
+    let val = 0;
+    // @ts-ignore
+    try { if (typeof invoiceValue !== 'undefined') val = parseFloat(invoiceValue) || 0; } catch(e){}
+    // @ts-ignore
+    try { if (typeof totalTaxable !== 'undefined') val = parseFloat(totalTaxable) || 0; } catch(e){}
+    // @ts-ignore
+    try { if (typeof noteValue !== 'undefined') val = parseFloat(noteValue) || 0; } catch(e){}
+    // @ts-ignore
+    try { if (typeof grossAdvance !== 'undefined') val = parseFloat(grossAdvance) || 0; } catch(e){}
+    
+    let r = 0;
+    // @ts-ignore
+    try { if (typeof rate !== 'undefined') r = parseFloat(rate) || 0; } catch(e){}
+    // @ts-ignore
+    try { if (typeof taxRate !== 'undefined') r = parseFloat(taxRate) || 0; } catch(e){}
+    // @ts-ignore
+    try { if (typeof gst !== 'undefined') r = parseFloat(gst) || 0; } catch(e){}
+    
+    let taxAmt = (val * r) / 100;
+    let cgst = 0, sgst = 0, igst = 0;
+    
+    let st = "";
+    // @ts-ignore
+    try { if (typeof state !== 'undefined') st = state; } catch(e){}
+    // @ts-ignore
+    try { if (typeof place !== 'undefined') st = place; } catch(e){}
+    
+    if (!st || st.toLowerCase().includes("delhi")) {
+      cgst = taxAmt / 2;
+      sgst = taxAmt / 2;
+    } else {
+      igst = taxAmt;
+    }
+
+    const payload = {
+      state,
       invoiceValue,
-      rate: selectedRate,
-      supplyType,
+      rate,
+      supplyTypeInput,
       cess,
-    },
-  ]);
-
-  const handleDelete = (id: string) => {
-    setRecords((prev) =>
-      prev.filter((item) => item.id !== id)
-    );
-  };
-
-  const handleEdit = (item: any) => {
-    setSelectedState(item.state);
-    setInvoiceValue(item.invoiceValue);
-    setSelectedRate(item.rate);
-    setSupplyType(item.supplyType);
-    setCess(item.cess);
-  };
-
-  const handleAdd = () => {
-    const newRecord = {
-      id: Date.now().toString(),
-      state: selectedState,
-      invoiceValue,
-      rate: selectedRate,
-      supplyType,
-      cess,
+      totalTaxable: val.toFixed(2),
+      centralTax: cgst.toFixed(2),
+      stateTax: sgst.toFixed(2),
+      integrated: igst.toFixed(2),
+      integratedTax: igst.toFixed(2),
     };
+if (editId) {
+      updateFullRecord(editId, payload);
+      if (Platform.OS === 'web') {
+        window.alert("Record Updated Successfully!");
+      } else {
+        Alert.alert("Success", "Record Updated Successfully!");
+      }
+      router.back();
+    } else {
+      // @ts-ignore
+    addRecord({
+        id: Date.now(),
+        ...payload
+      });
+      
+      // Clear fields after adding
+      setState("");
+      setInvoiceValue("");
+      setRate("");
+      setSupplyTypeInput("");
+      setCess("");
 
-    setRecords((prev) => [...prev, newRecord]);
-
-    setSelectedState("Select State");
-    setInvoiceValue("");
-    setSelectedRate("5%");
-    setSupplyType("");
-    setCess("");
+      if (Platform.OS === 'web') {
+        window.alert("Record Added! You can add another or go back.");
+      } else {
+        Alert.alert("Success", "Record Added! You can add another or go back.");
+      }
+    }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* HEADER */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() =>
-            router.push(
-              "/gst/b2c-others" as any
-            )
-          }
-          style={styles.backButton}
-        >
-          <Ionicons
-            name="arrow-back"
-            size={18}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.container}>
+        <GSTHeader title="7-B2C (Others)" />
 
-        <Text style={styles.headerTitle}>
-          7-B2C (Others)
-        </Text>
-      </View>
-
-      {/* BODY */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* TITLE */}
-        <Text style={styles.title}>
-          Outward and Reverse charge Inward
-        </Text>
-
-        <Text style={styles.subTitle}>
-          Sr. No 1
-        </Text>
-
-        {/* STATE */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.selectBox}
-          onPress={() => setStateModal(true)}
-        >
-          <Text
-            style={[
-              styles.selectText,
-              selectedState ===
-                "Select State" && {
-                color: "#7B8190",
-              },
-            ]}
-          >
-            {selectedState}
-          </Text>
-
-          <Ionicons
-            name="chevron-down"
-            size={16}
-            color="#6B7280"
-          />
-        </TouchableOpacity>
-
-        {/* INVOICE VALUE */}
-        <TextInput
-          placeholder="Invoices Value"
-          placeholderTextColor="#7B8190"
-          value={invoiceValue}
-          onChangeText={setInvoiceValue}
-          style={styles.input}
-        />
-
-        {/* RATE */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.selectBox}
-          onPress={() => setRateModal(true)}
-        >
-          <Text style={styles.selectText}>
-            {selectedRate}
-          </Text>
-
-          <Ionicons
-            name="chevron-down"
-            size={16}
-            color="#6B7280"
-          />
-        </TouchableOpacity>
-
-        {/* SUPPLY TYPE */}
-        <TextInput
-          placeholder="Supply Type"
-          placeholderTextColor="#7B8190"
-          value={supplyType}
-          onChangeText={setSupplyType}
-          style={styles.input}
-        />
-
-        {/* CESS */}
-        <TextInput
-          placeholder="Cess"
-          placeholderTextColor="#7B8190"
-          value={cess}
-          onChangeText={setCess}
-          style={styles.input}
-        />
-
-        {/* ACTION ICONS */}
-        <View style={styles.actionRow}>
-          {/* EDIT */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.iconButton}
-            onPress={() =>
-              handleEdit(records[0])
-            }
-          >
-            <Ionicons
-              name="create-outline"
-              size={18}
-              color="#2563EB"
-            />
-          </TouchableOpacity>
-
-          {/* DELETE */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.iconButton}
-            onPress={() =>
-              handleDelete(records[0]?.id)
-            }
-          >
-            <Ionicons
-              name="trash-outline"
-              size={18}
-              color="#EF4444"
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* BUTTONS */}
-        <View style={styles.buttonRow}>
-          {/* BACK */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.backBtn}
-            onPress={() =>
-              router.push(
-                "/gst/b2c-others" as any
-              )
-            }
-          >
-            <Text style={styles.buttonText}>
-              Back
-            </Text>
-          </TouchableOpacity>
-
-          {/* ADD */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.addBtn}
-            onPress={handleAdd}
-          >
-            <Text style={styles.buttonText}>
-              Add
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-
-      {/* STATE MODAL */}
-      <Modal
-        visible={stateModal}
-        transparent
-        animationType="fade"
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          style={styles.modalOverlay}
-          onPress={() => setStateModal(false)}
-        >
-          <View style={styles.modalBox}>
-            <FlatList
-              data={states}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.optionItem}
-                  onPress={() => {
-                    setSelectedState(item);
-                    setStateModal(false);
-                  }}
-                >
-                  <Text style={styles.optionText}>
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
+          <View style={styles.card}>
+            {/* Title from Figma */}
+            
+            <Text style={styles.cardTitle}>{editId ? "Edit Record" : "Add New Record"}</Text>
+            
+            <FormControl style={{ marginBottom: 16 }}>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => setStateModalVisible(true)}>
+                <Input style={styles.inputBox} pointerEvents="none">
+                  <InputField value={state} editable={false} placeholder="Select State" placeholderTextColor="#9b9b9b" style={styles.inputText} />
+                  <InputSlot>
+                    <Ionicons name="chevron-down" size="sm" color="#7d7d7d" />
+                  </InputSlot>
+                </Input>
+              </TouchableOpacity>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={[styles.inputBox, (state && !state.includes("Delhi") && Number(invoiceValue) > 250000) ? { borderColor: 'red' } : {}]}>
+                <InputField value={invoiceValue} onChangeText={setInvoiceValue} placeholder="Total Taxable Value" placeholderTextColor="#9b9b9b" style={styles.inputText} keyboardType="numeric" />
+              </Input>
+              {(state && !state.includes("Delhi") && Number(invoiceValue) > 250000) ? (
+                <Text style={{ color: 'red', fontSize: fontSizes.sm, marginTop: 4, marginLeft: 4 }}>
+                  Interstate value &gt; 2.5L goes to B2C Large (Table 5).
+                </Text>
+              ) : null}
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => setRateModalVisible(true)}>
+                <Input style={styles.inputBox} pointerEvents="none">
+                  <InputField value={rate} editable={false} placeholder="Select Rate" placeholderTextColor="#9b9b9b" style={styles.inputText} />
+                  <InputSlot>
+                    <Ionicons name="chevron-down" size="sm" color="#7d7d7d" />
+                  </InputSlot>
+                </Input>
+              </TouchableOpacity>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={[styles.inputBox, { backgroundColor: "#f8fafc" }]} pointerEvents="none">
+                <InputField value={state ? (state === "Delhi" ? "Intrastate" : "Interstate") : ""} editable={false} placeholder="Supply Type (Auto-filled)" placeholderTextColor="#9b9b9b" style={[styles.inputText, { color: "#475569" }]} />
+              </Input>
+            </FormControl>
+            <FormControl style={{ marginBottom: 16 }}>
+              <Input style={styles.inputBox}>
+                <InputField value={cess} onChangeText={setCess} placeholder="Cess" placeholderTextColor="#9b9b9b" style={styles.inputText} />
+              </Input>
+            </FormControl>
           </View>
-        </TouchableOpacity>
-      </Modal>
 
-      {/* RATE MODAL */}
-      <Modal
-        visible={rateModal}
-        transparent
-        animationType="fade"
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          style={styles.modalOverlay}
-          onPress={() => setRateModal(false)}
-        >
-          <View style={styles.modalBox}>
-            <FlatList
-              data={rates}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.optionItem}
-                  onPress={() => {
-                    setSelectedRate(item);
-                    setRateModal(false);
-                  }}
-                >
-                  <Text style={styles.optionText}>
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
+          
+
+          {/* Buttons placed inside ScrollView at the bottom so they flow naturally and don't overlap */}
+          <View style={styles.bottomButtons}>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => router.back()}>
+              <Text style={styles.btnText}>Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn} onPress={handleSave}>
+              <Text style={styles.btnText}>{editId ? "Save" : "Add"}</Text>
+            </TouchableOpacity>
           </View>
-        </TouchableOpacity>
-      </Modal>
+        </ScrollView>
 
-      {/* BOTTOM BAR */}
-      <GSTBottomBar />
+        <Modal visible={stateModalVisible} transparent animationType="fade">
+          <TouchableOpacity activeOpacity={1} style={styles.modalOverlay} onPress={() => setStateModalVisible(false)}>
+            <View style={styles.dropdownBox}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {STATE_OPTIONS.map((item, idx) => (
+                  <TouchableOpacity key={idx} activeOpacity={0.8} style={styles.dropdownItem} onPress={() => { 
+                    setState(item); 
+                    setSupplyTypeInput(item === "Delhi" ? "Intrastate" : "Interstate");
+                    setStateModalVisible(false); 
+                  }}>
+                    <Text style={styles.dropdownText}>{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+        <Modal visible={rateModalVisible} transparent animationType="fade">
+          <TouchableOpacity activeOpacity={1} style={styles.modalOverlay} onPress={() => setRateModalVisible(false)}>
+            <View style={styles.dropdownBox}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {RATE_OPTIONS.map((item, idx) => (
+                  <TouchableOpacity key={idx} activeOpacity={0.8} style={styles.dropdownItem} onPress={() => { setRate(item); setRateModalVisible(false); }}>
+                    <Text style={styles.dropdownText}>{item}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+
+
+
+
+
+
+
+
+
+
+        <View style={styles.bottomNavWrapper}>
+          <GSTBottomBar />
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F3F4F6",
+  safeArea: { flex: 1, backgroundColor: "#f0f2f5" },
+  container: { flex: 1 },
+  header: { 
+    backgroundColor: "#3D7BEA", 
+    flexDirection: "row", 
+    alignItems: "center", 
+    paddingHorizontal: 14, 
+    paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 45) : 45, 
+    paddingBottom: 16 
   },
-
-  header: {
-    height: 58,
-    backgroundColor: "#3B82F6",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-  },
-
-  backButton: {
-    marginRight: 10,
-  },
-
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  scrollContent: {
-    paddingHorizontal: 14,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
-
-  title: {
-    fontSize: 13,
-    color: "#374151",
-    fontWeight: "500",
-    marginBottom: 10,
-  },
-
-  subTitle: {
-    fontSize: 11,
-    color: "#2563EB",
-    marginBottom: 10,
-    fontWeight: "500",
-  },
-
-  /* SAME UI */
-  selectBox: {
-    height: 42,
-    borderWidth: 1,
-    borderColor: "#C9D2E3",
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-
-  selectText: {
-    fontSize: 11,
-    color: "#111827",
-  },
-
-  input: {
-    height: 42,
-    borderWidth: 1,
-    borderColor: "#C9D2E3",
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 12,
-    fontSize: 11,
-    color: "#111827",
-    marginBottom: 12,
-  },
-
-  /* ACTION ICONS */
-  actionRow: {
-    flexDirection: "row",
-    marginTop: 4,
-    marginBottom: 60,
-  },
-
-  iconButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-  },
-
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-
-  backBtn: {
-    flex: 1,
-    height: 42,
-    backgroundColor: "#4B83F5",
-    borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 6,
-  },
-
-  addBtn: {
-    flex: 1,
-    height: 42,
-    backgroundColor: "#4B83F5",
-    borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 6,
-  },
-
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-
-  /* MODAL */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.10)",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-
-  modalBox: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    overflow: "hidden",
-    maxHeight: 220,
-  },
-
-  optionItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-
-  optionText: {
-    fontSize: 13,
-    color: "#111827",
-  },
+  backButton: { marginRight: 8 },
+  headerTitle: { color: "#fff", fontSize: fontSizes.lg, fontWeight: fontWeights.semibold },
+  scrollContent: { padding: 16, paddingBottom: 40 }, // Breathing room below buttons
+  card: { backgroundColor: "#fff", borderRadius: 8, padding: 16, marginBottom: 24, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
+  cardSubtitle: { fontSize: fontSizes.md, color: "#333", fontWeight: fontWeights.semibold, marginBottom: 8, textAlign: "center" },
+  srNoText: { fontSize: fontSizes.md, color: "#3D7BEA", fontWeight: fontWeights.semibold, marginBottom: 16 },
+  cardTitle: { fontSize: fontSizes.lg, color: "#333", fontWeight: fontWeights.semibold, marginBottom: 16 },
+  
+  // Figma input field styles
+  inputBox: { height: 48, borderWidth: 1, borderColor: "#B0B5C1", borderRadius: 8, paddingHorizontal: 0, marginBottom: 0, backgroundColor: "#fff" },
+  inputText: { fontSize: fontSizes.md, color: "#333", height: "100%", paddingHorizontal: 14 },
+  
+  // Blue View and Download style buttons from Figma
+  bottomButtons: { flexDirection: "row", justifyContent: "space-between", gap: 16 },
+  actionBtn: { flex: 1, height: 48, backgroundColor: "#3D7BEA", borderRadius: 8, justifyContent: "center", alignItems: "center" },
+  btnText: { color: "#fff", fontSize: fontSizes.lg, fontWeight: fontWeights.semibold },
+  
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 16, paddingTop: height * 0.3 },
+  dropdownBox: { width: "100%", maxHeight: height * 0.4, backgroundColor: "#fff", borderRadius: 12, overflow: "hidden", elevation: 5 },
+  dropdownItem: { padding: 16, borderBottomWidth: 1, borderBottomColor: "#f3f4f6" },
+  dropdownText: { fontSize: fontSizes.md, color: "#333" },
+  
+  bottomNavWrapper: { backgroundColor: "#fff" }
 });

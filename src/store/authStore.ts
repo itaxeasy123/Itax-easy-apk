@@ -1,8 +1,8 @@
 
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Constants from "expo-constants";
 import axios from "axios";
+import { API_URL } from "../config/env";
 
 export type AuthUser = {
   email: string;
@@ -70,8 +70,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       if (token) {
         try {
-          const API_URL = Constants?.expoConfig?.extra?.API_URL || "https://api.itaxeasy.com/api";
-          
           await axios.get(`${API_URL}/user/profile`, {
             headers: { Authorization: `Bearer ${token}` },
             timeout: 5000,
