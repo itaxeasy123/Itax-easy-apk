@@ -25,6 +25,7 @@ import {
 } from '../types/accountingTypes';
 import { voucherService } from './voucherService';
 import { companyService } from './companyService';
+import * as engine from '../local/engine';
 import {
   getBalancesByLedger,
   groupIdForLedgerType,
@@ -154,16 +155,13 @@ export const accountingService = {
 
   getLedgers: async (): Promise<ListResponse<Ledger>> => {
     const companyId = await companyService.ensureCompanyId();
-    const [response, balances] = await Promise.all([
-      apiClient.get(endpoints.billshield.ledgers(companyId)),
+    const [rows, balances] = await Promise.all([
+      engine.listLedgers(companyId),
       getBalancesByLedger(companyId).catch(() => new Map<string, number>()),
     ]);
     return {
-      success: Boolean(response.data?.success),
-      data: Array.isArray(response.data?.data)
-        ? response.data.data.map((ledger: unknown) => toLegacyLedger(ledger, balances))
-        : [],
-      message: response.data?.message,
+      success: true,
+      data: rows.map((ledger) => toLegacyLedger(ledger, balances)),
     };
   },
 
@@ -174,17 +172,14 @@ export const accountingService = {
   }): Promise<ApiResponse<Ledger>> => {
     const companyId = await companyService.ensureCompanyId();
     const groupId = await groupIdForLedgerType(companyId, data.ledgerType);
-    const response = await apiClient.post(endpoints.billshield.ledgers(companyId), {
+    const created = await engine.createLedger(companyId, {
       name: data.ledgerName,
       groupId,
       openingBalance: Math.abs(data.openingBalance ?? 0),
       openingBalanceType: (data.openingBalance ?? 0) < 0 ? 'CR' : 'DR',
     });
-    return {
-      success: Boolean(response.data?.success),
-      data: toLegacyLedger(response.data?.data ?? response.data),
-      message: response.data?.message,
-    };
+    const full = await engine.getLedgerById(companyId, created.id);
+    return { success: true, data: toLegacyLedger(full) };
   },
 
   updateLedger: async (
@@ -205,28 +200,20 @@ export const accountingService = {
       payload.openingBalance = Math.abs(data.openingBalance);
       payload.openingBalanceType = data.openingBalance < 0 ? 'CR' : 'DR';
     }
-    const response = await apiClient.put(endpoints.billshield.ledgerById(companyId, id), payload);
-    return {
-      success: Boolean(response.data?.success),
-      data: toLegacyLedger(response.data?.data ?? response.data),
-      message: response.data?.message,
-    };
+    const updated = await engine.updateLedger(companyId, id, payload as any);
+    return { success: true, data: toLegacyLedger(updated) };
   },
 
   deleteLedger: async (id: string): Promise<ApiResponse<any>> => {
     const companyId = await companyService.ensureCompanyId();
-    const response = await apiClient.delete(endpoints.billshield.ledgerById(companyId, id));
-    return response.data;
+    await engine.deleteLedger(companyId, id);
+    return { success: true } as ApiResponse<any>;
   },
 
   getLedgerById: async (id: string): Promise<ApiResponse<Ledger>> => {
     const companyId = await companyService.ensureCompanyId();
-    const response = await apiClient.get(endpoints.billshield.ledgerById(companyId, id));
-    return {
-      success: Boolean(response.data?.success),
-      data: response.data?.data ? toLegacyLedger(response.data.data) : undefined,
-      message: response.data?.message,
-    };
+    const ledger = await engine.getLedgerById(companyId, id);
+    return { success: Boolean(ledger), data: ledger ? toLegacyLedger(ledger) : undefined };
   },
 
   getLedgerByPartyId: async (
@@ -518,10 +505,9 @@ export const accountingService = {
   getDayBook: async (): Promise<ApiResponse<DayBook[]>> => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.get(endpoints.billshield.daybook(companyId));
-      const vouchersList = Array.isArray(response.data?.data) ? response.data.data : [];
-      // BillShield daybook returns vouchers with balanced lines —
-      // flatten to one row per line, the shape the screen expects.
+      const vouchersList = await engine.dayBook(companyId);
+      // The daybook returns vouchers with balanced lines — flatten to one
+      // row per line, the shape the screen expects.
       const backendDaybook: DayBook[] = vouchersList.flatMap((voucher: any) => {
         const transactionDate = formatDayBookDate(voucher?.voucherDate);
         const narration = String(voucher?.narration ?? '');
@@ -535,12 +521,12 @@ export const accountingService = {
           return {
             id: String(line?.id ?? ''),
             ledgerId: String(line?.ledgerId ?? ''),
-            ledgerName: String(line?.ledger?.name ?? ''),
+            ledgerName: String(line?.ledgerName ?? line?.ledger?.name ?? ''),
             transactionDate,
             entryDate: transactionDate,
             amount: debit > 0 ? debit : toNumber(line?.credit),
             transactionType: side,
-            description: narration || voucherNumber || String(line?.ledger?.name ?? 'Voucher'),
+            description: narration || voucherNumber || String(line?.ledgerName ?? line?.ledger?.name ?? 'Voucher'),
             voucherType,
             voucherNumber,
             narration,
@@ -551,12 +537,11 @@ export const accountingService = {
 
       if (backendDaybook.length > 0) {
         return {
-          success: Boolean(response.data?.success),
+          success: true,
           data: backendDaybook.sort(
             (a: DayBook, b: DayBook) =>
               new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime()
           ),
-          message: response.data?.message,
         };
       }
 
@@ -564,11 +549,10 @@ export const accountingService = {
       const voucherEntries = (vouchers.data ?? []).flatMap(normalizeDayBookFromVoucher);
 
       return {
-        success: Boolean(response.data?.success),
+        success: true,
         data: voucherEntries.sort(
           (a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime()
         ),
-        message: response.data?.message,
       };
     } catch {
       return { success: false, data: [] };

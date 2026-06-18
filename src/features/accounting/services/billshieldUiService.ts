@@ -1,23 +1,14 @@
 /**
- * UI-facing helpers for BillShield features that have no legacy
- * equivalent: chart-of-accounts tree, fiscal years, bankbook
- * reconciliation. All methods resolve the active company themselves.
+ * UI-facing BillShield helpers — chart-of-accounts tree, fiscal years,
+ * reports, bankbook reconciliation.
+ *
+ * Now backed by the on-device SQLite engine (../local/engine) instead of
+ * the server. Return shapes are unchanged so the screens keep working.
  */
-import { apiClient } from '../../../api/client';
-import { endpoints } from '../../../api/endpoints';
 import { companyService } from './companyService';
+import * as engine from '../local/engine';
 
-export interface AccountGroupNode {
-  id: string;
-  name: string;
-  nature: 'ASSET' | 'LIABILITY' | 'INCOME' | 'EXPENSE';
-  reportSection: string;
-  isSystem: boolean;
-  path: string;
-  parentGroupId: string | null;
-  subGroups: AccountGroupNode[];
-  ledgers: { id: string; name: string; isSystem: boolean }[];
-}
+export type { AccountGroupNode } from '../local/engine';
 
 export interface FiscalYearInfo {
   id: string;
@@ -44,41 +35,36 @@ export interface BankbookRow {
   statementRef: string | null;
 }
 
-const errMessage = (error: any, fallback: string) =>
-  error?.response?.data?.message ?? error?.message ?? fallback;
+const fail = (error: any, fallback: string) => error?.message ?? fallback;
 
 export const billshieldUiService = {
   // ---- chart of accounts ----
-  getGroupTree: async (): Promise<{ success: boolean; data: AccountGroupNode[]; message?: string }> => {
+  getGroupTree: async () => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.get(endpoints.billshield.groupTree(companyId));
-      return { success: true, data: Array.isArray(response.data?.data) ? response.data.data : [] };
+      return { success: true, data: await engine.getGroupTree(companyId) };
     } catch (error: any) {
-      return { success: false, data: [], message: errMessage(error, 'Unable to load chart of accounts') };
+      return { success: false, data: [], message: fail(error, 'Unable to load chart of accounts') };
     }
   },
 
   createSubGroup: async (name: string, parentGroupId: string) => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.post(endpoints.billshield.groups(companyId), {
-        name,
-        parentGroupId,
-      });
-      return { success: Boolean(response.data?.success), data: response.data?.data };
+      const data = await engine.createSubGroup(companyId, name, parentGroupId);
+      return { success: true, data };
     } catch (error: any) {
-      return { success: false, message: errMessage(error, 'Unable to create group') };
+      return { success: false, message: fail(error, 'Unable to create group') };
     }
   },
 
   deleteGroup: async (groupId: string) => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.delete(`${endpoints.billshield.groups(companyId)}/${groupId}`);
-      return { success: Boolean(response.data?.success), message: response.data?.message };
+      await engine.deleteGroup(companyId, groupId);
+      return { success: true };
     } catch (error: any) {
-      return { success: false, message: errMessage(error, 'Unable to delete group') };
+      return { success: false, message: fail(error, 'Unable to delete group') };
     }
   },
 
@@ -86,119 +72,52 @@ export const billshieldUiService = {
   listFiscalYears: async (): Promise<{ success: boolean; data: FiscalYearInfo[]; message?: string }> => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.get(endpoints.billshield.fiscalYears(companyId));
-      return { success: true, data: Array.isArray(response.data?.data) ? response.data.data : [] };
+      return { success: true, data: (await engine.listFiscalYears(companyId)) as FiscalYearInfo[] };
     } catch (error: any) {
-      return { success: false, data: [], message: errMessage(error, 'Unable to load fiscal years') };
+      return { success: false, data: [], message: fail(error, 'Unable to load fiscal years') };
     }
   },
 
   closeFiscalYear: async (fiscalYearId: string) => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.post(
-        `${endpoints.billshield.fiscalYears(companyId)}/${fiscalYearId}/close`
-      );
-      return { success: Boolean(response.data?.success), data: response.data?.data };
+      return { success: true, data: await engine.closeFiscalYear(companyId, fiscalYearId) };
     } catch (error: any) {
-      return { success: false, message: errMessage(error, 'Unable to close fiscal year') };
+      return { success: false, message: fail(error, 'Unable to close fiscal year') };
     }
   },
 
-  // ---- reports (live from the journal) ----
-  getTrialBalance: async (asOf?: string): Promise<{
-    success: boolean;
-    data: {
-      ledgers: {
-        ledgerId: string;
-        ledgerName: string;
-        groupName: string;
-        groupPath: string;
-        nature: 'ASSET' | 'LIABILITY' | 'INCOME' | 'EXPENSE';
-        debit: number;
-        credit: number;
-      }[];
-      totals: { debit: number; credit: number };
-    };
-    message?: string;
-  }> => {
+  // ---- reports ----
+  getTrialBalance: async (asOf?: string) => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.get(endpoints.billshield.trialBalance(companyId), {
-        params: asOf ? { asOf } : {},
-      });
-      const d = response.data?.data ?? { ledgers: [], totals: { debit: 0, credit: 0 } };
-      return {
-        success: true,
-        data: {
-          ledgers: (d.ledgers ?? []).map((r: any) => ({
-            ledgerId: String(r.ledgerId),
-            ledgerName: String(r.ledgerName),
-            groupName: String(r.groupName ?? ""),
-            groupPath: String(r.groupPath ?? ""),
-            nature: r.nature ?? 'ASSET',
-            debit: Number(r.debit ?? 0),
-            credit: Number(r.credit ?? 0),
-          })),
-          totals: { debit: Number(d.totals?.debit ?? 0), credit: Number(d.totals?.credit ?? 0) },
-        },
-      };
+      const d = await engine.trialBalance(companyId, asOf);
+      return { success: true, data: d };
     } catch (error: any) {
-      return {
-        success: false,
-        data: { ledgers: [], totals: { debit: 0, credit: 0 } },
-        message: errMessage(error, 'Unable to load trial balance'),
-      };
+      return { success: false, data: { ledgers: [], totals: { debit: 0, credit: 0 } }, message: fail(error, 'Unable to load trial balance') };
     }
   },
 
-  getBalanceSheet: async (asOf?: string): Promise<{
-    success: boolean;
-    data: {
-      assets: { group: string; amount: number }[];
-      liabilities: { group: string; amount: number }[];
-      totals: { assets: number; liabilities: number; difference: number };
-    };
-    message?: string;
-  }> => {
+  getBalanceSheet: async (asOf?: string) => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.get(endpoints.billshield.balanceSheet(companyId), {
-        params: asOf ? { asOf } : {},
-      });
-      const d = response.data?.data ?? { assets: [], liabilities: [], totals: { assets: 0, liabilities: 0, difference: 0 } };
-      return {
-        success: true,
-        data: {
-          assets: (d.assets ?? []).map((r: any) => ({ group: String(r.group), amount: Number(r.amount ?? 0) })),
-          liabilities: (d.liabilities ?? []).map((r: any) => ({ group: String(r.group), amount: Number(r.amount ?? 0) })),
-          totals: {
-            assets: Number(d.totals?.assets ?? 0),
-            liabilities: Number(d.totals?.liabilities ?? 0),
-            difference: Number(d.totals?.difference ?? 0),
-          },
-        },
-      };
+      const d = await engine.balanceSheet(companyId, asOf);
+      return { success: true, data: d };
     } catch (error: any) {
       return {
         success: false,
         data: { assets: [], liabilities: [], totals: { assets: 0, liabilities: 0, difference: 0 } },
-        message: errMessage(error, 'Unable to load balance sheet'),
+        message: fail(error, 'Unable to load balance sheet'),
       };
     }
   },
 
-  /**
-   * "Add New Entry" on the Balance Sheet screen. Books a REAL journal
-   * voucher so the entry shows up in the balance sheet and the books
-   * stay balanced: the chosen category's adjustment ledger on one side,
-   * Suspense A/c on the other (the standard treatment for a one-sided
-   * entry until it is classified properly).
-   */
+  /** "Add New Entry" on the Balance Sheet screen — books a real journal
+   *  voucher (chosen category's adjustment ledger vs Suspense A/c). */
   addBalanceSheetEntry: async (input: {
-    category: string; // UI category label
+    category: string;
     side: 'assets' | 'liabilities';
-    date: string; // ISO YYYY-MM-DD
+    date: string;
     amount: number;
   }) => {
     const CATEGORY_TO_GROUP: Record<string, string> = {
@@ -215,29 +134,21 @@ export const billshieldUiService = {
       const groupName = CATEGORY_TO_GROUP[input.category];
       if (!groupName) return { success: false, message: `Unknown category "${input.category}"` };
 
-      const [groupsRes, ledgersRes] = await Promise.all([
-        apiClient.get(endpoints.billshield.groups(companyId)),
-        apiClient.get(endpoints.billshield.ledgers(companyId)),
-      ]);
-      const groups: any[] = groupsRes.data?.data ?? [];
-      const ledgers: any[] = ledgersRes.data?.data ?? [];
-      const findGroup = (name: string) => groups.find((g) => g.name === name);
+      const groups = await engine.listGroups(companyId);
+      const ledgers = await engine.listLedgers(companyId);
+      const findGroup = (name: string) => groups.find((g: any) => g.name === name);
 
       const ensureLedger = async (name: string, group: string) => {
-        const found = ledgers.find((l) => l.name === name);
+        const found = ledgers.find((l: any) => l.name === name);
         if (found) return found;
-        const created = await apiClient.post(endpoints.billshield.ledgers(companyId), {
-          name,
-          groupId: findGroup(group)?.id,
-        });
-        return created.data?.data;
+        return engine.createLedger(companyId, { name, groupId: findGroup(group)?.id });
       };
 
       const entryLedger = await ensureLedger(`${input.category} Adjustment A/c`, groupName);
       const suspense = await ensureLedger('Suspense A/c', 'Suspense Account');
 
-      const debitFirst = input.side === 'assets'; // assets increase on the debit side
-      const response = await apiClient.post(endpoints.billshield.vouchers(companyId), {
+      const debitFirst = input.side === 'assets';
+      const voucher = await engine.createVoucher(companyId, 0, {
         voucherTypeCode: 'JRN',
         voucherDate: input.date,
         narration: `Balance sheet entry — ${input.category} (via Suspense)`,
@@ -247,74 +158,23 @@ export const billshieldUiService = {
           { ledgerId: suspense.id, debit: debitFirst ? 0 : input.amount, credit: debitFirst ? input.amount : 0 },
         ],
       });
-      return {
-        success: Boolean(response.data?.success),
-        data: response.data?.data,
-        message: response.data?.message,
-      };
+      return { success: true, data: voucher };
     } catch (error: any) {
-      return { success: false, message: errMessage(error, 'Unable to save the entry') };
+      return { success: false, message: fail(error, 'Unable to save the entry') };
     }
   },
 
-  /** Account statement for one ledger: opening → entries with running balance → closing. */
-  getLedgerStatement: async (
-    ledgerId: string,
-    from?: string,
-    to?: string
-  ): Promise<{
-    success: boolean;
-    data: {
-      ledger: { id: string; name: string; group: string };
-      opening: { amount: number; type: 'DR' | 'CR' };
-      entries: {
-        voucherNo: string;
-        voucherDate: string;
-        voucherType: string;
-        narration: string | null;
-        debit: number;
-        credit: number;
-        runningBalance: number;
-      }[];
-      closing: { amount: number; type: 'DR' | 'CR' };
-    } | null;
-    message?: string;
-  }> => {
+  getLedgerStatement: async (ledgerId: string, from?: string, to?: string) => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.get(endpoints.billshield.ledgerStatement(companyId, ledgerId), {
-        params: { ...(from ? { from } : {}), ...(to ? { to } : {}) },
-      });
-      const d = response.data?.data;
-      if (!d) return { success: false, data: null, message: 'Statement unavailable' };
-      return {
-        success: true,
-        data: {
-          ledger: { id: String(d.ledger?.id), name: String(d.ledger?.name), group: String(d.ledger?.group ?? '') },
-          opening: { amount: Number(d.opening?.amount ?? 0), type: d.opening?.type ?? 'DR' },
-          entries: (d.entries ?? []).map((e: any) => ({
-            voucherNo: String(e.voucherNo ?? ''),
-            voucherDate: String(e.voucherDate ?? ''),
-            voucherType: String(e.voucherType ?? ''),
-            narration: e.narration ?? null,
-            debit: Number(e.debit ?? 0),
-            credit: Number(e.credit ?? 0),
-            runningBalance: Number(e.runningBalance ?? 0),
-          })),
-          closing: { amount: Number(d.closing?.amount ?? 0), type: d.closing?.type ?? 'DR' },
-        },
-      };
+      const d = await engine.ledgerStatement(companyId, ledgerId, from, to);
+      return { success: true, data: d };
     } catch (error: any) {
-      return { success: false, data: null, message: errMessage(error, 'Unable to load ledger statement') };
+      return { success: false, data: null, message: fail(error, 'Unable to load ledger statement') };
     }
   },
 
-  /**
-   * Cash flow (indirect-style) computed from REAL trial-balance movement
-   * between two dates: net cash = Δ(cash+bank ledgers); financing =
-   * Δ(Capital + Loans) credit-side; investing = −Δ(Fixed Assets +
-   * Investments); operating = net − investing − financing.
-   */
+  /** Cash flow from trial-balance movement between two dates. */
   getCashFlow: async (from: string, to: string) => {
     try {
       const dayBefore = (iso: string) => {
@@ -344,28 +204,21 @@ export const billshieldUiService = {
         (r.groupPath.startsWith('capital-account') || r.groupPath.startsWith('loans-liability')) &&
         !r.groupPath.startsWith('loans-liability/bank-od-occ-accounts');
 
-      const netCashFlow = delta(isCashBank); // Dr-positive: cash gained
-      const investingCashFlow = -delta(isInvesting); // buying assets consumes cash
-      const financingCashFlow = -delta(isFinancing); // credit growth (capital/loans) brings cash in
+      const netCashFlow = delta(isCashBank);
+      const investingCashFlow = -delta(isInvesting);
+      const financingCashFlow = -delta(isFinancing);
       const operatingCashFlow = netCashFlow - investingCashFlow - financingCashFlow;
 
-      return {
-        success: true,
-        data: { operatingCashFlow, investingCashFlow, financingCashFlow, netCashFlow },
-      };
+      return { success: true, data: { operatingCashFlow, investingCashFlow, financingCashFlow, netCashFlow } };
     } catch (error: any) {
-      return { success: false, data: null, message: errMessage(error, 'Unable to compute cash flow') };
+      return { success: false, data: null, message: fail(error, 'Unable to compute cash flow') };
     }
   },
 
-  /** Real Trading + P&L from the journal, flattened for the P&L screen. */
   getProfitAndLoss: async (from?: string, to?: string) => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.get(endpoints.billshield.profitLoss(companyId), {
-        params: { ...(from ? { from } : {}), ...(to ? { to } : {}) },
-      });
-      const d = response.data?.data;
+      const d = await engine.profitAndLoss(companyId, from, to);
       const sum = (rows: any[]) => (rows ?? []).reduce((s, r) => s + Number(r.amount ?? 0), 0);
       return {
         success: true,
@@ -379,7 +232,7 @@ export const billshieldUiService = {
         },
       };
     } catch (error: any) {
-      return { success: false, data: null, message: errMessage(error, 'Unable to load profit & loss') };
+      return { success: false, data: null, message: fail(error, 'Unable to load profit & loss') };
     }
   },
 
@@ -387,11 +240,10 @@ export const billshieldUiService = {
   getBankbook: async (): Promise<{ success: boolean; data: BankbookRow[]; message?: string }> => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.get(endpoints.billshield.bankbook(companyId));
-      const rows: any[] = Array.isArray(response.data?.data) ? response.data.data : [];
+      const rows = await engine.bankbook(companyId);
       return {
         success: true,
-        data: rows.map((r) => ({
+        data: rows.map((r: any) => ({
           lineId: String(r.lineId),
           ledgerId: String(r.ledgerId),
           ledgerName: String(r.ledgerName),
@@ -409,7 +261,7 @@ export const billshieldUiService = {
         })),
       };
     } catch (error: any) {
-      return { success: false, data: [], message: errMessage(error, 'Unable to load bankbook') };
+      return { success: false, data: [], message: fail(error, 'Unable to load bankbook') };
     }
   },
 
@@ -418,14 +270,10 @@ export const billshieldUiService = {
     data: { instrumentNo?: string; instrumentDate?: string; clearedOn?: string | null; statementRef?: string }
   ) => {
     try {
-      const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.put(
-        `/billshield/companies/${companyId}/voucher-lines/${lineId}/reconcile`,
-        data
-      );
-      return { success: Boolean(response.data?.success), data: response.data?.data };
+      await engine.reconcileLine(lineId, data);
+      return { success: true, data: { lineId, ...data } };
     } catch (error: any) {
-      return { success: false, message: errMessage(error, 'Unable to save reconciliation') };
+      return { success: false, message: fail(error, 'Unable to save reconciliation') };
     }
   },
 };

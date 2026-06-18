@@ -4,9 +4,8 @@
  * (company-scoped ledgers under an account-group tree). Screens keep
  * consuming the old shapes; only the service layer knows BillShield.
  */
-import { apiClient } from '../../../api/client';
-import { endpoints } from '../../../api/endpoints';
 import { Ledger, LedgerType } from '../types/accountingTypes';
+import * as engine from '../local/engine';
 
 /** Old flat ledgerType → seeded BillShield group name. */
 export const LEDGER_TYPE_TO_GROUP: Record<LedgerType, string> = {
@@ -58,8 +57,7 @@ const groupCache = new Map<string, any[]>();
 
 export const getGroups = async (companyId: string, force = false): Promise<any[]> => {
   if (!force && groupCache.has(companyId)) return groupCache.get(companyId)!;
-  const response = await apiClient.get(endpoints.billshield.groups(companyId));
-  const groups: any[] = Array.isArray(response.data?.data) ? response.data.data : [];
+  const groups = await engine.listGroups(companyId);
   groupCache.set(companyId, groups);
   return groups;
 };
@@ -77,9 +75,8 @@ export const groupIdForLedgerType = async (
 
 /** Per-ledger closing balances from the trial balance (Dr positive). */
 export const getBalancesByLedger = async (companyId: string): Promise<Map<string, number>> => {
-  const response = await apiClient.get(endpoints.billshield.trialBalance(companyId));
-  const rows: any[] = Array.isArray(response.data?.data?.ledgers) ? response.data.data.ledgers : [];
-  return new Map(rows.map((r) => [String(r.ledgerId), Number(r.net ?? 0)]));
+  const tb = await engine.trialBalance(companyId);
+  return new Map(tb.ledgers.map((r) => [String(r.ledgerId), Number(r.debit) - Number(r.credit)]));
 };
 
 /** BillShield LedgerAccount → legacy Ledger shape the screens expect. */
@@ -99,7 +96,7 @@ export const toLegacyLedger = (
     partyId: raw?.partyId ?? undefined,
     year: created.getFullYear(),
     month: created.getMonth(),
-    ledgerType: pathToLedgerType(raw?.group?.path),
+    ledgerType: pathToLedgerType(raw?.groupPath ?? raw?.group?.path),
     createdAt: String(raw?.createdAt ?? new Date().toISOString()),
     updatedAt: String(raw?.updatedAt ?? new Date().toISOString()),
   };

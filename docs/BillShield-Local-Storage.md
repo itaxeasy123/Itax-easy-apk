@@ -15,7 +15,7 @@ Make the **BillShield accounting module store all of its data on the user's own 
 - If the user uninstalls/deletes the app, **their accounting data is gone with it** (like a self-contained offline app).
 - Rationale: this data is not needed by us centrally, so we avoid storing it server-side.
 
-> **Current status:** ❌ Not implemented. Today BillShield sends everything to our server (Postgres). This document lists exactly what would move to local-only storage so it can be approved before we build it.
+> **Current status:** ✅ Implemented (local engine + Drive backup) — see `src/features/accounting/local/`. BillShield now reads/writes on-device SQLite; nothing touches our server. The only off-device copy is the user's own Google Drive backup. **Pending:** device testing, the Google OAuth client id, and removing the now-unused BillShield tables/code from the backend (done last, after verification).
 
 ---
 

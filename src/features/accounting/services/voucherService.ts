@@ -1,8 +1,11 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiClient } from "../../../api/client";
-import { endpoints } from "../../../api/endpoints";
+/**
+ * Vouchers — now read/written through the on-device SQLite engine
+ * (../local/engine). The app's VoucherEntry shape is preserved so the
+ * screens are unchanged.
+ */
 import { VoucherEntry, VoucherLine, VoucherType } from "../types/accountingTypes";
 import { companyService } from "./companyService";
+import * as engine from "../local/engine";
 
 /** App voucher types → BillShield voucher type codes. */
 const VOUCHER_TYPE_CODE: Record<string, string> = {
@@ -16,54 +19,7 @@ const VOUCHER_TYPE_CODE: Record<string, string> = {
   creditNote: "CRN",
 };
 
-const VOUCHER_CACHE_KEY = "accounting_vouchers_cache";
-type RawVoucher = Record<string, unknown> & { lines?: unknown[] };
-
-const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-const normalizeVoucher = (voucher: unknown): VoucherEntry => {
-  const source = (voucher ?? {}) as RawVoucher;
-  return {
-    id: String(source.id ?? makeId()),
-    voucherNumber: String(source.voucherNumber ?? source.voucherNo ?? ""),
-    voucherType: (source.voucherType ?? "journal") as VoucherType,
-    entryDate: String(source.entryDate ?? new Date().toISOString()),
-    narration: String(source.narration ?? ""),
-    lines: Array.isArray(source.lines)
-      ? source.lines.map((line) => {
-          const lineSource = (line ?? {}) as Record<string, unknown>;
-          return {
-            id: String(lineSource.id ?? makeId()),
-            ledgerId: String(lineSource.ledgerId ?? ""),
-            ledgerName: String(lineSource.ledgerName ?? ""),
-            side: (lineSource.side ?? lineSource.transactionType ?? "debit") as VoucherLine["side"],
-            amount: Number(lineSource.amount ?? 0),
-          };
-        })
-      : [],
-    totalDebit: Number(source.totalDebit ?? 0),
-    totalCredit: Number(source.totalCredit ?? 0),
-    createdAt: String(source.createdAt ?? new Date().toISOString()),
-    updatedAt: String(source.updatedAt ?? new Date().toISOString()),
-  };
-};
-
-const readVouchers = async (): Promise<VoucherEntry[]> => {
-  const stored = await AsyncStorage.getItem(VOUCHER_CACHE_KEY);
-  if (!stored) return [];
-  try {
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed.map(normalizeVoucher) : [];
-  } catch {
-    return [];
-  }
-};
-
-const writeVouchers = async (vouchers: VoucherEntry[]) => {
-  await AsyncStorage.setItem(VOUCHER_CACHE_KEY, JSON.stringify(vouchers));
-};
-
-/** BillShield server voucher type names → app VoucherType keys. */
+/** BillShield voucher type names → app VoucherType keys. */
 const SERVER_NAME_TO_TYPE: Record<string, VoucherType> = {
   journal: "journal",
   payment: "payment",
@@ -75,8 +31,10 @@ const SERVER_NAME_TO_TYPE: Record<string, VoucherType> = {
   "credit note": "creditNote",
 };
 
-/** Maps a BillShield server voucher to the app's VoucherEntry shape. */
-const fromServerVoucher = (raw: any): VoucherEntry => {
+const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+/** Maps an engine voucher row to the app's VoucherEntry shape. */
+const fromEngineVoucher = (raw: any): VoucherEntry => {
   const lines = Array.isArray(raw?.lines) ? raw.lines : [];
   const totalDebit = lines.reduce((s: number, l: any) => s + Number(l?.debit ?? 0), 0);
   const totalCredit = lines.reduce((s: number, l: any) => s + Number(l?.credit ?? 0), 0);
@@ -90,14 +48,13 @@ const fromServerVoucher = (raw: any): VoucherEntry => {
     lines: lines.map((l: any) => ({
       id: String(l?.id ?? makeId()),
       ledgerId: String(l?.ledgerId ?? ""),
-      ledgerName: String(l?.ledger?.name ?? ""),
+      ledgerName: String(l?.ledgerName ?? l?.ledger?.name ?? ""),
       side: Number(l?.debit ?? 0) > 0 ? "debit" : "credit",
       amount: Number(l?.debit ?? 0) > 0 ? Number(l?.debit) : Number(l?.credit ?? 0),
     })),
     totalDebit,
     totalCredit,
     status: raw?.status,
-    partyName: raw?.party?.partyName ?? undefined,
     createdAt: String(raw?.createdAt ?? new Date().toISOString()),
     updatedAt: String(raw?.updatedAt ?? new Date().toISOString()),
   };
@@ -105,53 +62,36 @@ const fromServerVoucher = (raw: any): VoucherEntry => {
 
 export const voucherService = {
   getAll: async () => {
-    const data = await readVouchers();
+    const companyId = await companyService.ensureCompanyId();
+    const data = (await engine.listVouchers(companyId)).map(fromEngineVoucher);
     return { success: true, data };
   },
 
-  /** Vouchers straight from BillShield (source of truth). Falls back to
-   *  the local cache when offline. */
+  /** Kept for call-site compatibility — vouchers come from the local DB. */
   getAllFromServer: async (): Promise<{ success: boolean; data: VoucherEntry[]; message?: string }> => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.get(endpoints.billshield.vouchers(companyId), {
-        params: { limit: 200 },
-      });
-      const vouchers = Array.isArray(response.data?.data)
-        ? response.data.data.map(fromServerVoucher)
-        : [];
-      return { success: true, data: vouchers };
-    } catch {
-      const cached = await readVouchers();
-      return { success: false, data: cached, message: "Showing offline copies — could not reach the server." };
+      const data = (await engine.listVouchers(companyId)).map(fromEngineVoucher);
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, data: [], message: error?.message ?? "Unable to load vouchers" };
     }
   },
 
-  /** Reverses a POSTED voucher (the double-entry way to undo). */
   reverse: async (voucherId: string): Promise<{ success: boolean; data?: VoucherEntry; message?: string }> => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.post(
-        endpoints.billshield.reverseVoucher(companyId, voucherId),
-        {}
-      );
-      return {
-        success: Boolean(response.data?.success),
-        data: response.data?.data ? fromServerVoucher(response.data.data) : undefined,
-        message: response.data?.message,
-      };
+      const reversed = await engine.reverseVoucher(companyId, 0, voucherId);
+      return { success: true, data: reversed ? fromEngineVoucher(reversed) : undefined };
     } catch (error: any) {
-      return {
-        success: false,
-        message: error?.response?.data?.message ?? "Unable to reverse voucher",
-      };
+      return { success: false, message: error?.message ?? "Unable to reverse voucher" };
     }
   },
 
   getById: async (id: string) => {
-    const vouchers = await readVouchers();
-    const voucher = vouchers.find((item) => item.id === id);
-    return { success: true, data: voucher };
+    const companyId = await companyService.ensureCompanyId();
+    const voucher = await engine.getVoucher(companyId, id);
+    return { success: true, data: voucher ? fromEngineVoucher(voucher) : undefined };
   },
 
   create: async (data: {
@@ -170,36 +110,9 @@ export const voucherService = {
       cess?: number;
     }[];
   }) => {
-    const vouchers = await readVouchers();
-    const totalDebit = data.lines
-      .filter((line) => line.side === "debit")
-      .reduce((sum, line) => sum + Number(line.amount || 0), 0);
-    const totalCredit = data.lines
-      .filter((line) => line.side === "credit")
-      .reduce((sum, line) => sum + Number(line.amount || 0), 0);
-
-    const voucher: VoucherEntry = {
-      id: makeId(),
-      voucherNumber: data.voucherNumber,
-      voucherType: data.voucherType,
-      entryDate: data.entryDate,
-      narration: data.narration,
-      lines: data.lines.map((line) => ({
-        ...line,
-        id: line.id || makeId(),
-      })),
-      totalDebit,
-      totalCredit,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const next = [voucher, ...vouchers];
-    await writeVouchers(next);
-
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.post(endpoints.billshield.vouchers(companyId), {
+      const created = await engine.createVoucher(companyId, 0, {
         voucherTypeCode: VOUCHER_TYPE_CODE[data.voucherType] ?? "JRN",
         voucherDate: data.entryDate,
         narration: data.narration,
@@ -211,35 +124,29 @@ export const voucherService = {
         })),
         ...(data.gstLines?.length ? { gstLines: data.gstLines } : {}),
       });
-      // Adopt the server-assigned voucher number (e.g. JRN/2025-26/0001)
-      const serverVoucher = response.data?.data;
-      if (serverVoucher?.voucherNo) {
-        voucher.voucherNumber = serverVoucher.voucherNo;
-        voucher.id = String(serverVoucher.id ?? voucher.id);
-        await writeVouchers([voucher, ...vouchers]);
-      }
-    } catch {
-      // Keep the local voucher cache working even if the backend sync is temporarily unavailable.
+      return { success: true, data: created ? fromEngineVoucher(created) : undefined };
+    } catch (error: any) {
+      return { success: false, message: error?.message ?? "Unable to save voucher" };
     }
-
-    return { success: true, data: voucher };
   },
 
   delete: async (id: string) => {
-    const vouchers = await readVouchers();
-    const next = vouchers.filter((voucher) => voucher.id !== id);
-    await writeVouchers(next);
-    return { success: true };
+    try {
+      const companyId = await companyService.ensureCompanyId();
+      await engine.deleteDraftVoucher(companyId, id);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, message: error?.message ?? "Unable to delete voucher" };
+    }
   },
 
-  /** Deletes a server-side DRAFT voucher (posted ones must be reversed). */
   deleteDraftOnServer: async (id: string): Promise<{ success: boolean; message?: string }> => {
     try {
       const companyId = await companyService.ensureCompanyId();
-      const response = await apiClient.delete(endpoints.billshield.voucherById(companyId, id));
-      return { success: Boolean(response.data?.success), message: response.data?.message };
+      await engine.deleteDraftVoucher(companyId, id);
+      return { success: true };
     } catch (error: any) {
-      return { success: false, message: error?.response?.data?.message ?? "Unable to delete draft" };
+      return { success: false, message: error?.message ?? "Unable to delete draft" };
     }
   },
 };
