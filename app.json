@@ -42,7 +42,13 @@
       "expo-web-browser",
       "expo-font",
       "@react-native-community/datetimepicker",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "./plugins/withReactNativeArchitectures",
+        {
+          "architectures": "arm64-v8a"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -130,6 +130,24 @@ export const accountingService = {
     };
   },
 
+  // Toggle the per-user "inventory" feature flag. The backend update endpoint
+  // requires a non-empty firstName, so we pass it through alongside the flag
+  // (all other fields are left untouched — Prisma ignores undefined values).
+  setInventoryEnabled: async (
+    enabled: boolean,
+    firstName: string
+  ): Promise<ApiResponse<null>> => {
+    const response = await apiClient.put(endpoints.auth.update, {
+      firstName,
+      inventory: enabled,
+    });
+    return {
+      success: Boolean(response.data?.success),
+      data: null,
+      message: response.data?.message,
+    };
+  },
+
   getInvoiceSummary: async (): Promise<
     ApiResponse<{
       total_sales: number;
@@ -167,16 +185,23 @@ export const accountingService = {
 
   createLedger: async (data: {
     ledgerName: string;
-    ledgerType: LedgerType;
+    ledgerType?: LedgerType;
+    groupId?: string;
+    partyId?: string;
     openingBalance: number;
+    openingBalanceType?: 'DR' | 'CR';
   }): Promise<ApiResponse<Ledger>> => {
     const companyId = await companyService.ensureCompanyId();
-    const groupId = await groupIdForLedgerType(companyId, data.ledgerType);
+    const groupId = data.groupId ?? (data.ledgerType ? await groupIdForLedgerType(companyId, data.ledgerType) : '');
+    if (!groupId) {
+      throw new Error('Either groupId or ledgerType is required.');
+    }
     const created = await engine.createLedger(companyId, {
       name: data.ledgerName,
       groupId,
+      partyId: data.partyId ?? undefined,
       openingBalance: Math.abs(data.openingBalance ?? 0),
-      openingBalanceType: (data.openingBalance ?? 0) < 0 ? 'CR' : 'DR',
+      openingBalanceType: data.openingBalanceType ?? ((data.openingBalance ?? 0) < 0 ? 'CR' : 'DR'),
     });
     const full = await engine.getLedgerById(companyId, created.id);
     return { success: true, data: toLegacyLedger(full) };
@@ -187,17 +212,27 @@ export const accountingService = {
     data: Partial<{
       ledgerName: string;
       ledgerType: LedgerType;
+      groupId: string;
+      partyId: string | null;
       openingBalance: number;
+      openingBalanceType: 'DR' | 'CR';
     }>
   ): Promise<ApiResponse<Ledger>> => {
     const companyId = await companyService.ensureCompanyId();
     const payload: Record<string, unknown> = {};
     if (data.ledgerName !== undefined) payload.name = data.ledgerName;
-    if (data.ledgerType !== undefined) {
+    if (data.groupId !== undefined) {
+      payload.groupId = data.groupId;
+    } else if (data.ledgerType !== undefined) {
       payload.groupId = await groupIdForLedgerType(companyId, data.ledgerType);
     }
+    if (data.partyId !== undefined) payload.partyId = data.partyId;
     if (data.openingBalance !== undefined) {
       payload.openingBalance = Math.abs(data.openingBalance);
+    }
+    if (data.openingBalanceType !== undefined) {
+      payload.openingBalanceType = data.openingBalanceType;
+    } else if (data.openingBalance !== undefined) {
       payload.openingBalanceType = data.openingBalance < 0 ? 'CR' : 'DR';
     }
     const updated = await engine.updateLedger(companyId, id, payload as any);
@@ -230,6 +265,35 @@ export const accountingService = {
       data: ledger,
       message: ledger ? undefined : 'Ledger not found',
     };
+  },
+
+  // Ensure a party has its own ledger account linked via partyId. A customer
+  // becomes an accountsReceivable (Sundry Debtors) ledger; a supplier becomes
+  // an accountsPayable (Sundry Creditors) ledger. Idempotent — returns the
+  // existing linked ledger if one already exists.
+  ensurePartyLedger: async (party: {
+    id: string;
+    partyName: string;
+    type: PartyType;
+  }): Promise<ApiResponse<Ledger | null>> => {
+    const companyId = await companyService.ensureCompanyId();
+
+    const ledgers = await accountingService.getLedgers();
+    const existing = (ledgers.data ?? []).find((l) => l.partyId === party.id);
+    if (existing) {
+      return { success: true, data: existing };
+    }
+
+    const ledgerType: LedgerType =
+      party.type === 'supplier' ? 'accountsPayable' : 'accountsReceivable';
+    const groupId = await groupIdForLedgerType(companyId, ledgerType);
+    const created = await engine.createLedger(companyId, {
+      name: party.partyName,
+      groupId,
+      partyId: party.id,
+    });
+    const full = await engine.getLedgerById(companyId, created.id);
+    return { success: true, data: full ? toLegacyLedger(full) : null };
   },
 
   getParties: async (): Promise<ListResponse<Party>> => {

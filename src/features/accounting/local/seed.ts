@@ -60,6 +60,8 @@ const VOUCHER_TYPE_SEEDS = [
 const SYSTEM_LEDGER_SEEDS = [
   { name: 'Cash A/c', group: 'Cash-in-Hand' },
   { name: 'Profit & Loss A/c', group: 'Reserves & Surplus' },
+  { name: 'Sales A/c', group: 'Sales Accounts' },
+  { name: 'Purchase A/c', group: 'Purchase Accounts' },
   { name: 'CGST Input A/c', group: 'Duties & Taxes' },
   { name: 'CGST Output A/c', group: 'Duties & Taxes' },
   { name: 'SGST Input A/c', group: 'Duties & Taxes' },

@@ -99,5 +99,7 @@ export const toLegacyLedger = (
     ledgerType: pathToLedgerType(raw?.groupPath ?? raw?.group?.path),
     createdAt: String(raw?.createdAt ?? new Date().toISOString()),
     updatedAt: String(raw?.updatedAt ?? new Date().toISOString()),
+    groupId: raw?.groupId ? String(raw.groupId) : undefined,
+    groupPath: raw?.groupPath ? String(raw.groupPath) : (raw?.group?.path ? String(raw.group.path) : undefined),
   };
 };

@@ -11,6 +11,8 @@ export interface Ledger {
   ledgerType: LedgerType;
   createdAt: string;
   updatedAt: string;
+  groupId?: string;
+  groupPath?: string;
 }
 
 export type LedgerType =

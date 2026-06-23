@@ -65,12 +65,13 @@ export default function VoucherCreateScreen() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showLines, setShowLines] = useState(false);
+  const [showLines, setShowLines] = useState(true);
   const [lines, setLines] = useState<EditableLine[]>([
     { id: makeId(), ledgerId: "", ledgerName: "", side: "debit", amount: "" },
     { id: makeId(), ledgerId: "", ledgerName: "", side: "credit", amount: "" },
   ]);
   const [activeLineId, setActiveLineId] = useState<string | null>(null);
+  const [ledgerSearch, setLedgerSearch] = useState("");
 
   // GST invoice detail (sales/purchase vouchers) — feeds GSTR reports
   const [showGst, setShowGst] = useState(false);
@@ -106,6 +107,19 @@ export default function VoucherCreateScreen() {
       .reduce((sum, line) => sum + (Number(line.amount) || 0), 0);
     return { totalDebit, totalCredit, difference: totalDebit - totalCredit };
   }, [lines]);
+
+  useEffect(() => {
+    setLedgerSearch("");
+  }, [activeLineId]);
+
+  const filteredLedgersForSelection = useMemo(() => {
+    const query = ledgerSearch.trim().toLowerCase();
+    if (!query) return ledgers;
+    return ledgers.filter((ledger) =>
+      (ledger.ledgerName || "").toLowerCase().includes(query) ||
+      (ledger.ledgerType || "").toLowerCase().includes(query)
+    );
+  }, [ledgers, ledgerSearch]);
 
   const updateLine = (id: string, patch: Partial<EditableLine>) => {
     setLines((current) =>
@@ -190,7 +204,7 @@ export default function VoucherCreateScreen() {
             ]
           : undefined;
 
-      await voucherService.create({
+      const result = await voucherService.create({
         voucherNumber: voucherNumber.trim(),
         voucherType,
         entryDate: new Date(entryDate).toISOString(),
@@ -198,6 +212,11 @@ export default function VoucherCreateScreen() {
         lines: cleanLines,
         gstLines,
       });
+
+      if (!result.success) {
+        setError(result.message ?? "Unable to create voucher.");
+        return;
+      }
 
       setSuccessMessage("Voucher created successfully.");
       router.replace("/accounting/vouchers");
@@ -286,7 +305,7 @@ export default function VoucherCreateScreen() {
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Lines</Text>
             <Pressable onPress={() => setShowLines((current) => !current)}>
-              <Text style={styles.linkText}>{showLines ? "Close" : "Add"}</Text>
+              <Text style={styles.linkText}>{showLines ? "Hide" : "Show"}</Text>
             </Pressable>
           </View>
 
@@ -346,7 +365,13 @@ export default function VoucherCreateScreen() {
                   {activeLineId === line.id ? (
                     <Card style={styles.ledgerListCard}>
                       <Text style={styles.ledgerListTitle}>Choose a ledger</Text>
-                      {ledgers.map((ledger) => (
+                      <TextInput
+                        value={ledgerSearch}
+                        onChangeText={setLedgerSearch}
+                        placeholder="Search ledger by name or type..."
+                        style={[styles.input, { marginBottom: 10, paddingHorizontal: 12, paddingVertical: 8, fontSize: 13 }]}
+                      />
+                      {filteredLedgersForSelection.map((ledger) => (
                         <Pressable
                           key={ledger.id}
                           style={styles.ledgerOption}
@@ -358,6 +383,11 @@ export default function VoucherCreateScreen() {
                           </Text>
                         </Pressable>
                       ))}
+                      {filteredLedgersForSelection.length === 0 ? (
+                        <Text style={{ fontSize: 13, color: '#94A3B8', textAlign: 'center', marginTop: 10 }}>
+                          No ledgers found
+                        </Text>
+                      ) : null}
                     </Card>
                   ) : null}
                 </Card>

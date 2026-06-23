@@ -76,7 +76,10 @@ const defaultLine = (): VoucherLineDraft => ({
   taxPercent: "0",
 });
 
-const gstOptions = ["IGST", "CGST", "GST 18%", "GST 2.5%", "GST 1%"];
+// GST components. Multiple can apply to one invoice — intra-state sales use
+// CGST + SGST (or CGST + UTGST in a union territory); inter-state uses IGST.
+// Cess applies on top where relevant.
+const gstOptions = ["CGST", "SGST", "IGST", "UTGST", "Cess"];
 
 const money = (value: number) => formatMoney(value);
 
@@ -90,8 +93,9 @@ export default function DealVoucherCreateScreen({
   const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
-  const { draftVouchers, setDraftVoucher, clearDraftVoucher } = useAccountingSessionStore();
-  const draft = draftVouchers[mode];
+  const setDraftVoucher = useAccountingSessionStore((state) => state.setDraftVoucher);
+  const clearDraftVoucher = useAccountingSessionStore((state) => state.clearDraftVoucher);
+  const [draft] = useState(() => useAccountingSessionStore.getState().draftVouchers[mode]);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,12 +121,23 @@ export default function DealVoucherCreateScreen({
   const [invoiceDate, setInvoiceDate] = useState(draft?.invoiceDate ?? todayInputValue());
   const [dueDate, setDueDate] = useState(draft?.dueDate ?? addDaysInputValue(14));
   const [gstAmount, setGstAmount] = useState(draft?.gstAmount ?? "0");
-  const [selectedGstOption, setSelectedGstOption] = useState<string | null>(draft?.selectedGstOption ?? null);
+  const [selectedGstOptions, setSelectedGstOptions] = useState<string[]>(draft?.selectedGstOptions ?? []);
+
+  const toggleGstOption = (option: string) =>
+    setSelectedGstOptions((current) =>
+      current.includes(option)
+        ? current.filter((item) => item !== option)
+        : [...current, option]
+    );
   const [gstSearch, setGstSearch] = useState("");
   const [otherCharges, setOtherCharges] = useState(draft?.otherCharges ?? "0");
   const [notes, setNotes] = useState(draft?.notes ?? "");
   const [addressDraft, setAddressDraft] = useState("");
   const [lineItems, setLineItems] = useState<VoucherLineDraft[]>(draft?.lineItems ?? [defaultLine()]);
+  
+  const [selectedSystemLedgerId, setSelectedSystemLedgerId] = useState(draft?.selectedSystemLedgerId ?? "");
+  const [showLedgerSheet, setShowLedgerSheet] = useState(false);
+  const [ledgerSearch, setLedgerSearch] = useState("");
 
   useEffect(() => {
     setDraftVoucher(mode, {
@@ -130,12 +145,13 @@ export default function DealVoucherCreateScreen({
       invoiceDate,
       dueDate,
       gstAmount,
-      selectedGstOption,
+      selectedGstOptions,
       otherCharges,
       notes,
       lineItems,
+      selectedSystemLedgerId,
     });
-  }, [mode, selectedPartyId, invoiceDate, dueDate, gstAmount, selectedGstOption, otherCharges, notes, lineItems, setDraftVoucher]);
+  }, [mode, selectedPartyId, invoiceDate, dueDate, gstAmount, selectedGstOptions, otherCharges, notes, lineItems, selectedSystemLedgerId, setDraftVoucher]);
 
   useEffect(() => {
     async function loadData() {
@@ -143,10 +159,10 @@ export default function DealVoucherCreateScreen({
         setLoading(true);
         setError(null);
 
-        const [partyResult, itemResult, ledgerResult] = await Promise.all([
+        // Parties + items are the required remote data needed to render the form.
+        const [partyResult, itemResult] = await Promise.all([
           accountingService.getParties(),
           accountingService.getItems(),
-          accountingService.getLedgers(),
         ]);
 
         setParties(partyResult.data ?? []);
@@ -159,9 +175,57 @@ export default function DealVoucherCreateScreen({
             purchasePrice: item.purchasePrice ?? null,
           }))
         );
-        setLedgers(ledgerResult.data ?? []);
         setSelectedPartyId((prev) => prev || ((partyResult.data ?? [])[0]?.id ?? ""));
-      } catch {
+
+        // Ledgers come from the local SQLite (BillShield) engine. On web that
+        // can fail (OPFS access-handle limits); don't let it block the whole
+        // form — load best-effort. Posting validates ledgers separately.
+        try {
+          const ledgerResult = await accountingService.getLedgers();
+          const loadedLedgers = ledgerResult.data ?? [];
+          setLedgers(loadedLedgers);
+
+          setSelectedSystemLedgerId((prev) => {
+            if (prev) return prev;
+            const candidates = loadedLedgers.filter((ledger) => {
+              const path = ledger.groupPath;
+              if (mode === "sales") {
+                return (
+                  path === "sales-accounts" ||
+                  path?.startsWith("sales-accounts/") ||
+                  ledger.ledgerType === "sales" ||
+                  path === "direct-income" ||
+                  path?.startsWith("direct-income/") ||
+                  ledger.ledgerType === "directIncome"
+                );
+              } else {
+                return (
+                  path === "purchase-accounts" ||
+                  path?.startsWith("purchase-accounts/") ||
+                  ledger.ledgerType === "purchase" ||
+                  path === "direct-expenses" ||
+                  path?.startsWith("direct-expenses/") ||
+                  ledger.ledgerType === "directExpense"
+                );
+              }
+            });
+
+            let defaultLedger = candidates.find((l) => l.ledgerName.toLowerCase() === (mode === "sales" ? "sales a/c" : "purchase a/c"));
+            if (!defaultLedger && candidates.length > 0) {
+              defaultLedger = candidates[0];
+            }
+            if (!defaultLedger) {
+              defaultLedger =
+                findLedgerByType(loadedLedgers, mode === "sales" ? "sales" : "purchase") ??
+                findLedgerByType(loadedLedgers, mode === "sales" ? "directIncome" : "directExpense");
+            }
+            return defaultLedger ? defaultLedger.id : "";
+          });
+        } catch (ledgerError) {
+          console.warn("Could not load local ledgers (continuing):", ledgerError);
+        }
+      } catch (loadError) {
+        console.error("loadData error:", loadError);
         setError("Unable to load voucher form data.");
       } finally {
         setLoading(false);
@@ -177,6 +241,11 @@ export default function DealVoucherCreateScreen({
   );
 
   const selectedPartyLedger = useMemo(() => {
+    // 1. Prefer the ledger explicitly linked to this party (by partyId).
+    const linked = ledgers.find((ledger) => ledger.partyId && ledger.partyId === selectedPartyId);
+    if (linked) return linked;
+
+    // 2. Else a receivable/payable ledger carried on the party object.
     const partyLedgers = selectedParty?.ledgers ?? [];
     const byParty =
       findLedgerByType(
@@ -185,13 +254,14 @@ export default function DealVoucherCreateScreen({
       ) ?? null;
     if (byParty) return byParty;
 
+    // 3. Fall back to the shared Sundry Debtors / Creditors ledger.
     return (
       findLedgerByType(
         ledgers,
         mode === "sales" ? "accountsReceivable" : "accountsPayable"
       ) ?? null
     );
-  }, [ledgers, mode, selectedParty]);
+  }, [ledgers, mode, selectedParty, selectedPartyId]);
 
   useEffect(() => {
     if (showAddressSheet) {
@@ -199,13 +269,50 @@ export default function DealVoucherCreateScreen({
     }
   }, [selectedParty, showAddressSheet]);
 
+  const candidateSystemLedgers = useMemo(() => {
+    return ledgers.filter((ledger) => {
+      const path = ledger.groupPath;
+      if (mode === "sales") {
+        return (
+          path === "sales-accounts" ||
+          path?.startsWith("sales-accounts/") ||
+          ledger.ledgerType === "sales" ||
+          path === "direct-income" ||
+          path?.startsWith("direct-income/") ||
+          ledger.ledgerType === "directIncome"
+        );
+      } else {
+        return (
+          path === "purchase-accounts" ||
+          path?.startsWith("purchase-accounts/") ||
+          ledger.ledgerType === "purchase" ||
+          path === "direct-expenses" ||
+          path?.startsWith("direct-expenses/") ||
+          ledger.ledgerType === "directExpense"
+        );
+      }
+    });
+  }, [ledgers, mode]);
+
+  const visibleCandidateLedgers = useMemo(() => {
+    const query = ledgerSearch.trim().toLowerCase();
+    if (!query) return candidateSystemLedgers;
+    return candidateSystemLedgers.filter((ledger) =>
+      ledger.ledgerName.toLowerCase().includes(query)
+    );
+  }, [candidateSystemLedgers, ledgerSearch]);
+
   const systemLedger = useMemo(() => {
+    if (selectedSystemLedgerId) {
+      const found = ledgers.find((l) => l.id === selectedSystemLedgerId);
+      if (found) return found;
+    }
     return (
       findLedgerByType(ledgers, mode === "sales" ? "sales" : "purchase") ??
       findLedgerByType(ledgers, mode === "sales" ? "directIncome" : "directExpense") ??
       null
     );
-  }, [ledgers, mode]);
+  }, [ledgers, mode, selectedSystemLedgerId]);
 
   const visibleParties = useMemo(() => {
     const query = partySearch.trim().toLowerCase();
@@ -380,7 +487,7 @@ export default function DealVoucherCreateScreen({
         })
         .join(" | ");
 
-      await voucherService.create({
+      const result = await voucherService.create({
         voucherNumber: safeString(invoiceNumber),
         voucherType: mode,
         entryDate: new Date(invoiceDate).toISOString(),
@@ -393,6 +500,11 @@ export default function DealVoucherCreateScreen({
           .join(" - "),
         lines: [partyLine, businessLine],
       });
+
+      if (!result.success) {
+        setError(result.message ?? "Unable to create voucher.");
+        return;
+      }
 
       clearDraftVoucher(mode);
       router.replace("/accounting/vouchers");
@@ -456,6 +568,20 @@ export default function DealVoucherCreateScreen({
               Closing Balance: {money(selectedPartyLedger?.balance ?? 0)}
             </Text>
           ) : null}
+        </Card>
+
+        <Card style={styles.cardBlock}>
+          <View style={styles.sectionTop}>
+            <Text style={styles.sectionTitle}>
+              {mode === "sales" ? "Sales Account" : "Purchase Account"}
+            </Text>
+          </View>
+          <Pressable style={styles.selectBox} onPress={() => setShowLedgerSheet(true)}>
+            <Text style={systemLedger ? styles.selectBoxText : styles.partyPlaceholder}>
+              {systemLedger ? systemLedger.ledgerName : (mode === "sales" ? "Select Sales Account" : "Select Purchase Account")}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
+          </Pressable>
         </Card>
 
         <Card style={styles.cardBlock}>
@@ -560,7 +686,9 @@ export default function DealVoucherCreateScreen({
               <View style={styles.gridField}>
                 <Text style={styles.fieldLabel}>Select GST</Text>
                 <Pressable style={styles.selectBox} onPress={() => setShowGstSheet(true)}>
-                  <Text style={styles.selectBoxText}>{selectedGstOption || "Select GST"}</Text>
+                  <Text style={styles.selectBoxText}>
+                    {selectedGstOptions.length ? selectedGstOptions.join(" + ") : "Select GST"}
+                  </Text>
                   <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
                 </Pressable>
               </View>
@@ -630,6 +758,9 @@ export default function DealVoucherCreateScreen({
           <View style={[styles.sheet, styles.gstSheet]}>
             <View style={styles.sheetHandle} />
             <Text style={styles.sheetTitle}>Select GST & Taxes</Text>
+            <Text style={styles.sheetSubtitle}>
+              Select all that apply — e.g. CGST + SGST for a within-state sale, or IGST for inter-state.
+            </Text>
             <View style={styles.sheetSearchRow}>
               <Ionicons name="search" size={18} color={accountingTheme.colors.textSecondary} />
               <TextInput
@@ -642,22 +773,24 @@ export default function DealVoucherCreateScreen({
             </View>
             <ScrollView style={[styles.sheetList, styles.gstSheetList]} keyboardShouldPersistTaps="handled">
               {visibleGstOptions.map((option) => {
-                const active = selectedGstOption === option;
+                const active = selectedGstOptions.includes(option);
                 return (
                   <Pressable
                     key={option}
-                    style={[styles.sheetRow, active && styles.sheetRowActive]}
-                    onPress={() => {
-                      setSelectedGstOption(option);
-                      setShowGstSheet(false);
-                    }}
+                    style={[styles.sheetRow, { justifyContent: "flex-start" }, active && styles.sheetRowActive]}
+                    onPress={() => toggleGstOption(option)}
                   >
-                    <Text style={styles.sheetRowTitle}>{option}</Text>
-                    {active ? <Ionicons name="checkmark" size={18} color={accountingTheme.colors.primary} /> : null}
+                    <Ionicons
+                      name={active ? "checkbox" : "square-outline"}
+                      size={20}
+                      color={active ? accountingTheme.colors.primary : accountingTheme.colors.textMuted}
+                    />
+                    <Text style={[styles.sheetRowTitle, { marginLeft: 10 }]}>{option}</Text>
                   </Pressable>
                 );
               })}
             </ScrollView>
+            <Button title="Done" onPress={() => setShowGstSheet(false)} />
           </View>
         </View>
       </Modal>
@@ -778,6 +911,66 @@ export default function DealVoucherCreateScreen({
             </View>
             <Pressable style={styles.sheetButton} onPress={handleSaveAddress}>
               <Text style={styles.sheetButtonText}>{saving ? "Saving..." : "Update"}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showLedgerSheet}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowLedgerSheet(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFillObject} onPress={() => setShowLedgerSheet(false)} />
+          <View style={styles.sheet}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.sheetTitle}>
+              {mode === "sales" ? "Select Sales Account" : "Select Purchase Account"}
+            </Text>
+            <TextInput
+              value={ledgerSearch}
+              onChangeText={setLedgerSearch}
+              placeholder="Search ledger account"
+              placeholderTextColor={accountingTheme.colors.textMuted}
+              style={styles.sheetSearch}
+            />
+            <ScrollView showsVerticalScrollIndicator={false} style={styles.sheetList}>
+              {visibleCandidateLedgers.map((ledger) => {
+                const active = ledger.id === selectedSystemLedgerId;
+                return (
+                  <Pressable
+                    key={ledger.id}
+                    style={[styles.sheetRow, active && styles.sheetRowActive]}
+                    onPress={() => {
+                      setSelectedSystemLedgerId(ledger.id);
+                      setShowLedgerSheet(false);
+                      setLedgerSearch("");
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.sheetRowTitle}>{ledger.ledgerName}</Text>
+                      {ledger.groupPath ? (
+                        <Text style={styles.sheetRowMeta}>{ledger.groupPath}</Text>
+                      ) : null}
+                    </View>
+                    {active ? (
+                      <Ionicons name="checkmark-circle" size={20} color={accountingTheme.colors.primary} />
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+              {visibleCandidateLedgers.length === 0 ? (
+                <View style={{ paddingVertical: 24, alignItems: "center" }}>
+                  <Text style={{ color: accountingTheme.colors.textSecondary, fontSize: 14 }}>
+                    No matching ledgers found.
+                  </Text>
+                </View>
+              ) : null}
+            </ScrollView>
+            <Pressable style={styles.sheetButton} onPress={() => setShowLedgerSheet(false)}>
+              <Text style={styles.sheetButtonText}>Close</Text>
             </Pressable>
           </View>
         </View>
@@ -1048,6 +1241,12 @@ const styles = StyleSheet.create({
     fontWeight: accountingTheme.fontWeights.extraBold,
     color: accountingTheme.colors.text,
     marginBottom: accountingTheme.spacing.md,
+  },
+  sheetSubtitle: {
+    fontSize: 12,
+    color: accountingTheme.colors.textSecondary,
+    marginBottom: accountingTheme.spacing.md,
+    lineHeight: 16,
   },
   sheetSearch: {
     borderWidth: 1,

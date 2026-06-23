@@ -9,12 +9,14 @@ import {
   View,
   Modal,
   TextInput,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 
-import { AccountingHeader, BottomNav, Card, EmptyState, Loading } from "../components";
-import { accountingService } from "../services/accountingService";
-import { DayBook, Ledger } from "../types/accountingTypes";
-import { buildBankCashTransactions, formatCurrency, titleCase } from "../utils/bankCashReport";
+import { AccountingHeader, BottomNav, Card, EmptyState, Loading, DateField } from "../components";
+import { billshieldUiService } from "../services/billshieldUiService";
+import { voucherService } from "../services/voucherService";
+import { formatCurrency, titleCase } from "../utils/bankCashReport";
 import { accountingTheme } from "../../../theme/accounting";
 
 const formatDate = (value: string) => {
@@ -35,18 +37,22 @@ export default function BankCashDetailScreen() {
   const ledgerName = Array.isArray(params.name) ? params.name[0] : params.name;
   const ledgerType = Array.isArray(params.type) ? params.type[0] : params.type;
 
-  const [ledgers, setLedgers] = useState<Ledger[]>([]);
-  const [dayBook, setDayBook] = useState<DayBook[]>([]);
+  const [statementData, setStatementData] = useState<any>(null);
+  const [allLedgers, setAllLedgers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [showAddReduceModal, setShowAddReduceModal] = useState(false);
+  const [showLedgerSelectModal, setShowLedgerSelectModal] = useState(false);
+  
   const [transactionType, setTransactionType] = useState<"add" | "reduce">("add");
-  const [selectedAccount, setSelectedAccount] = useState("");
-  const [payFor, setPayFor] = useState("");
+  const [oppositeLedgerId, setOppositeLedgerId] = useState("");
+  const [oppositeLedgerName, setOppositeLedgerName] = useState("");
+  const [ledgerSearch, setLedgerSearch] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState("14 Nov 24");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [remarks, setRemarks] = useState("");
+  const [savingTransaction, setSavingTransaction] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!ledgerId) {
@@ -58,13 +64,20 @@ export default function BankCashDetailScreen() {
     try {
       setLoading(true);
       setError(null);
-      const [ledgerResult, dayBookResult] = await Promise.all([
-        accountingService.getLedgers(),
-        accountingService.getDayBook(),
+      const [statementResult, ledgersResult] = await Promise.all([
+        billshieldUiService.getLedgerStatement(ledgerId),
+        billshieldUiService.listLedgers(),
       ]);
 
-      setLedgers(ledgerResult.data ?? []);
-      setDayBook(dayBookResult.data ?? []);
+      if (statementResult.success) {
+        setStatementData(statementResult.data);
+      } else {
+        setError(statementResult.message ?? "Unable to load ledger statement.");
+      }
+
+      if (ledgersResult.success) {
+        setAllLedgers(ledgersResult.data ?? []);
+      }
     } catch {
       setError("Unable to load bank/cash details.");
     } finally {
@@ -78,17 +91,35 @@ export default function BankCashDetailScreen() {
     }, [loadData])
   );
 
-  const currentLedger = useMemo(
-    () => ledgers.find((ledger) => ledger.id === ledgerId) ?? null,
-    [ledgerId, ledgers]
-  );
+  const title = ledgerName || statementData?.ledger?.name || "Ledger";
+  const balance = statementData?.closing?.amount ?? 0;
+  const balanceType = statementData?.closing?.type ?? "DR";
 
-  const title = ledgerName || currentLedger?.ledgerName || "Ledger";
-  const balance = Number(currentLedger?.balance || 0);
-  const transactions = useMemo(
-    () => buildBankCashTransactions(dayBook, ledgerId ?? ""),
-    [dayBook, ledgerId]
-  );
+  const transactions = useMemo(() => {
+    if (!statementData?.entries) return [];
+    return statementData.entries.map((entry: any, index: number) => {
+      const isDebit = entry.debit > 0;
+      return {
+        id: `${entry.voucherNo}-${index}`,
+        title: entry.voucherNo || `Voucher #${index + 1}`,
+        voucherType: entry.voucherType || "Journal",
+        date: entry.voucherDate,
+        description: entry.narration || "",
+        amount: isDebit ? entry.debit : entry.credit,
+        side: isDebit ? "debit" : "credit",
+        runningBalance: entry.runningBalance,
+      };
+    }).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [statementData]);
+
+  const filteredLedgers = useMemo(() => {
+    return allLedgers.filter((l) => {
+      if (l.id === ledgerId) return false; // Exclude current bank/cash ledger itself
+      if (!ledgerSearch) return true;
+      return l.name.toLowerCase().includes(ledgerSearch.toLowerCase());
+    });
+  }, [allLedgers, ledgerId, ledgerSearch]);
+
   const financialYear = useMemo(() => {
     const now = new Date();
     const currentYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
@@ -99,11 +130,56 @@ export default function BankCashDetailScreen() {
     setShowAddReduceModal(true);
   };
 
-  const handleSaveTransaction = () => {
-    // Implement save logic here
-    setShowAddReduceModal(false);
-    setAmount("");
-    setRemarks("");
+  const handleSaveTransaction = async () => {
+    const amt = Number(amount);
+    if (!oppositeLedgerId) {
+      Alert.alert("Missing account", "Please select an opposite account ledger.");
+      return;
+    }
+    if (!amt || amt <= 0 || Number.isNaN(amt)) {
+      Alert.alert("Invalid amount", "Please enter a valid amount greater than zero.");
+      return;
+    }
+    if (!date) {
+      Alert.alert("Missing date", "Please select a transaction date.");
+      return;
+    }
+
+    setSavingTransaction(true);
+    
+    // Receipt voucher if adding money (Dr Bank/Cash, Cr Opposite)
+    // Payment voucher if reducing money (Dr Opposite, Cr Bank/Cash)
+    const lines = transactionType === "add"
+      ? [
+          { ledgerId: ledgerId!, side: "debit" as const, amount: amt },
+          { ledgerId: oppositeLedgerId, side: "credit" as const, amount: amt }
+        ]
+      : [
+          { ledgerId: oppositeLedgerId, side: "debit" as const, amount: amt },
+          { ledgerId: ledgerId!, side: "credit" as const, amount: amt }
+        ];
+
+    const result = await voucherService.create({
+      voucherNumber: "", // Automatically generated on device
+      voucherType: transactionType === "add" ? "receipt" : "payment",
+      entryDate: date,
+      narration: remarks || `${transactionType === "add" ? "Received from" : "Paid to"} ${oppositeLedgerName}`,
+      lines,
+    });
+
+    setSavingTransaction(false);
+
+    if (result.success) {
+      setShowAddReduceModal(false);
+      setAmount("");
+      setRemarks("");
+      setOppositeLedgerId("");
+      setOppositeLedgerName("");
+      Alert.alert("Success", "Transaction successfully booked inside local double-entry system.");
+      void loadData();
+    } else {
+      Alert.alert("Error", result.message ?? "Could not save transaction.");
+    }
   };
 
   return (
@@ -115,7 +191,9 @@ export default function BankCashDetailScreen() {
         rightContent={<Ionicons name="ellipsis-horizontal" size={18} color={accountingTheme.colors.card} />}
         headerContent={(
           <View style={styles.headerBlock}>
-            <Text style={styles.headerAmount}>{formatCurrency(balance)}</Text>
+            <Text style={styles.headerAmount}>
+              {formatCurrency(balance)} {balanceType === "DR" ? "Dr" : "Cr"}
+            </Text>
             <Text style={styles.headerMeta}>Total Balance</Text>
           </View>
         )}
@@ -153,18 +231,23 @@ export default function BankCashDetailScreen() {
                         </View>
                       </View>
                       <Text style={styles.rowDate}>{formatDate(row.date)}</Text>
-                      <Text style={styles.rowSub}>{row.description || row.ledgerName}</Text>
+                      <Text style={styles.rowSub}>{row.description}</Text>
                     </View>
 
-                    <Text
-                      style={[
-                        styles.rowAmount,
-                        positive ? styles.positiveAmount : styles.negativeAmount,
-                      ]}
-                    >
-                      {positive ? "+" : "-"}
-                      {formatCurrency(row.amount)}
-                    </Text>
+                    <View style={styles.amountWrap}>
+                      <Text
+                        style={[
+                          styles.rowAmount,
+                          positive ? styles.positiveAmount : styles.negativeAmount,
+                        ]}
+                      >
+                        {positive ? "+" : "-"}
+                        {formatCurrency(row.amount)}
+                      </Text>
+                      <Text style={styles.runningBalText}>
+                        Bal: {formatCurrency(row.runningBalance)}
+                      </Text>
+                    </View>
                   </View>
                 );
               })
@@ -224,18 +307,18 @@ export default function BankCashDetailScreen() {
                 </Pressable>
               </View>
 
-              <Pressable style={styles.dropdownWrap}>
-                <Text style={styles.dropdownText}>{selectedAccount || "Select Account"}</Text>
-                <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
-              </Pressable>
-
-              <Pressable style={styles.dropdownWrap}>
-                <Text style={styles.dropdownText}>{payFor || "Pay for"}</Text>
+              {/* Opposite Ledger selector dropdown */}
+              <Text style={styles.fieldLabel}>Opposite Account (Double Entry)</Text>
+              <Pressable style={styles.dropdownWrap} onPress={() => setShowLedgerSelectModal(true)}>
+                <Text style={styles.dropdownText}>
+                  {oppositeLedgerName || "Select Opposite Ledger"}
+                </Text>
                 <Ionicons name="chevron-down" size={18} color={accountingTheme.colors.textSecondary} />
               </Pressable>
 
               <View style={styles.rowInputs}>
                 <View style={styles.halfInput}>
+                  <Text style={styles.fieldLabel}>Amount</Text>
                   <TextInput
                     value={amount}
                     onChangeText={setAmount}
@@ -245,16 +328,12 @@ export default function BankCashDetailScreen() {
                   />
                 </View>
                 <View style={styles.halfInput}>
-                  <View style={styles.dateWrap}>
-                    <Text style={styles.dateLabel}>Select Date</Text>
-                    <Pressable style={styles.dateBox}>
-                      <Text style={styles.dateText}>{date}</Text>
-                      <Ionicons name="calendar-outline" size={18} color={accountingTheme.colors.textSecondary} />
-                    </Pressable>
-                  </View>
+                  <Text style={styles.fieldLabel}>Select Date</Text>
+                  <DateField value={date} onChange={setDate} />
                 </View>
               </View>
 
+              <Text style={styles.fieldLabel}>Remarks (Optional)</Text>
               <TextInput
                 value={remarks}
                 onChangeText={setRemarks}
@@ -262,10 +341,86 @@ export default function BankCashDetailScreen() {
                 style={styles.sheetInput}
               />
 
-              <Pressable style={styles.saveBtn} onPress={handleSaveTransaction}>
-                <Text style={styles.saveBtnText}>Save</Text>
+              <Pressable style={styles.saveBtn} onPress={handleSaveTransaction} disabled={savingTransaction}>
+                {savingTransaction ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.saveBtnText}>Post Transaction</Text>
+                )}
               </Pressable>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Ledger Selection Modal */}
+      <Modal
+        visible={showLedgerSelectModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLedgerSelectModal(false)}
+      >
+        <View style={styles.ledgerSelectBackdrop}>
+          <View style={styles.ledgerSelectCard}>
+            <View style={styles.ledgerSelectHeader}>
+              <Text style={styles.ledgerSelectTitle}>Select Account Ledger</Text>
+              <Pressable onPress={() => setShowLedgerSelectModal(false)}>
+                <Ionicons name="close" size={22} color="#475569" />
+              </Pressable>
+            </View>
+
+            {/* Search Input */}
+            <View style={styles.searchBoxWrap}>
+              <Ionicons name="search-outline" size={18} color="#64748B" style={styles.searchIcon} />
+              <TextInput
+                value={ledgerSearch}
+                onChangeText={setLedgerSearch}
+                placeholder="Search accounts..."
+                placeholderTextColor="#94A3B8"
+                style={styles.searchBox}
+              />
+              {ledgerSearch ? (
+                <Pressable onPress={() => setLedgerSearch("")}>
+                  <Ionicons name="close-circle" size={16} color="#94A3B8" />
+                </Pressable>
+              ) : null}
+            </View>
+
+            {/* Flat List inside ScrollView */}
+            <ScrollView style={styles.ledgerListScroll} keyboardShouldPersistTaps="handled">
+              {filteredLedgers.length > 0 ? (
+                filteredLedgers.map((l) => (
+                  <Pressable
+                    key={l.id}
+                    style={[
+                      styles.ledgerSelectItem,
+                      oppositeLedgerId === l.id && styles.ledgerSelectItemActive,
+                    ]}
+                    onPress={() => {
+                      setOppositeLedgerId(l.id);
+                      setOppositeLedgerName(l.name);
+                      setShowLedgerSelectModal(false);
+                      setLedgerSearch("");
+                    }}
+                  >
+                    <View>
+                      <Text style={[
+                        styles.ledgerSelectItemText,
+                        oppositeLedgerId === l.id && styles.ledgerSelectItemTextActive
+                      ]}>
+                        {l.name}
+                      </Text>
+                      <Text style={styles.ledgerSelectItemGroupText}>{l.groupName}</Text>
+                    </View>
+                    {oppositeLedgerId === l.id ? (
+                      <Ionicons name="checkmark" size={18} color={accountingTheme.colors.primary} />
+                    ) : null}
+                  </Pressable>
+                ))
+              ) : (
+                <Text style={styles.noLedgerText}>No matching accounts found.</Text>
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -390,6 +545,9 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: accountingTheme.colors.textMuted,
   },
+  amountWrap: {
+    alignItems: "flex-end",
+  },
   rowAmount: {
     fontSize: accountingTheme.fontSizes.lg,
     fontWeight: accountingTheme.fontWeights.extraBold,
@@ -400,6 +558,11 @@ const styles = StyleSheet.create({
   },
   negativeAmount: {
     color: accountingTheme.colors.error,
+  },
+  runningBalText: {
+    fontSize: 10,
+    color: "#64748B",
+    marginTop: 4,
   },
   errorText: {
     color: accountingTheme.colors.error,
@@ -459,7 +622,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: accountingTheme.spacing.xl,
-    marginBottom: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.sm,
   },
   sheetTitle: {
     fontSize: accountingTheme.fontSizes.xl,
@@ -477,7 +640,8 @@ const styles = StyleSheet.create({
   radioGroup: {
     flexDirection: "row",
     gap: accountingTheme.spacing.xl,
-    marginBottom: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.md,
+    marginTop: accountingTheme.spacing.sm,
   },
   radioItem: {
     flexDirection: "row",
@@ -507,6 +671,13 @@ const styles = StyleSheet.create({
     fontWeight: accountingTheme.fontWeights.semiBold,
     color: "#334155",
   },
+  fieldLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#64748B",
+    marginBottom: 6,
+    marginTop: 8,
+  },
   dropdownWrap: {
     flexDirection: "row",
     alignItems: "center",
@@ -517,7 +688,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: accountingTheme.spacing.md,
     height: 48,
-    marginBottom: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.sm,
   },
   dropdownText: {
     fontSize: accountingTheme.fontSizes.lg,
@@ -527,39 +698,10 @@ const styles = StyleSheet.create({
   rowInputs: {
     flexDirection: "row",
     gap: accountingTheme.spacing.md,
-    marginBottom: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.sm,
   },
   halfInput: {
     flex: 1,
-  },
-  dateWrap: {
-    position: "relative",
-  },
-  dateLabel: {
-    position: "absolute",
-    top: -8,
-    left: 10,
-    backgroundColor: accountingTheme.colors.card,
-    paddingHorizontal: accountingTheme.spacing.xs,
-    fontSize: accountingTheme.fontSizes.xs,
-    color: accountingTheme.colors.textSecondary,
-    zIndex: 1,
-  },
-  dateBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: accountingTheme.colors.card,
-    borderWidth: 1,
-    borderColor: accountingTheme.colors.borderMedium,
-    borderRadius: 8,
-    paddingHorizontal: accountingTheme.spacing.md,
-    height: 48,
-  },
-  dateText: {
-    fontSize: accountingTheme.fontSizes.lg,
-    color: accountingTheme.colors.text,
-    fontWeight: accountingTheme.fontWeights.medium,
   },
   sheetInput: {
     height: 48,
@@ -570,18 +712,99 @@ const styles = StyleSheet.create({
     paddingHorizontal: accountingTheme.spacing.md,
     fontSize: accountingTheme.fontSizes.lg,
     color: accountingTheme.colors.text,
-    marginBottom: accountingTheme.spacing.lg,
+    marginBottom: accountingTheme.spacing.sm,
   },
   saveBtn: {
     backgroundColor: "#3B82F6",
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: "center",
-    marginTop: accountingTheme.spacing.xs,
+    marginTop: accountingTheme.spacing.md,
   },
   saveBtnText: {
     color: accountingTheme.colors.card,
     fontSize: 15,
     fontWeight: accountingTheme.fontWeights.bold,
+  },
+  ledgerSelectBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(15, 23, 42, 0.5)",
+    justifyContent: "center",
+    padding: 20,
+  },
+  ledgerSelectCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    maxHeight: "80%",
+    padding: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  ledgerSelectHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  ledgerSelectTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1E293B",
+  },
+  searchBoxWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F1F5F9",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 40,
+    marginBottom: 16,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchBox: {
+    flex: 1,
+    fontSize: 14,
+    color: "#1E293B",
+    paddingVertical: 0,
+  },
+  ledgerListScroll: {
+    maxHeight: 300,
+  },
+  ledgerSelectItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
+    borderRadius: 6,
+  },
+  ledgerSelectItemActive: {
+    backgroundColor: "#F1F5F9",
+  },
+  ledgerSelectItemText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#334155",
+  },
+  ledgerSelectItemTextActive: {
+    color: accountingTheme.colors.primary,
+  },
+  ledgerSelectItemGroupText: {
+    fontSize: 11,
+    color: "#64748B",
+    marginTop: 2,
+  },
+  noLedgerText: {
+    color: "#64748B",
+    fontSize: 13,
+    textAlign: "center",
+    paddingVertical: 24,
   },
 });

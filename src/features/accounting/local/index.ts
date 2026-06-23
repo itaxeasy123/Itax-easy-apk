@@ -53,12 +53,16 @@ export const billshieldBackup = {
     }
   },
 
-  /** Restore from a backup file the user picks (manual import). */
-  importFromFile: async (): Promise<{ success: boolean; message?: string }> => {
+  /**
+   * Restore from a backup file the user picks (manual import).
+   * Pass the current logged-in user's id to re-stamp ownership of the imported
+   * data to this account — same books, only the user id changes.
+   */
+  importFromFile: async (remapUserId?: number): Promise<{ success: boolean; message?: string }> => {
     try {
       const picked = await DocumentPicker.getDocumentAsync({ copyToCacheDirectory: true });
       if (picked.canceled || !picked.assets?.[0]?.uri) return { success: false, message: 'No file selected' };
-      await importDbFromFile(picked.assets[0].uri);
+      await importDbFromFile(picked.assets[0].uri, remapUserId);
       return { success: true };
     } catch (e: any) {
       return { success: false, message: e?.message ?? 'Import failed' };

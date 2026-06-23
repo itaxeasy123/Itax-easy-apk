@@ -9,10 +9,18 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.itaxeasy.com/api",
+        "EXPO_PUBLIC_OCR_API_BASE_URL": "https://ocr.itaxeasy.com/api"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.itaxeasy.com/api",
+        "EXPO_PUBLIC_OCR_API_BASE_URL": "https://ocr.itaxeasy.com/api"
+      }
     }
   },
   "submit": {

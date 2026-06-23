@@ -48,6 +48,15 @@ export const billshieldUiService = {
     }
   },
 
+  listLedgers: async () => {
+    try {
+      const companyId = await companyService.ensureCompanyId();
+      return { success: true, data: await engine.listLedgers(companyId) };
+    } catch (error: any) {
+      return { success: false, data: [], message: fail(error, 'Unable to list ledgers') };
+    }
+  },
+
   createSubGroup: async (name: string, parentGroupId: string) => {
     try {
       const companyId = await companyService.ensureCompanyId();

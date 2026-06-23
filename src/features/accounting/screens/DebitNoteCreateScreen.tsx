@@ -306,7 +306,7 @@ export default function DebitNoteCreateScreen() {
         .map((item) => `${item.name} x${item.qty} @ ${money(Math.max(toNumber(item.amount), 0))}`)
         .join(" | ");
 
-      await voucherService.create({
+      const result = await voucherService.create({
         voucherNumber: safeString(invoiceNumber),
         voucherType: "purchase",
         entryDate: new Date(invoiceDate).toISOString(),
@@ -320,6 +320,11 @@ export default function DebitNoteCreateScreen() {
           .join(" - "),
         lines: [partyLine, purchaseLine],
       });
+
+      if (!result.success) {
+        setError(result.message ?? "Unable to create debit note.");
+        return;
+      }
 
       router.replace("/accounting/vouchers");
     } catch (err) {

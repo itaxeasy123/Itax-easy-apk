@@ -221,6 +221,7 @@ export async function getLedgerById(companyId: string, ledgerId: string) {
 export async function updateLedger(companyId: string, ledgerId: string, data: {
   name?: string; groupId?: string; openingBalance?: number; openingBalanceType?: 'DR' | 'CR';
   bankName?: string; bankAccountNo?: string; bankIfsc?: string; description?: string;
+  partyId?: string | null;
 }) {
   const db = await getDb();
   const sets: string[] = [];
@@ -234,6 +235,7 @@ export async function updateLedger(companyId: string, ledgerId: string, data: {
   if (data.bankAccountNo !== undefined) put('bankAccountNo', data.bankAccountNo);
   if (data.bankIfsc !== undefined) put('bankIfsc', data.bankIfsc);
   if (data.description !== undefined) put('description', data.description);
+  if (data.partyId !== undefined) put('partyId', data.partyId);
   put('updatedAt', nowIso());
   params.push(ledgerId, companyId);
   await db.runAsync(`UPDATE ledger_account SET ${sets.join(', ')} WHERE id = ? AND companyId = ?`, params);
@@ -571,8 +573,9 @@ const signedOpening = (bal: number, type: 'DR' | 'CR') => (type === 'DR' ? Numbe
 export async function trialBalance(companyId: string, asOf?: string) {
   const db = await getDb();
   const dateFilter = asOf ? `AND v.voucherDate <= ?` : '';
-  const params: any[] = [companyId];
+  const params: any[] = [];
   if (asOf) params.push(asOf);
+  params.push(companyId);
   const rows = await db.getAllAsync<any>(
     `SELECT la.id AS ledgerId, la.name AS ledgerName, g.name AS groupName, g.path AS groupPath, g.nature,
             ((CASE WHEN la.openingBalanceType='DR' THEN la.openingBalance ELSE -la.openingBalance END)
@@ -639,8 +642,9 @@ export async function profitAndLoss(companyId: string, from?: string, to?: strin
 export async function balanceSheet(companyId: string, asOf?: string) {
   const db = await getDb();
   const dateFilter = asOf ? `AND v.voucherDate <= ?` : '';
-  const params: any[] = [companyId];
+  const params: any[] = [];
   if (asOf) params.push(asOf);
+  params.push(companyId);
   const rows = await db.getAllAsync<any>(
     `SELECT pg.name AS groupName, pg.nature,
             SUM((CASE WHEN la.openingBalanceType='DR' THEN la.openingBalance ELSE -la.openingBalance END)

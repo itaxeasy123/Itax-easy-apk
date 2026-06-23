@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   ScrollView,
   StyleSheet,
   Alert,
+  Switch,
+  Text,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { accountingTheme } from "../../../theme/accounting";
@@ -13,11 +16,65 @@ import {
   Card,
   ListItem,
 } from '../components';
+import { billshieldBackup } from '../local';
+import { useAuthStore } from '../../../store/authStore';
+import { accountingService } from '../services/accountingService';
+import { notify } from '../../../utils/notify';
 
 type MenuIconName = React.ComponentProps<typeof ListItem>['leftIcon'];
 
 export default function MoreScreen() {
   const router = useRouter();
+  const currentUserId = useAuthStore((state) => state.user?.id);
+
+  // "Inventory" is a per-user feature flag. When ON, the user can maintain an
+  // item/stock list and add items to invoices. When OFF, item creation is
+  // blocked by the backend (403) and the user bills with manual line items.
+  const [inventoryEnabled, setInventoryEnabled] = useState<boolean | null>(null);
+  const [inventoryFirstName, setInventoryFirstName] = useState('');
+  const [savingInventory, setSavingInventory] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await accountingService.getCurrentUserProfile();
+        if (!active) return;
+        setInventoryEnabled(Boolean(res.data?.inventory));
+        setInventoryFirstName(res.data?.firstName ?? '');
+      } catch {
+        // getApiErrorMessage/global handler already surfaces the failure;
+        // leave the toggle hidden (null) if we couldn't read the profile.
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleToggleInventory = async (next: boolean) => {
+    if (savingInventory) return;
+
+    if (!inventoryFirstName.trim()) {
+      Alert.alert(
+        'Profile incomplete',
+        'Please set your first name in your profile before changing this setting.'
+      );
+      return;
+    }
+
+    const previous = inventoryEnabled;
+    setInventoryEnabled(next); // optimistic
+    setSavingInventory(true);
+    try {
+      await accountingService.setInventoryEnabled(next, inventoryFirstName.trim());
+      notify(next ? 'Inventory enabled.' : 'Inventory disabled.');
+    } catch {
+      setInventoryEnabled(previous); // revert on failure (toast shown globally)
+    } finally {
+      setSavingInventory(false);
+    }
+  };
 
   const menuItems: {
     id: string;
@@ -57,11 +114,47 @@ export default function MoreScreen() {
   icon: 'document-text',
 },
     { id: 'company-create', title: 'Add Company', subtitle: 'Create a new company profile', icon: 'briefcase' },
+    { id: 'export-db', title: 'Export / Back up Data', subtitle: 'Save billshield.db to Files, Drive or email', icon: 'cloud-upload' },
+    { id: 'import-db', title: 'Import / Restore Data', subtitle: 'Replace local data from a backup file', icon: 'cloud-download' },
     { id: 'settings', title: 'Settings', subtitle: 'Configure accounting settings', icon: 'settings' },
     { id: 'help', title: 'Help & Support', subtitle: 'Get help and support', icon: 'help-circle' },
   ];
 
-  const handleMenuItemPress = (itemId: string) => {
+  const handleMenuItemPress = async (itemId: string) => {
+    if (itemId === 'export-db') {
+      const res = await billshieldBackup.exportToFile();
+      if (!res.success) {
+        Alert.alert('Export failed', res.message ?? 'Could not export the database.');
+      }
+      // On success the OS share-sheet opens — pick "Save to Files" → Downloads
+      // to get a copy of billshield.db you can browse in the Files app.
+      return;
+    }
+
+    if (itemId === 'import-db') {
+      Alert.alert(
+        'Restore data?',
+        'This replaces ALL current BillShield data on this device with the backup file you choose. This cannot be undone.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Choose file',
+            style: 'destructive',
+            onPress: async () => {
+              const res = await billshieldBackup.importFromFile(currentUserId);
+              Alert.alert(
+                res.success ? 'Restored' : 'Import failed',
+                res.success
+                  ? 'Data restored from the backup under your account. Reopen the accounting screens to see it.'
+                  : res.message ?? 'Could not import the file.'
+              );
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     if (itemId === 'daybook') {
       router.navigate('/accounting/daybook');
       return;
@@ -141,6 +234,29 @@ export default function MoreScreen() {
         />
 
         <View style={styles.menuContainer}>
+          <Card>
+            <View style={styles.inventoryRow}>
+              <View style={styles.inventoryTextWrap}>
+                <Text style={styles.inventoryTitle}>Inventory</Text>
+                <Text style={styles.inventorySubtitle}>
+                  {inventoryEnabled === null
+                    ? 'Loading your inventory setting…'
+                    : inventoryEnabled
+                      ? 'On — you can maintain items & stock and add them to invoices.'
+                      : 'Off — bill with manual line items; item/stock list is disabled.'}
+                </Text>
+              </View>
+              {savingInventory || inventoryEnabled === null ? (
+                <ActivityIndicator color={accountingTheme.colors.primary} />
+              ) : (
+                <Switch
+                  value={inventoryEnabled}
+                  onValueChange={handleToggleInventory}
+                />
+              )}
+            </View>
+          </Card>
+
           {menuItems.map((item) => (
             <Card key={item.id}>
               <ListItem
@@ -168,5 +284,27 @@ const styles = StyleSheet.create({
   menuContainer: {
     paddingHorizontal: accountingTheme.spacing.lg,
     paddingTop: accountingTheme.spacing.lg,
+  },
+  inventoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    gap: 12,
+  },
+  inventoryTextWrap: {
+    flex: 1,
+  },
+  inventoryTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2940',
+  },
+  inventorySubtitle: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 2,
+    lineHeight: 16,
   },
 });

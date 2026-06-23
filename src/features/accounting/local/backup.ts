@@ -10,7 +10,7 @@
  * robust, and well under Drive's 25 MB limit for accounting data.
  */
 import * as FileSystem from 'expo-file-system/legacy';
-import { closeDb, DB_NAME, getDb } from './db';
+import { closeDb, DB_NAME, getDb, nowIso, setMeta } from './db';
 
 export const BACKUP_FILE_NAME = 'billshield-backup.db';
 
@@ -28,8 +28,16 @@ export async function exportDbToFile(): Promise<string> {
   return target;
 }
 
-/** Replaces the live DB with the given backup file, then reopens it. */
-export async function importDbFromFile(fileUri: string): Promise<void> {
+/**
+ * Replaces the live DB with the given backup file, then reopens it.
+ *
+ * The local books are company-scoped, not user-scoped — every report reads by
+ * `companyId`, so imported data shows up regardless of which account is logged
+ * in. The one field that carries the original user's id is `voucher.createdById`
+ * (an audit stamp). Pass `remapUserId` to re-stamp ownership to the importing
+ * user, so the same data now "belongs to" this account's id.
+ */
+export async function importDbFromFile(fileUri: string, remapUserId?: number): Promise<void> {
   const info = await FileSystem.getInfoAsync(fileUri);
   if (!info.exists) throw new Error('Backup file not found');
 
@@ -42,5 +50,12 @@ export async function importDbFromFile(fileUri: string): Promise<void> {
     await FileSystem.deleteAsync(`${dbPath}${suffix}`, { idempotent: true });
   }
   await FileSystem.copyAsync({ from: fileUri, to: dbPath });
-  await getDb(); // reopen + migrate
+  const db = await getDb(); // reopen + migrate
+
+  // Re-stamp every voucher's audit owner to the importing user. Same data,
+  // only the user id changes.
+  if (typeof remapUserId === 'number' && Number.isFinite(remapUserId)) {
+    await db.runAsync('UPDATE voucher SET createdById = ?, updatedAt = ?', [remapUserId, nowIso()]);
+    await setMeta(db, 'dirty', '1');
+  }
 }

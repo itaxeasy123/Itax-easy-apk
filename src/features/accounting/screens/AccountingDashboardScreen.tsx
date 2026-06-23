@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   Image,
   Platform,
@@ -56,49 +56,59 @@ export default function AccountingDashboardScreen() {
   });
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadDashboard() {
-      try {
-        setLoading(true);
-        setError(null);
+  const loadDashboard = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const results = await Promise.allSettled([
-          accountingService.getInvoiceSummary(),
-          accountingService.getParties(),
-          accountingService.getItems(),
-          accountingService.getLedgers(),
-        ]);
+      const results = await Promise.allSettled([
+        accountingService.getInvoiceSummary(),
+        accountingService.getParties(),
+        accountingService.getItems(),
+        accountingService.getLedgers(),
+      ]);
 
-        const [summaryRes, partiesRes, itemsRes, ledgersRes] = results;
+      const [summaryRes, partiesRes, itemsRes, ledgersRes] = results;
 
-        const summary = summaryRes.status === "fulfilled" ? summaryRes.value.data : null;
-        const parties = partiesRes.status === "fulfilled" ? (partiesRes.value.data ?? []) : [];
-        const items = itemsRes.status === "fulfilled" ? (itemsRes.value.data ?? []) : [];
-        const ledgers = ledgersRes.status === "fulfilled" ? (ledgersRes.value.data ?? []) : [];
+      const summary = summaryRes.status === "fulfilled" ? summaryRes.value.data : null;
+      const parties = partiesRes.status === "fulfilled" ? (partiesRes.value.data ?? []) : [];
+      const items = itemsRes.status === "fulfilled" ? (itemsRes.value.data ?? []) : [];
+      const ledgers = ledgersRes.status === "fulfilled" ? (ledgersRes.value.data ?? []) : [];
 
-        setStats({
-          totalSales: summary?.total_sales ?? 0,
-          totalPurchases: summary?.total_purchases ?? 0,
-          partyCount: summary?.number_of_parties ?? parties.length,
-          itemCount: summary?.number_of_items ?? items.length,
-          ledgerCount: ledgers.length,
-          receivableBalance: getLedgerTotal(ledgers, ["accountsReceivable"]),
-          payableBalance: getLedgerTotal(ledgers, ["accountsPayable"]),
-        });
+      const localSales = ledgers
+        .filter((l) => l.ledgerType === "sales")
+        .reduce((sum, l) => sum + Math.abs(l.balance || 0), 0);
 
-        // If all requests failed, then show error
-        if (results.every(r => r.status === "rejected")) {
-          setError("Unable to load accounting dashboard.");
-        }
-      } catch (err) {
-        setError("An unexpected error occurred.");
-      } finally {
-        setLoading(false);
+      const localPurchases = ledgers
+        .filter((l) => l.ledgerType === "purchase")
+        .reduce((sum, l) => sum + Math.abs(l.balance || 0), 0);
+
+      setStats({
+        totalSales: Math.max(summary?.total_sales ?? 0, localSales),
+        totalPurchases: Math.max(summary?.total_purchases ?? 0, localPurchases),
+        partyCount: summary?.number_of_parties ?? parties.length,
+        itemCount: summary?.number_of_items ?? items.length,
+        ledgerCount: ledgers.length,
+        receivableBalance: getLedgerTotal(ledgers, ["accountsReceivable"]),
+        payableBalance: getLedgerTotal(ledgers, ["accountsPayable"]),
+      });
+
+      // If all requests failed, then show error
+      if (results.every(r => r.status === "rejected")) {
+        setError("Unable to load accounting dashboard.");
       }
+    } catch (err) {
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
-
-    loadDashboard();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadDashboard();
+    }, [loadDashboard])
+  );
 
 
   return (

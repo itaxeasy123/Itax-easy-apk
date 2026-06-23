@@ -1,18 +1,43 @@
-
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert, FlatList, ActivityIndicator, Modal, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AccountingHeader, Button, Card } from "../components";
 import { accountingService } from "../services/accountingService";
 import { PartyType } from "../types/accountingTypes";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { accountingTheme } from "../../../theme/accounting";
+
+// Safely require expo-contacts to prevent app crashes in environments without the native module
+let Contacts: any = null;
+let isContactsAvailable = false;
+try {
+  Contacts = require("expo-contacts");
+  isContactsAvailable = !!Contacts && typeof Contacts.requestPermissionsAsync === "function";
+} catch (e) {
+  console.warn("expo-contacts is not compiled/available in this build:", e);
+}
 
 const partyTypeOptions: { label: string; value: PartyType }[] = [
   { label: "Customer", value: "customer" },
   { label: "Supplier", value: "supplier" },
-]; 
+];
+
+const AVATAR_COLORS = [
+  "#3B82F6", // Blue
+  "#10B981", // Emerald
+  "#8B5CF6", // Violet
+  "#EF4444", // Red
+  "#F59E0B", // Amber
+  "#EC4899", // Pink
+  "#06B6D4", // Cyan
+  "#14B8A6", // Teal
+];
+
+const getAvatarBg = (name: string) => {
+  const code = name.charCodeAt(0) || 0;
+  return AVATAR_COLORS[code % AVATAR_COLORS.length];
+};
 
 export default function PartyCreateScreen() {
   const insets = useSafeAreaInsets();
@@ -35,6 +60,113 @@ export default function PartyCreateScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Contacts states
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [filteredContacts, setFilteredContacts] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [contactsModalVisible, setContactsModalVisible] = useState(false);
+  const [contactsLoading, setContactsLoading] = useState(false);
+
+  const handleImportContact = () => {
+    if (!isContactsAvailable || !Contacts) {
+      Alert.alert(
+        "Build Update Required",
+        "The native Contacts module is not yet compiled in your current app development build.\n\nPlease rebuild your app (e.g. run 'npx expo run:android' or 'npm run android') to bundle this new native feature."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Allow Contacts Access?",
+      "Would you like to connect with your contacts to easily import client details?",
+      [
+        {
+          text: "Disallow",
+          style: "cancel"
+        },
+        {
+          text: "Allow",
+          onPress: async () => {
+            try {
+              setContactsLoading(true);
+              const { status } = await Contacts.requestPermissionsAsync();
+              if (status !== "granted") {
+                Alert.alert(
+                  "Permission Denied",
+                  "Contacts permission is required to import details. Please enable contact permissions in your device settings."
+                );
+                return;
+              }
+
+              const { data } = await Contacts.getContactsAsync({
+                fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.Emails],
+              });
+
+              if (data && data.length > 0) {
+                // Sort contacts alphabetically by name
+                const sorted = data.sort((a: any, b: any) => {
+                  const nameA = a.name || "";
+                  const nameB = b.name || "";
+                  return nameA.localeCompare(nameB);
+                });
+                setContacts(sorted);
+                setFilteredContacts(sorted);
+                setSearchQuery("");
+                setContactsModalVisible(true);
+              } else {
+                Alert.alert("No Contacts", "No contacts found on your device.");
+              }
+            } catch (err) {
+              console.error("Error loading contacts:", err);
+              Alert.alert("Error", "Could not load contacts from your device.");
+            } finally {
+              setContactsLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleSearchContacts = (text: string) => {
+    setSearchQuery(text);
+    if (!text.trim()) {
+      setFilteredContacts(contacts);
+      return;
+    }
+    const query = text.toLowerCase();
+    const filtered = contacts.filter((c: any) => {
+      const nameMatch = c.name?.toLowerCase().includes(query);
+      const phoneMatch = c.phoneNumbers?.some((p: any) => p.number?.includes(query));
+      const emailMatch = c.emails?.some((e: any) => e.email?.toLowerCase().includes(query));
+      return nameMatch || phoneMatch || emailMatch;
+    });
+    setFilteredContacts(filtered);
+  };
+
+  const handleSelectContact = (contact: any) => {
+    if (contact.name) {
+      setPartyName(contact.name);
+    }
+
+    if (contact.phoneNumbers && contact.phoneNumbers.length > 0) {
+      // Clean up number (remove spaces, hyphens, and parentheses)
+      const rawNum = contact.phoneNumbers[0].number || "";
+      const cleanedNum = rawNum.replace(/[\s\-()]/g, "");
+      setPhone(cleanedNum);
+    } else {
+      setPhone("");
+    }
+
+    if (contact.emails && contact.emails.length > 0) {
+      setEmail(contact.emails[0].email || "");
+    } else {
+      setEmail("");
+    }
+
+    setContactsModalVisible(false);
+  };
+
   async function handleSave() {
     const trimmedName = partyName.trim();
 
@@ -47,7 +179,7 @@ export default function PartyCreateScreen() {
       setLoading(true);
       setError(null);
 
-      await accountingService.createParty({
+      const result = await accountingService.createParty({
         partyName: trimmedName,
         type,
         phone: phone.trim() || undefined,
@@ -63,6 +195,22 @@ export default function PartyCreateScreen() {
         bankIfsc: bankIfsc.trim() || undefined,
         bankBranch: bankBranch.trim() || undefined,
       });
+
+      // Auto-create a ledger linked to this party so invoices post to its own
+      // account. Best-effort: don't fail party creation if the local ledger
+      // engine is unavailable (e.g. on web).
+      const createdParty = result.data;
+      if (createdParty?.id) {
+        try {
+          await accountingService.ensurePartyLedger({
+            id: createdParty.id,
+            partyName: trimmedName,
+            type,
+          });
+        } catch (ledgerError) {
+          console.warn("Could not create ledger for party:", ledgerError);
+        }
+      }
 
       Alert.alert("Success", `${trimmedName} added as ${type}!`);
       router.replace("/accounting/parties");
@@ -85,7 +233,23 @@ export default function PartyCreateScreen() {
         {/* Basic Details Card */}
         <View style={styles.cardArea}>
           <Card>
-            <Text style={styles.sectionTitle}>Basic Details</Text>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitle}>Basic Details</Text>
+              <Pressable
+                onPress={handleImportContact}
+                style={styles.importBtn}
+                disabled={contactsLoading}
+              >
+                {contactsLoading ? (
+                  <ActivityIndicator size="small" color={accountingTheme.colors.primary} />
+                ) : (
+                  <>
+                    <Ionicons name="people" size={16} color={accountingTheme.colors.primary} />
+                    <Text style={styles.importBtnText}>From Contacts</Text>
+                  </>
+                )}
+              </Pressable>
+            </View>
 
             <View style={styles.field}>
               <Text style={styles.label}>Party Name</Text>
@@ -98,7 +262,7 @@ export default function PartyCreateScreen() {
             </View>
 
             <View style={styles.field}>
-              <Text style={styles.label}>Mobile Number</Text>
+              <Text style={styles.label}>Mobile Number (Optional)</Text>
               <TextInput
                 placeholder="Enter mobile number"
                 value={phone}
@@ -109,7 +273,7 @@ export default function PartyCreateScreen() {
             </View>
 
             <View style={styles.field}>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>Email (Optional)</Text>
               <TextInput
                 placeholder="Enter email address"
                 value={email}
@@ -356,6 +520,74 @@ export default function PartyCreateScreen() {
           fullWidth
         />
       </View>
+
+      {/* Contacts Picker Modal */}
+      <Modal visible={contactsModalVisible} animationType="slide" onRequestClose={() => setContactsModalVisible(false)}>
+        <View style={[styles.modalContainer, { paddingTop: Math.max(insets.top, 16) }]}>
+          {/* Modal Header */}
+          <View style={styles.modalHeader}>
+            <Pressable onPress={() => setContactsModalVisible(false)} style={styles.closeBtn}>
+              <Ionicons name="close" size={24} color="#334155" />
+            </Pressable>
+            <Text style={styles.modalTitle}>Import Contact</Text>
+            <View style={{ width: 24 }} />
+          </View>
+
+          {/* Search Bar */}
+          <View style={styles.searchBarContainer}>
+            <Ionicons name="search" size={20} color="#94A3B8" style={styles.searchIcon} />
+            <TextInput
+              placeholder="Search by name, number, or email..."
+              value={searchQuery}
+              onChangeText={handleSearchContacts}
+              style={styles.searchBarInput}
+              autoCorrect={false}
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => handleSearchContacts("")}>
+                <Ionicons name="close-circle" size={18} color="#94A3B8" />
+              </Pressable>
+            )}
+          </View>
+
+          {/* Contacts List */}
+          <FlatList
+            data={filteredContacts}
+            keyExtractor={(item) => item.id || ""}
+            renderItem={({ item }) => {
+              const firstLetter = (item.name || "?").charAt(0).toUpperCase();
+              const avatarBg = getAvatarBg(item.name || "?");
+              const primaryPhone = item.phoneNumbers?.[0]?.number;
+              const primaryEmail = item.emails?.[0]?.email;
+
+              return (
+                <Pressable onPress={() => handleSelectContact(item)} style={styles.contactRow}>
+                  <View style={[styles.avatar, { backgroundColor: avatarBg }]}>
+                    <Text style={styles.avatarText}>{firstLetter}</Text>
+                  </View>
+                  <View style={styles.contactDetails}>
+                    <Text style={styles.contactName}>{item.name}</Text>
+                    {(primaryPhone || primaryEmail) && (
+                      <Text style={styles.contactSub} numberOfLines={1}>
+                        {primaryPhone || ""}{primaryPhone && primaryEmail ? " • " : ""}{primaryEmail || ""}
+                      </Text>
+                    )}
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#CBD5E1" />
+                </Pressable>
+              );
+            }}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            ListEmptyComponent={() => (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="people-outline" size={48} color="#94A3B8" />
+                <Text style={styles.emptyText}>No matching contacts found</Text>
+              </View>
+            )}
+            contentContainerStyle={styles.listContent}
+          />
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -372,10 +604,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: accountingTheme.spacing.md,
     paddingVertical: 6,
   },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: accountingTheme.fontSizes.md,
     fontWeight: accountingTheme.fontWeights.extraBold,
     color: accountingTheme.colors.text,
+  },
+  importBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#EFF6FF",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+  },
+  importBtnText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: accountingTheme.colors.primary,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -485,5 +739,98 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  searchBarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 16,
+    marginVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    height: 44,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchBarInput: {
+    flex: 1,
+    fontSize: 14,
+    color: "#0F172A",
+  },
+  listContent: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+  },
+  contactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  avatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  avatarText: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+  contactDetails: {
+    flex: 1,
+  },
+  contactName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1E293B",
+  },
+  contactSub: {
+    fontSize: 12,
+    color: "#64748B",
+    marginTop: 2,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#F1F5F9",
+  },
+  emptyContainer: {
+    paddingVertical: 48,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#64748B",
+    marginTop: 8,
+    fontWeight: "500",
   },
 });

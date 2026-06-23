@@ -196,7 +196,7 @@ export default function ReceiptPaymentCreateScreen() {
       setSaving(true);
       setError(null);
 
-      await voucherService.create({
+      const result = await voucherService.create({
         voucherNumber: safeString(receiptNumber),
         voucherType: "receipt",
         entryDate: new Date(receiptDate).toISOString(),
@@ -205,6 +205,11 @@ export default function ReceiptPaymentCreateScreen() {
           `Receipt from ${selectedParty.partyName}${params.invoiceRefs ? ` against ${params.invoiceRefs}` : ""}`,
         lines: [debitLedger, creditLedger],
       });
+
+      if (!result.success) {
+        setError(result.message ?? "Unable to create receipt.");
+        return;
+      }
 
       router.replace("/accounting/vouchers");
     } catch (err) {

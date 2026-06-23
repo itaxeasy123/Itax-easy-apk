@@ -305,7 +305,7 @@ export default function CreditDebitNoteCreateScreen() {
         .map((item) => `${item.name} x${item.qty} @ ${money(Math.max(toNumber(item.amount), 0))}`)
         .join(" | ");
 
-      await voucherService.create({
+      const result = await voucherService.create({
         voucherNumber: safeString(invoiceNumber),
         voucherType: "sales",
         entryDate: new Date(invoiceDate).toISOString(),
@@ -319,6 +319,11 @@ export default function CreditDebitNoteCreateScreen() {
           .join(" - "),
         lines: [partyLine, salesLine],
       });
+
+      if (!result.success) {
+        setError(result.message ?? "Unable to create credit note.");
+        return;
+      }
 
       router.replace("/accounting/vouchers");
     } catch (err) {

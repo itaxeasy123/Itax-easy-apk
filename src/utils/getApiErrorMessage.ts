@@ -31,6 +31,17 @@ export function getApiErrorMessage(
     const response = axiosError.response;
     const data = response?.data;
 
+    // No response at all → the request never reached the server (offline,
+    // DNS failure, timeout, server down). Give a clear, friendly message
+    // instead of a raw "Network Error".
+    if (!response) {
+      const code = (axiosError as { code?: string }).code;
+      if (code === 'ECONNABORTED') {
+        return 'Request timed out. Please check your connection and try again.';
+      }
+      return 'Network error. Please check your internet connection and try again.';
+    }
+
     if (response?.status && statusMessages?.[response.status]) {
       return statusMessages[response.status] ?? fallback;
     }

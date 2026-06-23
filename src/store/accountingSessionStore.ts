@@ -27,10 +27,13 @@ export type DraftVoucher = {
   invoiceDate: string;
   dueDate: string;
   gstAmount: string;
-  selectedGstOption: string | null;
+  // Multiple GST components can apply together (e.g. CGST + SGST for an
+  // intra-state sale, or IGST for inter-state). Stored as a list of labels.
+  selectedGstOptions: string[];
   otherCharges: string;
   notes: string;
   lineItems: VoucherLineDraft[];
+  selectedSystemLedgerId?: string;
 };
 
 type AccountingSessionState = {

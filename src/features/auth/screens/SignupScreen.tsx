@@ -4,6 +4,7 @@ import { Image, Pressable, StyleSheet, Text, View, Linking } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { authService } from '../../../services/authService';
 import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
+import { notify } from '../../../utils/notify';
 import {
   validateEmail,
   validatePassword,
@@ -60,6 +61,12 @@ export default function SignupScreen() {
         return;
       }
 
+      if (!/^\d{10}$/.test(form.mobileNumber.trim())) {
+        setError('Please enter a valid 10 digit mobile number.');
+        setLoading(false);
+        return;
+      }
+
       if (!validatePassword(form.password)) {
         setError('Password must be at least 6 characters long.');
         setLoading(false);
@@ -78,7 +85,7 @@ export default function SignupScreen() {
         return;
       }
 
-      await authService.signup({
+      const result = await authService.signup({
         email: form.email,
         fullName: form.fullName,
         gender: form.gender,
@@ -86,15 +93,47 @@ export default function SignupScreen() {
         phone: form.mobileNumber,
       });
 
-      router.navigate({
-        params: { email: form.email, mode: 'signup', password: form.password },
-        pathname: '/otp',
-      });
+      // Account auto-verified (dev mode): no OTP, go straight to login.
+      if (result?.data?.verified === true) {
+        notify(result?.message || 'Account created. Please log in.');
+        router.replace({
+          params: { email: form.email, verified: '1' },
+          pathname: '/login',
+        });
+        return;
+      }
+
+      // OTP sent: continue to the verification screen with the otp_key.
+      if (result?.data?.otp_key != null) {
+        notify(result?.message || 'OTP sent successfully');
+        router.navigate({
+          params: {
+            email: form.email,
+            mode: 'signup',
+            otpKey: String(result.data.otp_key),
+            password: form.password,
+          },
+          pathname: '/otp',
+        });
+        return;
+      }
+
+      setError(result?.message || 'Failed to send OTP. Please try again.');
     } catch (signupError: any) {
+      const status = signupError?.response?.status;
+
+      // Account already exists and is verified — don't re-register. Show the
+      // message right here on the signup screen.
+      if (status === 409) {
+        setError('User already exists. Please login with your email address.');
+        return;
+      }
+
       setError(
         getApiErrorMessage(signupError, 'Signup failed. Please check the details.', {
-          409: 'This email or phone number is already registered.',
           400: 'Please check the entered details and try again.',
+          429: 'Too many requests. Please wait a moment and try again.',
+          500: 'Something went wrong. Please try again later.',
         })
       );
     } finally {

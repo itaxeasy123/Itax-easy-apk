@@ -88,10 +88,20 @@ export const authService = {
     return response.data;
   },
 
-  verifyOtp: async ({ email, otp }: { email: string; otp: string }) => {
+  verifyOtp: async ({
+    email,
+    otp,
+    otpKey,
+  }: {
+    email: string;
+    otp: string;
+    otpKey?: number | string | null;
+  }) => {
     const response = await apiClient.post(endpoints.auth.verifyOtp, {
       email,
       otp,
+      // Web client also sends otp_key; backend ignores it if not required.
+      ...(otpKey != null ? { otp_key: otpKey } : {}),
     });
 
     return response.data;

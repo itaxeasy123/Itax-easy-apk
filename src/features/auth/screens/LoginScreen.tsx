@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -13,8 +13,9 @@ import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
 export default function LoginScreen() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const params = useLocalSearchParams<{ email?: string; verified?: string }>();
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(params.email ?? '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -67,11 +68,34 @@ export default function LoginScreen() {
     } catch (loginError: any) {
       console.log("LOGIN ERROR:", loginError?.response?.data);
 
+      const status = loginError?.response?.status;
+      const body = loginError?.response?.data;
+
+      // Account exists with correct password but email is not verified.
+      // The backend has already sent a fresh OTP to the email — take the user
+      // straight to the OTP screen to verify, then they're logged in.
+      if (status === 403 || body?.needsVerification) {
+        const otpKey = body?.data?.otp_key;
+        router.navigate({
+          params: {
+            email,
+            mode: 'login',
+            password,
+            ...(otpKey != null ? { otpKey: String(otpKey) } : {}),
+          },
+          pathname: '/otp',
+        });
+        return;
+      }
+
       setError(
         getApiErrorMessage(loginError, 'Login failed. Please try again.', {
-          401: 'Incorrect password.',
-          403: 'Account not verified.',
-          404: 'User not found.',
+          400: 'Please enter a valid email and password.',
+          401: 'Incorrect email or password.',
+          404: 'No account found with this email. Please sign up first.',
+          429: 'Too many attempts. Please wait a moment and try again.',
+          500: 'Something went wrong. Please try again later.',
+          503: 'Service temporarily unavailable. Please try again shortly.',
         })
       );
     } finally {
@@ -95,6 +119,12 @@ export default function LoginScreen() {
       </View>
 
       <AuthIllustration />
+
+      {params.verified ? (
+        <Text style={styles.successText}>
+          Email verified successfully. Please log in to continue.
+        </Text>
+      ) : null}
 
       <View style={styles.form}>
         <AuthInput
@@ -194,6 +224,13 @@ const styles = StyleSheet.create({
     color: '#D64A4A',
     fontSize: 10,
     marginBottom: 2,
+  },
+  successText: {
+    color: '#1E9E5A',
+    fontSize: 11,
+    fontWeight: '500',
+    marginBottom: 8,
+    textAlign: 'center',
   },
   logoWrap: {
     alignItems: 'center',
