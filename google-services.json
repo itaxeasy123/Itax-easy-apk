@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "410350051245",
+    "project_id": "itax-4b8d7",
+    "storage_bucket": "itax-4b8d7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:410350051245:android:6d4de3237d31d821fccb24",
+        "android_client_info": {
+          "package_name": "com.itaxeasy.TaxShax"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "410350051245-3da8a1el82jp22sbd74ua0rh8i28npum.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_7Yb0AVPKE6giuheIgTtLpSd5IrFU6Nc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "410350051245-3da8a1el82jp22sbd74ua0rh8i28npum.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

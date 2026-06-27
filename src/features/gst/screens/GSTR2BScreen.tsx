@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import GSTHeader from "../components/GSTHeader";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { useWindowDimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -6,8 +7,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import GSTBottomBar from "../components/GSTBottomBar";
 import { useGSTBusinessProfileStore } from "../store/gstBusinessProfileStore";
 import { getAssessmentYears } from "../constants/gstData";
-import { previewGSTRPdf } from "../services/gstrPdf.service";
+import { previewGSTRPdf } from "../services/gstrPdf.service";;
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const tableRows = [
   { sr: "Part A", nature: "ITC Available - Credit may be claimed in relevant heading in GSTR - 3B", table: "", view: false, isHeader: true, group: "A" },
   { sr: "I", nature: "All other ITC - Supplies from registered persons.", table: "4(A)(5)", view: true, group: "A" },
@@ -188,15 +190,7 @@ export default function GSTR2BScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#FFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>GSTR-2B ({isQuarterly ? "Quarter" : "Month"})</Text>
-      </View>
+      <GSTHeader title={`GSTR-2B (${isQuarterly ? "Quarter" : "Month"})`} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -320,8 +314,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.semibold,
     color: "#FFF",
   },
   scrollContent: {
@@ -354,15 +348,15 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     width: 100,
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     color: "#374151",
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
   detailValue: {
     flex: 1,
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     color: "#4B5563",
-    fontWeight: "500",
+    fontWeight: fontWeights.medium,
   },
   profileArrow: {
     paddingLeft: 10,
@@ -376,8 +370,8 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.semibold,
     color: "#374151",
     marginBottom: 12,
   },
@@ -398,8 +392,8 @@ const styles = StyleSheet.create({
     borderColor: "#3574E2",
   },
   tabButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.semibold,
     color: "#4B5563",
   },
   tabButtonTextActive: {
@@ -419,8 +413,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   viewBtnText: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.medium,
     color: "#374151",
   },
   quarterBtn: {
@@ -433,8 +427,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   quarterBtnText: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.medium,
     color: "#374151",
   },
   accordionItem: {
@@ -455,8 +449,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   accordionTitle: {
-    fontSize: 13,
-    fontWeight: "600",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.semibold,
     color: "#374151",
   },
   expandedContent: {
@@ -491,18 +485,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#3574E2",
   },
   tableHeaderSubText: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.semibold,
     color: "#FFF",
     textAlign: "center",
   },
   tableDataText: {
-    fontSize: 11,
+    fontSize: fontSizes.sm,
     color: "#374151",
     textAlign: "center",
   },
   tableDataTextBold: {
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
   downloadBtn: {
     backgroundColor: "#3574E2",
@@ -512,8 +506,8 @@ const styles = StyleSheet.create({
   },
   downloadBtnText: {
     color: "#FFF",
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.semibold,
   },
   noDocBox: {
     backgroundColor: "#F4F6F9",
@@ -524,7 +518,7 @@ const styles = StyleSheet.create({
   },
   noDocText: {
     color: "#374151",
-    fontSize: 13,
+    fontSize: fontSizes.md,
   },
   floatingActionRow: {
     position: "absolute",
@@ -541,7 +535,7 @@ const styles = StyleSheet.create({
   },
   bottomBackBtnText: {
     color: "#3574E2",
-    fontWeight: "600",
-    fontSize: 14,
+    fontWeight: fontWeights.semibold,
+    fontSize: fontSizes.md,
   },
 });

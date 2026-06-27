@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   Image,
   Platform,
@@ -34,6 +34,15 @@ const getLedgerTotal = (ledgers: Ledger[], types: Ledger["ledgerType"][]) =>
     .filter((ledger) => types.includes(ledger.ledgerType))
     .reduce((sum, ledger) => sum + Number(ledger.balance || 0), 0);
 
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout")), ms)
+    ),
+  ]);
+}
+
 export default function AccountingDashboardScreen() {
   const navigateTo = (path: any) => {
     if (Platform.OS === 'web' && document.activeElement instanceof HTMLElement) {
@@ -56,49 +65,88 @@ export default function AccountingDashboardScreen() {
   });
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadDashboard() {
+  const loadDashboard = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // --- Stage 1: Load Local Ledger Accounts (Offline-first, extremely fast) ---
+      let localLedgers: Ledger[] = [];
       try {
-        setLoading(true);
-        setError(null);
-
-        const results = await Promise.allSettled([
-          accountingService.getInvoiceSummary(),
-          accountingService.getParties(),
-          accountingService.getItems(),
-          accountingService.getLedgers(),
-        ]);
-
-        const [summaryRes, partiesRes, itemsRes, ledgersRes] = results;
-
-        const summary = summaryRes.status === "fulfilled" ? summaryRes.value.data : null;
-        const parties = partiesRes.status === "fulfilled" ? (partiesRes.value.data ?? []) : [];
-        const items = itemsRes.status === "fulfilled" ? (itemsRes.value.data ?? []) : [];
-        const ledgers = ledgersRes.status === "fulfilled" ? (ledgersRes.value.data ?? []) : [];
-
-        setStats({
-          totalSales: summary?.total_sales ?? 0,
-          totalPurchases: summary?.total_purchases ?? 0,
-          partyCount: summary?.number_of_parties ?? parties.length,
-          itemCount: summary?.number_of_items ?? items.length,
-          ledgerCount: ledgers.length,
-          receivableBalance: getLedgerTotal(ledgers, ["accountsReceivable"]),
-          payableBalance: getLedgerTotal(ledgers, ["accountsPayable"]),
-        });
-
-        // If all requests failed, then show error
-        if (results.every(r => r.status === "rejected")) {
-          setError("Unable to load accounting dashboard.");
+        const ledgersRes = await accountingService.getLedgers();
+        if (ledgersRes && ledgersRes.success && ledgersRes.data) {
+          localLedgers = ledgersRes.data;
         }
       } catch (err) {
-        setError("An unexpected error occurred.");
-      } finally {
-        setLoading(false);
+        console.warn("Failed to load local ledgers:", err);
       }
-    }
 
-    loadDashboard();
+      const localSales = localLedgers
+        .filter((l) => l.ledgerType === "sales")
+        .reduce((sum, l) => sum + Math.abs(l.balance || 0), 0);
+
+      const localPurchases = localLedgers
+        .filter((l) => l.ledgerType === "purchase")
+        .reduce((sum, l) => sum + Math.abs(l.balance || 0), 0);
+
+      const localPartiesCount = new Set(
+        localLedgers.filter((l) => l.partyId).map((l) => l.partyId)
+      ).size;
+
+      // Populate stats immediately with offline data from local SQLite
+      setStats({
+        totalSales: localSales,
+        totalPurchases: localPurchases,
+        partyCount: localPartiesCount,
+        itemCount: 0, // Will be updated by background fetch
+        ledgerCount: localLedgers.length,
+        receivableBalance: getLedgerTotal(localLedgers, ["accountsReceivable"]),
+        payableBalance: getLedgerTotal(localLedgers, ["accountsPayable"]),
+      });
+
+      // Turn off the primary blocking loader so the dashboard renders instantly
+      setLoading(false);
+
+      // --- Stage 2: Background network fetch (with a strict 5s timeout) ---
+      Promise.allSettled([
+        withTimeout(accountingService.getInvoiceSummary(), 5000),
+        withTimeout(accountingService.getParties(), 5000),
+        withTimeout(accountingService.getItems(), 5000),
+      ])
+        .then((results) => {
+          const [summaryRes, partiesRes, itemsRes] = results;
+
+          const summary = summaryRes.status === "fulfilled" ? summaryRes.value.data : null;
+          const parties = partiesRes.status === "fulfilled" ? (partiesRes.value.data ?? []) : [];
+          const items = itemsRes.status === "fulfilled" ? (itemsRes.value.data ?? []) : [];
+
+          setStats((prev) => ({
+            ...prev,
+            totalSales: Math.max(summary?.total_sales ?? 0, localSales),
+            totalPurchases: Math.max(summary?.total_purchases ?? 0, localPurchases),
+            partyCount: summary?.number_of_parties ?? (parties.length > 0 ? parties.length : localPartiesCount),
+            itemCount: summary?.number_of_items ?? items.length,
+          }));
+        })
+        .catch((bgErr) => {
+          console.warn("Background dashboard stats update failed:", bgErr);
+        });
+
+    } catch (err) {
+      console.error("Dashboard error:", err);
+      setError("An unexpected error occurred.");
+    } finally {
+      // In our design, Stage 1 completes synchronously before turning loading off,
+      // but in case of any unhandled errors in Stage 1, ensure loader is turned off.
+      setLoading(false);
+    }
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadDashboard();
+    }, [loadDashboard])
+  );
 
 
   return (

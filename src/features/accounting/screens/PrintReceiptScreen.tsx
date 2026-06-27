@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-import { AccountingHeader, Card } from "../components";
+import { AccountingHeader, Card, DateField } from "../components";
 import { accountingService } from "../services/accountingService";
 import { buildA4Html, escapeHtml, exportHtmlToPdf, formatINR } from "../print/printHelpers";
 import { accountingTheme } from "../../../theme/accounting";
@@ -82,7 +82,7 @@ export default function PrintReceiptScreen() {
           <View style={styles.field}><Text style={styles.label}>Party Name</Text><TextInput value={partyName} onChangeText={setPartyName} style={styles.input} /></View>
           <View style={styles.field}><Text style={styles.label}>Party ID</Text><TextInput value={partyId} onChangeText={setPartyId} style={styles.input} /></View>
           <View style={styles.field}><Text style={styles.label}>Amount</Text><TextInput value={amount} onChangeText={setAmount} style={styles.input} keyboardType="numeric" /></View>
-          <View style={styles.field}><Text style={styles.label}>Receipt Date</Text><TextInput value={receiptDate} onChangeText={setReceiptDate} style={styles.input} /></View>
+          <View style={styles.field}><Text style={styles.label}>Receipt Date</Text><DateField value={receiptDate} onChange={setReceiptDate} placeholder="Select receipt date" /></View>
           <View style={styles.field}><Text style={styles.label}>Address (optional)</Text><TextInput value={address} onChangeText={setAddress} style={styles.input} multiline /></View>
           <Pressable style={[styles.btn, !canPrint && styles.btnDisabled]} onPress={handlePrint} disabled={!canPrint}>
             <Ionicons name="print-outline" size={18} color={accountingTheme.colors.card} />

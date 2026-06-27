@@ -1,21 +1,130 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { AccountingHeader } from "../components";
+import { AccountingHeader, Loading } from "../components";
 import { accountingTheme } from "../../../theme/accounting";
+import { accountingService } from "../services/accountingService";
+import { exportPdf, buildPdfHtml } from "../utils/exportFile";
+import type { Invoice } from "../types/accountingTypes";
 
 const format = (value: number) =>
   `₹ ${value.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
+const DAY_MS = 86400000;
+
+const formatDate = (iso: string | null) => {
+  if (!iso) return "Never sold";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "Never sold";
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+type InactiveItem = {
+  id: string;
+  name: string;
+  unit: string;
+  currentStock: number;
+  stockValue: number;
+  outOfStock: boolean;
+  lastSale: string | null;
+  daysInactive: number | null;
+};
+
 export default function InactiveItemsReportScreen() {
-  const router = useRouter();
   const [search, setSearch] = useState("");
-  const [inactiveItems, setInactiveItems] = useState<any[]>([]);
+  const [items, setItems] = useState<InactiveItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showSortModal, setShowSortModal] = useState(false);
   const [sortBy, setSortBy] = useState("All");
 
-  const totalStockValue = inactiveItems.reduce((sum, item) => sum + (item.currentStock * (item.price || 0)), 0);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [itemsRes, invoicesRes] = await Promise.all([
+          accountingService.getItems(),
+          accountingService.getInvoices({ page: 1, limit: 1000 }),
+        ]);
+
+        const rawItems = itemsRes.data ?? [];
+        const invoices: Invoice[] = (invoicesRes as any)?.invoices ?? [];
+
+        // Last sale timestamp per itemId across sales invoices
+        const lastSaleByItem = new Map<string, number>();
+        for (const inv of invoices) {
+          if (inv.type !== "sales") continue;
+          const dateStr = inv.invoiceDate ?? (inv as any).createdAt;
+          const t = dateStr ? new Date(dateStr).getTime() : NaN;
+          if (Number.isNaN(t)) continue;
+          for (const line of inv.invoiceItems ?? []) {
+            if (!line.itemId) continue;
+            const prev = lastSaleByItem.get(line.itemId);
+            if (prev === undefined || t > prev) lastSaleByItem.set(line.itemId, t);
+          }
+        }
+
+        const now = Date.now();
+        const result: InactiveItem[] = rawItems.map((item: any) => {
+          const stock = item.closingStock ?? item.openingStock ?? 0;
+          const last = lastSaleByItem.get(item.id);
+          return {
+            id: item.id,
+            name: item.itemName,
+            unit: item.unit || "PCS",
+            currentStock: stock,
+            stockValue: stock * (item.price || 0),
+            outOfStock: stock <= 0,
+            lastSale: last !== undefined ? new Date(last).toISOString() : null,
+            daysInactive: last !== undefined ? Math.floor((now - last) / DAY_MS) : null,
+          };
+        });
+
+        if (!cancelled) setItems(result);
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message ?? "Failed to load inactive items");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const inactiveItems = useMemo(() => {
+    const threshold = sortBy === "All" || sortBy === "Out of Stock" ? 0 : parseInt(sortBy, 10) || 0;
+    return items
+      .filter((item) => {
+        if (search.trim() && !item.name.toLowerCase().includes(search.trim().toLowerCase())) return false;
+        if (sortBy === "Out of Stock") return item.outOfStock;
+        if (threshold === 0) return true;
+        // Items never sold always count as inactive
+        return item.daysInactive === null || item.daysInactive >= threshold;
+      })
+      .sort((a, b) => (b.daysInactive ?? Infinity) - (a.daysInactive ?? Infinity) || a.name.localeCompare(b.name));
+  }, [items, search, sortBy]);
+
+  const totalStockValue = inactiveItems.reduce((sum, item) => sum + item.stockValue, 0);
+
+  const handleExportPdf = () => {
+    const rows: (string | number)[][] = [
+      ["Item", "Stock", "Stock Value", "Last Sale", "Days Inactive"],
+      ...inactiveItems.map((item) => [
+        item.name,
+        `${item.currentStock} ${item.unit}`,
+        item.stockValue,
+        formatDate(item.lastSale),
+        item.daysInactive === null ? "Never sold" : item.daysInactive,
+      ]),
+    ];
+    exportPdf(
+      "inactive-items",
+      buildPdfHtml("Inactive Items", `Filter: ${sortBy} • Generated ${formatDate(new Date().toISOString())}`, rows)
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -23,7 +132,7 @@ export default function InactiveItemsReportScreen() {
         title="Inactive Items"
         showBackButton
         rightContent={
-          <Pressable style={styles.pdfBtn}>
+          <Pressable style={styles.pdfBtn} onPress={handleExportPdf}>
             <Ionicons name="document-text" size={16} color={accountingTheme.colors.error} />
           </Pressable>
         }
@@ -58,41 +167,49 @@ export default function InactiveItemsReportScreen() {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
-        {inactiveItems.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <View style={styles.cardTop}>
-              <View style={styles.avatar}>
-                <Ionicons name="cube" size={16} color="#EAB308" />
-              </View>
-              <Text style={styles.name}>{item.name}</Text>
-              {item.outOfStock && (
-                <View style={styles.outOfStockBadge}>
-                  <Text style={styles.outOfStockText}>Out of Stock</Text>
+      {loading ? (
+        <Loading fullScreen text="Loading items..." />
+      ) : error ? (
+        <Text style={styles.errorText}>{error}</Text>
+      ) : (
+        <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
+          {inactiveItems.map((item) => (
+            <View key={item.id} style={styles.card}>
+              <View style={styles.cardTop}>
+                <View style={styles.avatar}>
+                  <Ionicons name="cube" size={16} color="#EAB308" />
                 </View>
-              )}
-            </View>
+                <Text style={styles.name}>{item.name}</Text>
+                {item.outOfStock && (
+                  <View style={styles.outOfStockBadge}>
+                    <Text style={styles.outOfStockText}>Out of Stock</Text>
+                  </View>
+                )}
+              </View>
 
-            <View style={styles.cardBottom}>
-              <View style={styles.infoCol}>
-                <Text style={styles.infoLabel}>Current Stock</Text>
-                <Text style={styles.infoValue}>{item.currentStock} PCS</Text>
-              </View>
-              <View style={styles.infoCol}>
-                <Text style={styles.infoLabel}>Last Sales Date</Text>
-                <Text style={styles.infoValue}>{item.lastSales}</Text>
-              </View>
-              <View style={[styles.infoCol, { alignItems: "flex-end" }]}>
-                <Text style={styles.infoLabel}>Inactive Since</Text>
-                <Text style={styles.infoValue}>{item.inactiveSince} Days</Text>
+              <View style={styles.cardBottom}>
+                <View style={styles.infoCol}>
+                  <Text style={styles.infoLabel}>Current Stock</Text>
+                  <Text style={styles.infoValue}>{item.currentStock} {item.unit}</Text>
+                </View>
+                <View style={styles.infoCol}>
+                  <Text style={styles.infoLabel}>Last Sales Date</Text>
+                  <Text style={styles.infoValue}>{formatDate(item.lastSale)}</Text>
+                </View>
+                <View style={[styles.infoCol, { alignItems: "flex-end" }]}>
+                  <Text style={styles.infoLabel}>Inactive Since</Text>
+                  <Text style={styles.infoValue}>
+                    {item.daysInactive === null ? "Never sold" : `${item.daysInactive} Days`}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-        ))}
-        {inactiveItems.length === 0 && (
-          <Text style={styles.emptyText}>No inactive items found</Text>
-        )}
-      </ScrollView>
+          ))}
+          {inactiveItems.length === 0 && (
+            <Text style={styles.emptyText}>No inactive items found</Text>
+          )}
+        </ScrollView>
+      )}
 
       {/* Sort By Modal */}
       <Modal
@@ -276,6 +393,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: accountingTheme.spacing.xxl,
     color: accountingTheme.colors.textSecondary,
+  },
+  errorText: {
+    textAlign: "center",
+    marginTop: accountingTheme.spacing.xxl,
+    paddingHorizontal: accountingTheme.spacing.lg,
+    color: accountingTheme.colors.error,
   },
   modalBackdrop: {
     flex: 1,

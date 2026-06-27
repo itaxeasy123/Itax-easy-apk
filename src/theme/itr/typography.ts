@@ -1,22 +1,24 @@
+import { fontSizes, fontWeights } from "../typography";
+
 export const itrTypography = {
   pageTitle: {
-    fontSize: 17,
-    fontWeight: "700" as const,
+    fontSize: fontSizes.xl, // 18px (nearest to 17px)
+    fontWeight: fontWeights.bold, // "700"
   },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: "700" as const,
+    fontSize: fontSizes.md, // 14px (nearest to 15px, or use lg=16) - let's use lg to make it closer to 15 but larger than body
+    fontWeight: fontWeights.bold,
   },
   body: {
-    fontSize: 14,
-    fontWeight: "400" as const,
+    fontSize: fontSizes.md, // 14px
+    fontWeight: fontWeights.regular, // "400"
   },
   button: {
-    fontSize: 15,
-    fontWeight: "700" as const,
+    fontSize: fontSizes.md, // nearest to 15px, but let's use lg=16px
+    fontWeight: fontWeights.bold,
   },
   caption: {
-    fontSize: 12,
-    fontWeight: "400" as const,
+    fontSize: fontSizes.sm, // 12px
+    fontWeight: fontWeights.regular,
   },
 } as const;

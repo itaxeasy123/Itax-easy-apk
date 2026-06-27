@@ -1,7 +1,11 @@
 import React from "react";
-
-import GSTDashboardScreen from "../../src/features/gst/screens/GSTDashboardScreen";
+import { Redirect } from "expo-router";
+import BusinessGate from "../../src/features/business/components/BusinessGate";
 
 export default function GSTPage() {
-  return <GSTDashboardScreen />;
+  return (
+    <BusinessGate require="gst" featureName="GST Return">
+      <Redirect href="/gst/returns" />
+    </BusinessGate>
+  );
 }

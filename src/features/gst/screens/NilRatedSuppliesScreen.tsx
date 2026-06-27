@@ -1,672 +1,166 @@
-import React, { useState } from "react";
-
+import React from "react";
+import GSTHeader from "../components/GSTHeader";
+import { useNilRatedStore } from "../../../store/nilRatedStore";
 import {
   View,
   Text,
- StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
   ScrollView,
-  TextInput,
-  Modal,
-  FlatList,
-  Alert,
+  Platform,
+  StatusBar,
 } from "react-native";
-
 import { useRouter } from "expo-router";
-
-import { Ionicons } from "@expo/vector-icons";
-
+import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import GSTBottomBar from "../components/GSTBottomBar";
 
-const states = [
-  "Andhra Pradesh",
-  "Arunachal Pradesh",
-  "Assam",
-  "Bihar",
-  "Chhattisgarh",
-  "Delhi",
-  "Goa",
-  "Gujarat",
-  "Haryana",
-  "Jharkhand",
-  "Karnataka",
-  "Kerala",
-  "Madhya Pradesh",
-  "Maharashtra",
-  "Punjab",
-  "Rajasthan",
-  "Tamil Nadu",
-  "Telangana",
-  "Uttar Pradesh",
-  "West Bengal",
-];
-
-const rates = ["5%", "12%", "18%", "28%"];
+import { fontSizes, fontWeights } from "../../../theme/typography";
 
 export default function NilRatedSuppliesScreen() {
   const router = useRouter();
+  const { records, deleteRecord } = useNilRatedStore();
 
-  const [selectedState, setSelectedState] =
-    useState("Select State");
-
-  const [invoiceValue, setInvoiceValue] =
-    useState("");
-
-  const [selectedRate, setSelectedRate] =
-    useState("5%");
-
-  const [supplyType, setSupplyType] =
-    useState("");
-
-  const [cess, setCess] = useState("");
-
-  const [stateModal, setStateModal] =
-    useState(false);
-
-  const [rateModal, setRateModal] =
-    useState(false);
-
-  const [editingId, setEditingId] =
-    useState<string | null>(null);
-
-  const [records, setRecords] = useState<
-    any[]
-  >([]);
-
-  // DELETE
-  const handleDelete = (id: string) => {
-    Alert.alert(
-      "Delete Record",
-      "Are you sure you want to delete this record?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            setRecords((prev) =>
-              prev.filter(
-                (item) => item.id !== id
-              )
-            );
-          },
-        },
-      ]
-    );
+  const handleAddRecord = () => {
+    router.push("/gst/add-nil-rated");
   };
 
-  // EDIT
-  const handleEdit = (item: any) => {
-    setEditingId(item.id);
-
-    setSelectedState(item.state);
-
-    setInvoiceValue(item.invoiceValue);
-
-    setSelectedRate(item.rate);
-
-    setSupplyType(item.supplyType);
-
-    setCess(item.cess);
-  };
-
-  // ADD / UPDATE
-  const handleAdd = () => {
-    if (
-      selectedState === "Select State" ||
-      !invoiceValue ||
-      !supplyType
-    ) {
-      Alert.alert(
-        "Validation",
-        "Please fill all required fields"
-      );
-
-      return;
-    }
-
-    // UPDATE
-    if (editingId) {
-      setRecords((prev) =>
-        prev.map((item) =>
-          item.id === editingId
-            ? {
-                ...item,
-                state: selectedState,
-                invoiceValue,
-                rate: selectedRate,
-                supplyType,
-                cess,
-              }
-            : item
-        )
-      );
-
-      setEditingId(null);
-
-      Alert.alert(
-        "Updated",
-        "Record updated successfully"
-      );
-    } else {
-      // ADD
-      const newRecord = {
-        id: Date.now().toString(),
-        state: selectedState,
-        invoiceValue,
-        rate: selectedRate,
-        supplyType,
-        cess,
-      };
-
-      setRecords((prev) => [
-        ...prev,
-        newRecord,
-      ]);
-
-      Alert.alert(
-        "Added",
-        "Record added successfully"
-      );
-    }
-
-    // RESET
-    setSelectedState("Select State");
-
-    setInvoiceValue("");
-
-    setSelectedRate("5%");
-
-    setSupplyType("");
-
-    setCess("");
+  const handleEditRecord = (id: number) => {
+    router.push({
+      pathname: "/gst/add-nil-rated",
+      params: { editId: id }
+    } as any);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* HEADER */}
-      <View style={styles.header}>
-        {/* BACK */}
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={styles.backButton}
-          onPress={() =>
-            router.push(
-              "/gst/gstr1-records" as any
-            )
-          }
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <GSTHeader title="8A,8B,8C,8D-Nil Rated Supplies" />
+
+        <ScrollView
+          style={{ flex: 1 }}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 150 }}
         >
-          <Ionicons
-            name="arrow-back"
-            size={18}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
-
-        {/* TITLE */}
-        <Text style={styles.headerTitle}>
-          8A,8B,8C,8D-Nil Rated Supplies
-        </Text>
-      </View>
-
-      {/* BODY */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={
-          styles.scrollContent
-        }
-      >
-        {/* TITLE */}
-        <Text style={styles.title}>
-          Outward and Reverse charge
-          Inward
-        </Text>
-
-        {/* SUB TITLE */}
-        <Text style={styles.subTitle}>
-          Sr. No 1
-        </Text>
-
-        {/* STATE */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.selectBox}
-          onPress={() =>
-            setStateModal(true)
-          }
-        >
-          <Text
-            style={[
-              styles.selectText,
-              selectedState ===
-                "Select State" && {
-                color: "#7B8190",
-              },
-            ]}
-          >
-            {selectedState}
-          </Text>
-
-          <Ionicons
-            name="chevron-down"
-            size={16}
-            color="#6B7280"
-          />
-        </TouchableOpacity>
-
-        {/* INVOICE VALUE */}
-        <TextInput
-          placeholder="Invoices Value"
-          placeholderTextColor="#7B8190"
-          value={invoiceValue}
-          onChangeText={setInvoiceValue}
-          style={styles.input}
-        />
-
-        {/* RATE */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.selectBox}
-          onPress={() =>
-            setRateModal(true)
-          }
-        >
-          <Text style={styles.selectText}>
-            {selectedRate}
-          </Text>
-
-          <Ionicons
-            name="chevron-down"
-            size={16}
-            color="#6B7280"
-          />
-        </TouchableOpacity>
-
-        {/* SUPPLY TYPE */}
-        <TextInput
-          placeholder="Supply Type"
-          placeholderTextColor="#7B8190"
-          value={supplyType}
-          onChangeText={setSupplyType}
-          style={styles.input}
-        />
-
-        {/* CESS */}
-        <TextInput
-          placeholder="Cess"
-          placeholderTextColor="#7B8190"
-          value={cess}
-          onChangeText={setCess}
-          style={styles.input}
-        />
-
-        {/* ICONS */}
-        <View style={styles.recordsWrapper}>
-          {records.length === 0 ? (
-            <View style={styles.recordCard}>
-              {/* EDIT */}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.iconButton}
-                onPress={() => {
-                  Alert.alert(
-                    "Edit",
-                    "Please add record first"
-                  );
-                }}
-              >
-                <Ionicons
-                  name="create-outline"
-                  size={18}
-                  color="#2563EB"
-                />
-              </TouchableOpacity>
-
-              {/* DELETE */}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.iconButton}
-                onPress={() => {
-                  Alert.alert(
-                    "Delete",
-                    "No record found"
-                  );
-                }}
-              >
-                <Ionicons
-                  name="trash-outline"
-                  size={18}
-                  color="#EF4444"
-                />
+          <View style={styles.tableSection}>
+            <View style={styles.tableHeaderRow}>
+              <Text style={styles.tableTitle}>Record Details</Text>
+              <TouchableOpacity style={styles.importBtn}>
+                <Text style={styles.importBtnText}>Import EWB</Text>
               </TouchableOpacity>
             </View>
-          ) : (
-            records.map((item) => (
-              <View
-                key={item.id}
-                style={styles.recordCard}
+
+            <View style={styles.tableContainer}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ flexGrow: 1 }}>
+                <View style={styles.tableWrapper}>
+                  {/* HEADER ROW */}
+                  <View style={styles.headerRow}>
+                    <Text style={[styles.headerCell, { width: 30 }, styles.firstCell]}>Sr.</Text>
+                    <Text style={[styles.headerCell, { flex: 2, minWidth: 90 }]}>Category</Text>
+                    <Text style={[styles.headerCell, { flex: 1, minWidth: 60 }]}>Nil Rated</Text>
+                    <Text style={[styles.headerCell, { flex: 1, minWidth: 60 }]}>Exempted</Text>
+                    <Text style={[styles.headerCell, { flex: 1, minWidth: 60 }]}>Non-GST</Text>
+                    <Text style={[styles.headerCell, { width: 65, textAlign: 'center' }]}>Actions</Text>
+                  </View>
+
+                  {/* DATA ROWS */}
+                  {records?.filter(item => item && item.id !== undefined).map((item, index) => (
+                    <View 
+                      key={item.id} 
+                      style={[styles.dataRow, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}
+                    >
+                      <Text style={[styles.dataCell, { width: 30 }, styles.firstCell]}>{index + 1}</Text>
+                      <Text style={[styles.dataCell, { flex: 2, minWidth: 90 }]} numberOfLines={2}>{item.nature || "N/A"}</Text>
+                      <Text style={[styles.dataCell, { flex: 1, minWidth: 60 }]} numberOfLines={1}>{item.nilRated || "0"}</Text>
+                      <Text style={[styles.dataCell, { flex: 1, minWidth: 60 }]} numberOfLines={1}>{item.exempted || "0"}</Text>
+                      <Text style={[styles.dataCell, { flex: 1, minWidth: 60 }]} numberOfLines={1}>{item.nonGst || "0"}</Text>
+                      <View style={[styles.actionCell, { width: 65 }]}>
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          style={styles.iconButton}
+                          onPress={() => deleteRecord(item.id)}
+                        >
+                          <MaterialIcons name="delete" size={14} color="#2962ff" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          style={styles.iconButton}
+                          onPress={() => handleEditRecord(item.id)}
+                        >
+                          <Feather name="edit-2" size={12} color="#ff3b30" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))}
+
+                  {(!records || records.length === 0) && (
+                    <View style={styles.emptyRow}>
+                      <Text style={styles.emptyText}>No records found</Text>
+                      <Text style={{ fontSize: fontSizes.xs, color: '#94a3b8', marginTop: 4 }}>Tap 'Add Record' below</Text>
+                    </View>
+                  )}
+                </View>
+              </ScrollView>
+            </View>
+
+            <View style={styles.bottomActions}>
+              <TouchableOpacity
+                style={styles.addRecordBtn}
+                onPress={handleAddRecord}
+                activeOpacity={0.8}
               >
-                {/* EDIT */}
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  style={styles.iconButton}
-                  onPress={() =>
-                    handleEdit(item)
-                  }
-                >
-                  <Ionicons
-                    name="create-outline"
-                    size={18}
-                    color="#2563EB"
-                  />
-                </TouchableOpacity>
-
-                {/* DELETE */}
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  style={styles.iconButton}
-                  onPress={() =>
-                    handleDelete(item.id)
-                  }
-                >
-                  <Ionicons
-                    name="trash-outline"
-                    size={18}
-                    color="#EF4444"
-                  />
-                </TouchableOpacity>
-              </View>
-            ))
-          )}
-        </View>
-
-        {/* BUTTONS */}
-        <View style={styles.buttonRow}>
-          {/* BACK */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.backBtn}
-            onPress={() =>
-              router.push(
-                "/gst/gstr1-records" as any
-              )
-            }
-          >
-            <Text style={styles.buttonText}>
-              Back
-            </Text>
-          </TouchableOpacity>
-
-          {/* ADD */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.addBtn}
-            onPress={handleAdd}
-          >
-            <Text style={styles.buttonText}>
-              {editingId
-                ? "Update"
-                : "Add"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-
-      {/* STATE MODAL */}
-      <Modal
-        visible={stateModal}
-        transparent
-        animationType="fade"
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          style={styles.modalOverlay}
-          onPress={() =>
-            setStateModal(false)
-          }
-        >
-          <View style={styles.modalBox}>
-            <FlatList
-              data={states}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.optionItem}
-                  onPress={() => {
-                    setSelectedState(item);
-
-                    setStateModal(false);
-                  }}
-                >
-                  <Text
-                    style={styles.optionText}
-                  >
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
+                <Text style={styles.addRecordBtnText}>Add Record</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.backActionBtn}
+                onPress={() => router.back()}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.backActionBtnText}>Back</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </TouchableOpacity>
-      </Modal>
+        </ScrollView>
 
-      {/* RATE MODAL */}
-      <Modal
-        visible={rateModal}
-        transparent
-        animationType="fade"
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          style={styles.modalOverlay}
-          onPress={() =>
-            setRateModal(false)
-          }
-        >
-          <View style={styles.modalBox}>
-            <FlatList
-              data={rates}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.optionItem}
-                  onPress={() => {
-                    setSelectedRate(item);
-
-                    setRateModal(false);
-                  }}
-                >
-                  <Text
-                    style={styles.optionText}
-                  >
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      {/* BOTTOM BAR */}
-      <GSTBottomBar />
+        <GSTBottomBar />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F3F4F6",
-  },
+  safeArea: { flex: 1, backgroundColor: "#f0f2f5" },
+  container: { flex: 1 },
+  
+  tableSection: { marginHorizontal: 10, marginTop: 16 },
+  tableHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingHorizontal: 4 },
+  tableTitle: { fontSize: fontSizes.lg, fontWeight: fontWeights.bold, color: "#1f2937" },
+  
+  importBtn: { backgroundColor: "#4B7BE5", paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6 },
+  importBtnText: { color: "#fff", fontSize: fontSizes.xs, fontWeight: fontWeights.semibold },
+  
+  tableContainer: { backgroundColor: "#fff", borderRadius: 8, overflow: "hidden", elevation: 2, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 5, shadowOffset: { width: 0, height: 2 } },
+  tableWrapper: { width: '100%', borderTopWidth: 1, borderTopColor: '#d1d5db' },
+  
+  headerRow: { flexDirection: 'row', backgroundColor: '#e5e7eb', borderBottomWidth: 1, borderBottomColor: '#d1d5db' },
+  headerCell: { paddingVertical: 10, paddingHorizontal: 2, fontSize: 10, fontWeight: fontWeights.bold, color: '#374151', textAlign: 'center', borderRightWidth: 1, borderRightColor: '#d1d5db', justifyContent: 'center' },
+  
+  dataRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#e5e7eb', alignItems: 'stretch' },
+  rowEven: { backgroundColor: '#ffffff' },
+  rowOdd: { backgroundColor: '#f8fafc' },
+  dataCell: { paddingVertical: 12, paddingHorizontal: 2, fontSize: 10, color: '#4b5563', textAlign: 'center', borderRightWidth: 1, borderRightColor: '#e5e7eb', justifyContent: 'center' },
+  firstCell: { borderLeftWidth: 1, borderLeftColor: '#d1d5db' },
+  
+  actionCell: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 2, borderRightWidth: 1, borderRightColor: '#e5e7eb' },
+  iconButton: { width: 22, height: 22, borderRadius: 11, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e2e8f0", justifyContent: "center", alignItems: "center" },
 
-  /* HEADER */
-  header: {
-    height: 58,
-    backgroundColor: "#3B82F6",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-  },
-
-  backButton: {
-    marginRight: 10,
-  },
-
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 13,
-    fontWeight: "600",
-    flex: 1,
-  },
-
-  /* BODY */
-  scrollContent: {
-    paddingHorizontal: 14,
-    paddingTop: 10,
-    paddingBottom: 24,
-  },
-
-  title: {
-    fontSize: 13,
-    color: "#374151",
-    fontWeight: "500",
-    marginBottom: 10,
-  },
-
-  subTitle: {
-    fontSize: 11,
-    color: "#2563EB",
-    marginBottom: 12,
-    fontWeight: "500",
-  },
-
-  /* INPUT */
-  selectBox: {
-    height: 42,
-    borderWidth: 1,
-    borderColor: "#C9D2E3",
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 14,
-  },
-
-  selectText: {
-    fontSize: 11,
-    color: "#111827",
-  },
-
-  input: {
-    height: 42,
-    borderWidth: 1,
-    borderColor: "#C9D2E3",
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 12,
-    fontSize: 11,
-    color: "#111827",
-    marginBottom: 14,
-  },
-
-  /* ICONS */
-  recordsWrapper: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: 10,
-    marginBottom: 60,
-  },
-
-  recordCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 12,
-    marginBottom: 12,
-  },
-
-  iconButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-  },
-
-  /* BUTTONS */
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-
-  backBtn: {
-    flex: 1,
-    height: 42,
-    backgroundColor: "#4B83F5",
-    borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 6,
-  },
-
-  addBtn: {
-    flex: 1,
-    height: 42,
-    backgroundColor: "#4B83F5",
-    borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 6,
-  },
-
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-
-  /* MODAL */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor:
-      "rgba(0,0,0,0.10)",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-
-  modalBox: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    overflow: "hidden",
-    maxHeight: 220,
-  },
-
-  optionItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-
-  optionText: {
-    fontSize: 13,
-    color: "#111827",
-  },
+  emptyRow: { padding: 40, alignItems: 'center', borderLeftWidth: 1, borderRightWidth: 1, borderBottomWidth: 1, borderColor: '#d1d5db', backgroundColor: '#f9fafb' },
+  emptyText: { color: '#64748b', fontSize: fontSizes.md, fontWeight: fontWeights.semibold },
+  
+  bottomActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16, gap: 12 },
+  addRecordBtn: { backgroundColor: "#4B7BE5", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 6, minWidth: 100, alignItems: 'center' },
+  addRecordBtnText: { color: "#fff", fontSize: fontSizes.md, fontWeight: fontWeights.semibold },
+  backActionBtn: { backgroundColor: "#fff", paddingVertical: 8, paddingHorizontal: 20, borderRadius: 6, borderWidth: 1, borderColor: "#4B7BE5", minWidth: 100, alignItems: 'center' },
+  backActionBtnText: { color: "#4B7BE5", fontSize: fontSizes.md, fontWeight: fontWeights.semibold },
 });

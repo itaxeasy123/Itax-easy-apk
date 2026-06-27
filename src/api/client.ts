@@ -1,18 +1,17 @@
 import axios from "axios";
-import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useAuthStore } from "../store/authStore";
-// ✅ API URL
-const API_URL =
-  Constants.expoConfig?.extra?.API_URL || "https://api.itaxeasy.com/api";
+import { API_URL } from "../config/env";
+import { getApiErrorMessage } from "../utils/getApiErrorMessage";
+import { notify } from "../utils/notify";
 
 // ===============================
 // AXIOS INSTANCE
 // ===============================
 const apiClientInstance = axios.create({
   baseURL: API_URL,
-  timeout: 15000,
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -76,6 +75,9 @@ apiClientInstance.interceptors.response.use(
     const isAuthRoute =
       originalRequest.url?.includes("/login") ||
       originalRequest.url?.includes("/signup") ||
+      originalRequest.url?.includes("/sign-up") ||
+      originalRequest.url?.includes("/verify") ||
+      originalRequest.url?.includes("/resendotp") ||
       originalRequest.url?.includes("/forgot-password") ||
       originalRequest.url?.includes("/verify-otp");
 
@@ -145,6 +147,17 @@ apiClientInstance.interceptors.response.use(
 
         return Promise.reject(refreshError);
       }
+    }
+
+    // ✅ GLOBAL ERROR NOTICE
+    // Safety net so no API failure is silent: surface the backend's actual
+    // message (e.g. "Inventory is not enabled for this user") as a toast.
+    // Skip:
+    //  - auth routes → those screens render their own inline errors
+    //  - buggy routes → known to return 401 incorrectly (see above)
+    //  - 401 → handled by the refresh/redirect flow above
+    if (!isAuthRoute && !isBuggyRoute && status !== 401) {
+      notify(getApiErrorMessage(error, "Something went wrong. Please try again."));
     }
 
     // ✅ NORMAL ERROR FLOW

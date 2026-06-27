@@ -8,27 +8,32 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
-export default function GSTR1EInvoiceSection() {
-  const [expanded, setExpanded] = useState(false);
+import { fontSizes, fontWeights } from "../../../theme/typography";
+interface GSTR1EInvoiceSectionProps {
+  isExpanded?: boolean;
+  onToggle?: () => void;
+}
+
+export default function GSTR1EInvoiceSection({ isExpanded, onToggle }: GSTR1EInvoiceSectionProps) {
 
   return (
     <>
       <TouchableOpacity
         activeOpacity={0.85}
         style={styles.dropdown}
-        onPress={() => setExpanded(!expanded)}
+        onPress={() => { if (onToggle) onToggle(); }}
       >
         <Text style={styles.dropdownText}>
           E-Invoice Download History
         </Text>
         <Ionicons
-          name={expanded ? "chevron-up" : "chevron-forward"}
+          name={isExpanded ? "chevron-up" : "chevron-forward"}
           size={20}
           color="#555"
         />
       </TouchableOpacity>
 
-      {expanded && (
+      {isExpanded && (
         <View>
           <TouchableOpacity
             activeOpacity={0.85}
@@ -73,9 +78,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   dropdownText: {
-    fontSize: 13,
+    fontSize: fontSizes.md,
     color: "#444",
-    fontWeight: "500",
+    fontWeight: fontWeights.medium,
   },
   invoiceCard: {
     backgroundColor: "#F4F6FB",
@@ -93,8 +98,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   invoiceTitle: {
-    fontSize: 12,
-    color: "#333",
+    fontSize: fontSizes.sm,
+    color: "#3D7BEA",
+    fontWeight: fontWeights.bold,
     flex: 1,
     paddingRight: 8,
   },
@@ -108,7 +114,7 @@ const styles = StyleSheet.create({
   },
   invoiceCount: {
     marginLeft: 6,
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     color: "#444",
   },
 });

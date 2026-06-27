@@ -11,6 +11,8 @@ export interface Ledger {
   ledgerType: LedgerType;
   createdAt: string;
   updatedAt: string;
+  groupId?: string;
+  groupPath?: string;
 }
 
 export type LedgerType =
@@ -146,7 +148,15 @@ export interface JournalEntry {
   lines?: VoucherLine[];
 }
 
-export type VoucherType = 'journal' | 'payment' | 'receipt' | 'contra' | 'sales' | 'purchase';
+export type VoucherType =
+  | 'journal'
+  | 'payment'
+  | 'receipt'
+  | 'contra'
+  | 'sales'
+  | 'purchase'
+  | 'debitNote'
+  | 'creditNote';
 export type VoucherSide = 'debit' | 'credit';
 
 export interface VoucherLine {
@@ -166,6 +176,8 @@ export interface VoucherEntry {
   lines: VoucherLine[];
   totalDebit: number;
   totalCredit: number;
+  status?: 'DRAFT' | 'POSTED' | 'REVERSED';
+  partyName?: string;
   createdAt: string;
   updatedAt: string;
 }

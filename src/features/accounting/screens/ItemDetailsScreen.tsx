@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Card, EmptyState, Loading, AccountingHeader } from "../components";
 import { accountingService } from "../services/accountingService";
 import { accountingTheme } from "../../../theme/accounting";
+import { exportCsv, exportExcel, exportPdf, buildPdfHtml } from "../utils/exportFile";
 
 const formatCurrency = (value: number) =>
   `₹ ${Math.abs(value || 0).toLocaleString("en-IN", {
@@ -31,7 +32,23 @@ interface Item {
   sac?: string;
   purchasePrice?: number;
   currentStock?: number;
+  taxRate: number;
 }
+
+/** The API sends price/hsnCode/openingStock/closingStock — map to screen fields. */
+const normalizeItem = (raw: any): Item => ({
+  id: String(raw?.id ?? ""),
+  itemName: String(raw?.itemName ?? ""),
+  unit: String(raw?.unit ?? "pieces"),
+  description: raw?.description ?? undefined,
+  unitPrice: Number(raw?.price ?? raw?.unitPrice ?? 0),
+  purchasePrice: raw?.purchasePrice != null ? Number(raw.purchasePrice) : undefined,
+  hsn: raw?.hsnCode ?? raw?.hsn ?? undefined,
+  sac: raw?.sac ?? undefined,
+  currentStock: Number(raw?.closingStock ?? raw?.openingStock ?? raw?.currentStock ?? 0),
+  quantity: Number(raw?.closingStock ?? raw?.openingStock ?? 0),
+  taxRate: Number(raw?.cgst ?? 0) + Number(raw?.sgst ?? 0) + Number(raw?.igst ?? 0),
+});
 
 export default function ItemDetailsScreen() {
   const params = useLocalSearchParams<{ id?: string }>();
@@ -57,7 +74,7 @@ export default function ItemDetailsScreen() {
         setLoading(true);
         const result = await accountingService.getItemById?.(itemId);
         if (result?.data) {
-          setItem(result.data);
+          setItem(normalizeItem(result.data));
         } else {
           setError("Item not found.");
         }
@@ -84,18 +101,15 @@ export default function ItemDetailsScreen() {
     }
 
     try {
-      // API call to update stock would go here
       const newStock =
         action === "in"
           ? (item?.currentStock || 0) + quantity
           : Math.max((item?.currentStock || 0) - quantity, 0);
 
+      // persist on the server, then reflect locally
+      await accountingService.updateItem(itemId!, { closingStock: newStock } as any);
       if (item) {
-        setItem({
-          ...item,
-          currentStock: newStock,
-          quantity: newStock,
-        });
+        setItem({ ...item, currentStock: newStock, quantity: newStock });
       }
 
       setStockChange("");
@@ -109,24 +123,102 @@ export default function ItemDetailsScreen() {
   const handleDeleteItem = () => {
     Alert.alert("Delete Item", "Are you sure you want to delete this item?", [
       { text: "Cancel", style: "cancel" },
-      { 
-        text: "Delete", 
-        style: "destructive", 
+      {
+        text: "Delete",
+        style: "destructive",
         onPress: async () => {
-          router.replace("/accounting/items");
-        }
-      }
+          try {
+            await accountingService.deleteItem(itemId!);
+            router.replace("/accounting/items");
+          } catch {
+            Alert.alert("Error", "Unable to delete this item (it may be used on an invoice).");
+          }
+        },
+      },
     ]);
   };
 
+  // ---- edit sheet ----
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editPurchasePrice, setEditPurchasePrice] = useState("");
+  const [editHsn, setEditHsn] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
   const handleEditItem = () => {
     setShowActionModal(false);
-    Alert.alert("Edit", "Navigate to item edit screen.");
+    setEditName(item?.itemName ?? "");
+    setEditPrice(String(item?.unitPrice ?? ""));
+    setEditPurchasePrice(item?.purchasePrice != null ? String(item.purchasePrice) : "");
+    setEditHsn(item?.hsn ?? "");
+    setEditDescription(item?.description ?? "");
+    setShowEditModal(true);
   };
 
-  const handleDownload = (format: string) => {
+  const handleSaveEdit = async () => {
+    if (!editName.trim()) {
+      Alert.alert("Invalid input", "Item name is required.");
+      return;
+    }
+    const price = Number(editPrice);
+    if (Number.isNaN(price) || price < 0) {
+      Alert.alert("Invalid input", "Sale price must be a valid number.");
+      return;
+    }
+    try {
+      setSavingEdit(true);
+      await accountingService.updateItem(itemId!, {
+        itemName: editName.trim(),
+        price,
+        ...(editPurchasePrice.trim() !== "" ? { purchasePrice: Number(editPurchasePrice) } : {}),
+        hsnCode: editHsn.trim(),
+        description: editDescription.trim(),
+      } as any);
+      setItem((current) =>
+        current
+          ? {
+              ...current,
+              itemName: editName.trim(),
+              unitPrice: price,
+              purchasePrice: editPurchasePrice.trim() !== "" ? Number(editPurchasePrice) : current.purchasePrice,
+              hsn: editHsn.trim() || current.hsn,
+              description: editDescription.trim() || current.description,
+            }
+          : current
+      );
+      setShowEditModal(false);
+      Alert.alert("Saved", "Item details updated.");
+    } catch {
+      Alert.alert("Error", "Unable to update the item. Please try again.");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  // ---- downloads (real exports) ----
+  const itemRows = (): (string | number)[][] => [
+    ["Field", "Value"],
+    ["Item Name", item?.itemName ?? ""],
+    ["Unit", item?.unit ?? ""],
+    ["Sale Price", item?.unitPrice ?? 0],
+    ["Purchase Price", item?.purchasePrice ?? 0],
+    ["Current Stock", item?.currentStock ?? 0],
+    ["Stock Value", (item?.currentStock || 0) * (item?.unitPrice || 0)],
+    ["HSN/SAC Code", item?.hsn ?? item?.sac ?? ""],
+    ["Tax Rate (%)", item?.taxRate ?? 0],
+    ["Description", item?.description ?? ""],
+  ];
+
+  const handleDownload = async (format: string) => {
     setShowActionModal(false);
-    Alert.alert("Download", `Downloading item as ${format}`);
+    const filename = `item-${(item?.itemName ?? "details").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`;
+    const rows = itemRows();
+    if (format === "CSV") await exportCsv(filename, rows);
+    else if (format === "Excel") await exportExcel(filename, item?.itemName ?? "Item", rows);
+    else if (format === "PDF")
+      await exportPdf(filename, buildPdfHtml(item?.itemName ?? "Item", `Item details — exported from iTaxEasy`, rows));
   };
 
   if (loading) {
@@ -215,7 +307,7 @@ export default function ItemDetailsScreen() {
             </View>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Tax Rate</Text>
-              <Text style={styles.detailValue}>0%</Text>
+              <Text style={styles.detailValue}>{item?.taxRate ?? 0}%</Text>
             </View>
             <View style={styles.detailRowFull}>
               <Text style={styles.detailLabel}>Description</Text>
@@ -313,6 +405,87 @@ export default function ItemDetailsScreen() {
                 <Text style={[styles.optionText, styles.dangerText]}>Delete Item</Text>
               </Pressable>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Item Bottom Sheet */}
+      <Modal
+        visible={showEditModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <Pressable style={styles.modalDismiss} onPress={() => setShowEditModal(false)} />
+          <View style={styles.bottomSheet}>
+            <View style={styles.sheetHandleWrap}>
+              <View style={styles.sheetHandle} />
+            </View>
+
+            <ScrollView style={{ maxHeight: 480 }} contentContainerStyle={styles.sheetOptions}>
+              <Text style={styles.editTitle}>Edit Item Details</Text>
+
+              <View style={styles.field}>
+                <Text style={styles.label}>Item Name</Text>
+                <TextInput value={editName} onChangeText={setEditName} style={styles.input} placeholder="Item name" />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>Sale Price</Text>
+                <TextInput
+                  value={editPrice}
+                  onChangeText={(t) => setEditPrice(t.replace(/[^\d.]/g, ""))}
+                  style={styles.input}
+                  keyboardType="decimal-pad"
+                  placeholder="0.00"
+                />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>Purchase Price</Text>
+                <TextInput
+                  value={editPurchasePrice}
+                  onChangeText={(t) => setEditPurchasePrice(t.replace(/[^\d.]/g, ""))}
+                  style={styles.input}
+                  keyboardType="decimal-pad"
+                  placeholder="0.00"
+                />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>HSN/SAC Code</Text>
+                <TextInput
+                  value={editHsn}
+                  onChangeText={(t) => setEditHsn(t.replace(/[^\dA-Za-z]/g, ""))}
+                  style={styles.input}
+                  placeholder="e.g. 8471"
+                />
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.label}>Description</Text>
+                <TextInput
+                  value={editDescription}
+                  onChangeText={setEditDescription}
+                  style={styles.input}
+                  placeholder="Description"
+                  multiline
+                />
+              </View>
+
+              <View style={styles.actionButtons}>
+                <Pressable
+                  style={[styles.actionButton, styles.cancelButton]}
+                  onPress={() => setShowEditModal(false)}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.actionButton, styles.confirmButton, savingEdit && { opacity: 0.6 }]}
+                  onPress={handleSaveEdit}
+                  disabled={savingEdit}
+                >
+                  <Text style={styles.confirmButtonText}>{savingEdit ? "Saving..." : "Save"}</Text>
+                </Pressable>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -574,6 +747,13 @@ const styles = StyleSheet.create({
   },
   sheetOptions: {
     marginTop: accountingTheme.spacing.sm,
+  },
+  editTitle: {
+    fontSize: accountingTheme.fontSizes.xl,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+    color: "#111827",
+    paddingHorizontal: accountingTheme.spacing.xxl,
+    marginBottom: accountingTheme.spacing.md,
   },
   optionRow: {
     flexDirection: "row",

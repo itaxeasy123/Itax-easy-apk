@@ -97,38 +97,25 @@ const REPORTS_MARQUEE = [
   { title: "Daybook", icon: "book", route: "/accounting/daybook", colors: ['#f59e0b', '#b45309'] as const },
   { title: "Profit & Loss", icon: "trending-up", route: "/accounting/reports-profit-loss", colors: ['#10b981', '#047857'] as const },
   { title: "Balance Sheet", icon: "reader", route: "/accounting/reports-balance-sheet", colors: ['#3b82f6', '#1d4ed8'] as const },
+  { title: "Cost", icon: "cash", route: "/accounting/reports-expense", colors: ['#ef4444', '#b91c1c'] as const },
 ];
 
 function MarqueeBanner({ onNavigate }: { onNavigate: (route: string) => void }) {
-  const scrollX = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    let animation: Animated.CompositeAnimation;
-    const startAnimation = () => {
-      scrollX.setValue(0);
-      animation = Animated.timing(scrollX, {
-        toValue: -480, // roughly 4 items * 120 width
-        duration: 12000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      });
-      animation.start(({ finished }) => {
-        if (finished) {
-          startAnimation();
-        }
-      });
-    };
-    startAnimation();
-    return () => animation?.stop();
-  }, [scrollX]);
-
-  const marqueeItems = [...REPORTS_MARQUEE, ...REPORTS_MARQUEE, ...REPORTS_MARQUEE];
-
   return (
     <View style={styles.marqueeContainer}>
-      <Animated.View style={[styles.marqueeScroll, { transform: [{ translateX: scrollX }] }]}>
-        {marqueeItems.map((item, index) => (
-          <Pressable key={index} onPress={() => onNavigate(item.route)}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 12, alignItems: 'center' }}
+      >
+        {REPORTS_MARQUEE.map((item, index) => (
+          <Pressable
+            key={index}
+            onPress={() => onNavigate(item.route)}
+            style={({ pressed }) => [
+              { opacity: pressed ? 0.7 : 1.0 }
+            ]}
+          >
             <View style={styles.marqueeCard}>
               <LinearGradient colors={item.colors as any} style={styles.marqueeCardIcon}>
                 <Ionicons name={item.icon as any} size={22} color="#fff" />
@@ -137,7 +124,7 @@ function MarqueeBanner({ onNavigate }: { onNavigate: (route: string) => void }) 
             </View>
           </Pressable>
         ))}
-      </Animated.View>
+      </ScrollView>
     </View>
   );
 }
@@ -439,6 +426,7 @@ export default function DashboardScreen() {
               placeholder="Search"
               onChangeText={(text) => {
                 setSearchQuery(text);
+                // @ts-ignore
                 if (text.trim() && activeTab !== "home" && activeTab !== "tools" && activeTab !== "more") {
                   setActiveTab("home");
                 }

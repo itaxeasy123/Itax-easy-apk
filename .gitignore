@@ -42,3 +42,8 @@ app-example
 # generated native folders
 /ios
 /android
+
+# local binaries & databases
+itaxeasy-app.apk
+billshield-selftest.db
+

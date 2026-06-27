@@ -601,10 +601,7 @@ bottomTextActive: {
     overflow: 'hidden',
     justifyContent: 'center',
   },
-  marqueeScroll: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  marqueeScroll: {},
   marqueeCard: {
     flex: 1,
     borderRadius: 12,

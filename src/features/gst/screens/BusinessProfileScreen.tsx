@@ -4,6 +4,7 @@ import React, {
   useState,
 } from "react";
 
+import GSTHeader from "../../gst/components/GSTHeader";
 import {
   SafeAreaView,
   View,
@@ -22,6 +23,7 @@ import {
   router,
 } from "expo-router";
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 import {
   useGSTBusinessProfileStore,
 } from "../../gst/store/gstBusinessProfileStore";
@@ -182,42 +184,7 @@ export default function BusinessProfileScreen() {
       >
         {/* HEADER */}
 
-        <View style={styles.header}>
-          {/* BACK */}
-
-          <TouchableOpacity
-            onPress={() =>
-              router.back()
-            }
-            style={
-              styles.backButton
-            }
-          >
-            <Ionicons
-              name="arrow-back"
-              size={22}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          {/* TITLE */}
-
-          <Text
-            style={
-              styles.headerTitle
-            }
-          >
-            Business Profile
-          </Text>
-
-          {/* EMPTY */}
-
-          <View
-            style={{
-              width: 38,
-            }}
-          />
-        </View>
+        <GSTHeader title="Business Profile" />
 
         {/* HERO CARD */}
 
@@ -235,7 +202,7 @@ export default function BusinessProfileScreen() {
           >
             <Ionicons
               name="business"
-              size={42}
+              size={28}
               color="#FFFFFF"
             />
           </View>
@@ -497,7 +464,7 @@ const styles =
       alignItems: "center",
       justifyContent:
         "space-between",
-      paddingHorizontal: 18,
+      paddingHorizontal: 12,
     },
 
     backButton: {
@@ -512,8 +479,8 @@ const styles =
     },
 
     headerTitle: {
-      fontSize: 20,
-      fontWeight: "700",
+      fontSize: fontSizes.xxl,
+      fontWeight: fontWeights.bold,
       color: "#FFFFFF",
     },
 
@@ -528,7 +495,7 @@ const styles =
       marginTop: 22,
       backgroundColor:
         "#FFFFFF",
-      borderRadius: 30,
+      borderRadius: 12,
       alignItems: "center",
       paddingVertical: 28,
       paddingHorizontal: 20,
@@ -536,8 +503,8 @@ const styles =
     },
 
     avatar: {
-      width: 100,
-      height: 100,
+      width: 60,
+      height: 60,
       borderRadius: 999,
       backgroundColor:
         "#3D7BEA",
@@ -548,15 +515,15 @@ const styles =
 
     businessTitle: {
       marginTop: 18,
-      fontSize: 24,
-      fontWeight: "700",
+      fontSize: fontSizes.display,
+      fontWeight: fontWeights.bold,
       color: "#111827",
     },
 
     businessSubTitle: {
       marginTop: 10,
-      fontSize: 14,
-      fontWeight: "500",
+      fontSize: fontSizes.md,
+      fontWeight: fontWeights.medium,
       color: "#6B7280",
       textAlign: "center",
       lineHeight: 22,
@@ -566,14 +533,14 @@ const styles =
       marginTop: 18,
       backgroundColor:
         "#E8F0FF",
-      paddingHorizontal: 18,
-      paddingVertical: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
       borderRadius: 999,
     },
 
     fyText: {
-      fontSize: 14,
-      fontWeight: "700",
+      fontSize: fontSizes.md,
+      fontWeight: fontWeights.bold,
       color: "#2563EB",
     },
 
@@ -588,7 +555,7 @@ const styles =
       marginHorizontal: 18,
       backgroundColor:
         "#FFFFFF",
-      borderRadius: 28,
+      borderRadius: 12,
       padding: 20,
       elevation: 3,
     },
@@ -598,20 +565,20 @@ const styles =
     },
 
     label: {
-      fontSize: 15,
-      fontWeight: "700",
+      fontSize: fontSizes.md,
+      fontWeight: fontWeights.bold,
       color: "#111827",
       marginBottom: 10,
     },
 
     input: {
-      height: 58,
+      height: 44,
       backgroundColor:
         "#F8FAFC",
-      borderRadius: 18,
-      paddingHorizontal: 18,
-      fontSize: 15,
-      fontWeight: "600",
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      fontSize: fontSizes.md,
+      fontWeight: fontWeights.semibold,
       color: "#111827",
       borderWidth: 1,
       borderColor: "#E5E7EB",
@@ -624,11 +591,11 @@ const styles =
     */
 
     dropdownButton: {
-      height: 58,
+      height: 44,
       backgroundColor:
         "#F8FAFC",
-      borderRadius: 18,
-      paddingHorizontal: 18,
+      borderRadius: 8,
+      paddingHorizontal: 12,
       borderWidth: 1,
       borderColor: "#E5E7EB",
       flexDirection: "row",
@@ -638,8 +605,8 @@ const styles =
     },
 
     dropdownText: {
-      fontSize: 15,
-      fontWeight: "600",
+      fontSize: fontSizes.md,
+      fontWeight: fontWeights.semibold,
       color: "#111827",
     },
 
@@ -647,7 +614,7 @@ const styles =
       marginTop: 10,
       backgroundColor:
         "#FFFFFF",
-      borderRadius: 18,
+      borderRadius: 8,
       borderWidth: 1,
       borderColor: "#E5E7EB",
       overflow: "hidden",
@@ -655,7 +622,7 @@ const styles =
 
     dropdownItem: {
       height: 52,
-      paddingHorizontal: 18,
+      paddingHorizontal: 12,
       flexDirection: "row",
       alignItems: "center",
       justifyContent:
@@ -666,8 +633,8 @@ const styles =
     },
 
     dropdownItemText: {
-      fontSize: 15,
-      fontWeight: "600",
+      fontSize: fontSizes.md,
+      fontWeight: fontWeights.semibold,
       color: "#111827",
     },
 
@@ -680,10 +647,10 @@ const styles =
     saveButton: {
       marginHorizontal: 18,
       marginTop: 24,
-      height: 58,
+      height: 44,
       backgroundColor:
         "#3D7BEA",
-      borderRadius: 20,
+      borderRadius: 8,
       alignItems: "center",
       justifyContent:
         "center",
@@ -693,8 +660,8 @@ const styles =
     },
 
     saveButtonText: {
-      fontSize: 16,
-      fontWeight: "700",
+      fontSize: fontSizes.lg,
+      fontWeight: fontWeights.bold,
       color: "#FFFFFF",
     },
   });

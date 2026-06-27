@@ -1,79 +1,59 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import AuthInput from '../components/AuthInput';
 import AuthScaffold, { AuthIllustration, PrimaryButton } from '../components/AuthScaffold';
-import { authService } from '../../../services/authService';
-import { useAuthStore } from '../../../store/authStore';
-import { validateEmail } from '../../../utils/validators/authValidator';
-import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
+import {
+  isFirebaseAvailable,
+  isValidIndianMobile,
+  sendOtp,
+  toE164India,
+} from '../services/firebasePhone';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const params = useLocalSearchParams<{ phone?: string; verified?: string }>();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [mobile, setMobile] = useState(params.phone ?? '');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleSendOtp = async () => {
     try {
-      setLoading(true);
       setError('');
 
-      if (!validateEmail(email)) {
-        setError('Please enter a valid email address.');
-        setLoading(false);
+      if (!isValidIndianMobile(mobile)) {
+        setError('Please enter a valid 10 digit mobile number.');
         return;
       }
 
-      if (!password.trim()) {
-        setError('Please enter your password.');
-        setLoading(false);
+      if (!isFirebaseAvailable()) {
+        setError('Phone verification is unavailable in this build. Please update the app.');
         return;
       }
 
-      // 🔥 API CALL
-      const res = await authService.login({ email, password });
+      setLoading(true);
+      const phoneE164 = toE164India(mobile);
+      await sendOtp(phoneE164);
 
-      console.log("LOGIN RESPONSE:", res);
-
-      // ✅ FIXED RESPONSE HANDLING
-      const user =
-        res?.data?.user ||
-        res?.user ||
-        res?.data;
-
-      const token =
-        res?.data?.accessToken ||
-        res?.data?.token ||
-        res?.accessToken ||
-        res?.token;
-
-      if (!token) {
-        setError('Login failed: token not received');
-        return;
+      router.navigate({
+        params: { mode: 'login', phone: phoneE164, phoneDisplay: mobile.replace(/\D/g, '').slice(-10) },
+        pathname: '/otp',
+      });
+    } catch (sendError: any) {
+      console.log('SEND OTP ERROR:', sendError);
+      const code = sendError?.code as string | undefined;
+      if (code === 'auth/invalid-phone-number') {
+        setError('Please enter a valid mobile number.');
+      } else if (code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please wait a while and try again.');
+      } else if (code === 'auth/network-request-failed') {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError(sendError?.message || 'Could not send OTP. Please try again.');
       }
-
-      // ✅ SAVE AUTH (IMPORTANT)
-      await setAuth(user, token);
-
-      // ✅ SUCCESS
-      router.replace('/dashboard');
-
-    } catch (loginError: any) {
-      console.log("LOGIN ERROR:", loginError?.response?.data);
-
-      setError(
-        getApiErrorMessage(loginError, 'Login failed. Please try again.', {
-          401: 'Incorrect password.',
-          403: 'Account not verified.',
-          404: 'User not found.',
-        })
-      );
     } finally {
       setLoading(false);
     }
@@ -91,35 +71,29 @@ export default function LoginScreen() {
       </View>
       <View style={styles.hero}>
         <Text style={styles.title}>Let&apos;s get started</Text>
-        <Text style={styles.subtitle}>Access your account securely.</Text>
+        <Text style={styles.subtitle}>Sign in securely with your mobile number.</Text>
       </View>
 
       <AuthIllustration />
 
+      {params.verified ? (
+        <Text style={styles.successText}>
+          Account verified successfully. Please log in to continue.
+        </Text>
+      ) : null}
+
       <View style={styles.form}>
         <AuthInput
-          onChangeText={setEmail}
-          placeholder="Email"
-          value={email}
+          keyboardType="phone-pad"
+          onChangeText={setMobile}
+          placeholder="Mobile Number"
+          value={mobile}
         />
-
-        <AuthInput
-          onChangeText={setPassword}
-          placeholder="Password"
-          secureToggle
-          value={password}
-        />
-      </View>
-
-      <View style={styles.optionsRow}>
-        <Pressable onPress={() => router.navigate('/forgot-password')}>
-          <Text style={styles.linkText}>Forgot Password?</Text>
-        </Pressable>
       </View>
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <PrimaryButton label="Login" loading={loading} onPress={handleLogin} />
+      <PrimaryButton label="Send OTP" loading={loading} onPress={handleSendOtp} />
 
       <View style={styles.signupRow}>
         <View style={styles.line} />
@@ -135,7 +109,7 @@ export default function LoginScreen() {
       <View style={styles.privacyRow}>
         <MaterialCommunityIcons name="shield-check-outline" size={14} color="#60708A" />
         <Text style={styles.privacyText}>
-          Your data is securely encrypted
+          We&apos;ll send a one-time code to verify your number
         </Text>
       </View>
     </AuthScaffold>
@@ -156,10 +130,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   form: { gap: 12 },
-  optionsRow: {
-    alignItems: 'flex-end',
-    marginTop: 10,
-  },
   linkText: {
     color: '#347BE5',
     fontSize: 10,
@@ -194,6 +164,13 @@ const styles = StyleSheet.create({
     color: '#D64A4A',
     fontSize: 10,
     marginBottom: 2,
+  },
+  successText: {
+    color: '#1E9E5A',
+    fontSize: 11,
+    fontWeight: '500',
+    marginBottom: 8,
+    textAlign: 'center',
   },
   logoWrap: {
     alignItems: 'center',

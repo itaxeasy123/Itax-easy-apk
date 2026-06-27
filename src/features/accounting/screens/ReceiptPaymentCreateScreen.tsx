@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { AccountingHeader, Button, Card, Loading } from "../components";
+import { AccountingHeader, Button, Card, DateField, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { voucherService } from "../services/voucherService";
 import { Ledger, Party, VoucherLine } from "../types/accountingTypes";
@@ -196,7 +196,7 @@ export default function ReceiptPaymentCreateScreen() {
       setSaving(true);
       setError(null);
 
-      await voucherService.create({
+      const result = await voucherService.create({
         voucherNumber: safeString(receiptNumber),
         voucherType: "receipt",
         entryDate: new Date(receiptDate).toISOString(),
@@ -205,6 +205,11 @@ export default function ReceiptPaymentCreateScreen() {
           `Receipt from ${selectedParty.partyName}${params.invoiceRefs ? ` against ${params.invoiceRefs}` : ""}`,
         lines: [debitLedger, creditLedger],
       });
+
+      if (!result.success) {
+        setError(result.message ?? "Unable to create receipt.");
+        return;
+      }
 
       router.replace("/accounting/vouchers");
     } catch (err) {
@@ -417,7 +422,7 @@ export default function ReceiptPaymentCreateScreen() {
             <Text style={styles.sheetTitle}>Edit Invoice Date & Number</Text>
             <View style={styles.sheetField}>
               <Text style={styles.fieldLabel}>Select Date</Text>
-              <TextInput value={receiptDate} onChangeText={setReceiptDate} style={styles.sheetInput} />
+              <DateField value={receiptDate} onChange={setReceiptDate} placeholder="Select receipt date" />
             </View>
             <View style={styles.sheetField}>
               <Text style={styles.fieldLabel}>Invoice Number</Text>
@@ -493,7 +498,7 @@ export default function ReceiptPaymentCreateScreen() {
             </View>
             <View style={styles.sheetField}>
               <Text style={styles.fieldLabel}>Select Date</Text>
-              <TextInput value={bankDateDraft} onChangeText={setBankDateDraft} style={styles.sheetInput} />
+              <DateField value={bankDateDraft} onChange={setBankDateDraft} placeholder="Select date" />
             </View>
             <View style={styles.sheetField}>
               <Text style={styles.fieldLabel}>Select Bank</Text>

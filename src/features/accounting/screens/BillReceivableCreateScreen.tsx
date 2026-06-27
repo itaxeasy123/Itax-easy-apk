@@ -10,6 +10,7 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { DateField } from "../components";
 import { accountingService } from "../services/accountingService";
 import { BillReceivable } from "../types/accountingTypes";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -231,13 +232,7 @@ export default function BillReceivableCreateScreen() {
 
         <View style={styles.field}>
           <Text style={styles.label}>Due Date</Text>
-          <TextInput
-            value={dueDate}
-            onChangeText={setDueDate}
-            placeholder="YYYY-MM-DD"
-            style={styles.input}
-            placeholderTextColor="#9CA3AF"
-          />
+          <DateField value={dueDate} onChange={setDueDate} placeholder="Select due date" />
         </View>
 
         <View style={styles.field}>

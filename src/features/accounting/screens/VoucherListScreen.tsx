@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { View, ScrollView, StyleSheet, Text, Pressable } from "react-native";
+import { View, ScrollView, StyleSheet, Text, Pressable, Alert } from "react-native";
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Button, Card, EmptyState, Header, Loading } from "../components";
@@ -25,7 +25,8 @@ export default function VoucherListScreen() {
     try {
       setLoading(true);
       setError(null);
-      const result = await voucherService.getAll();
+      // Server is the source of truth; falls back to the local cache offline.
+      const result = await voucherService.getAllFromServer();
       setVouchers(result.data ?? []);
       setSelectedVoucher((current) =>
         current ? result.data?.find((voucher) => voucher.id === current.id) ?? null : null
@@ -43,9 +44,40 @@ export default function VoucherListScreen() {
     }, [loadVouchers])
   );
 
-  const handleDelete = async (id: string) => {
-    await voucherService.delete(id);
+  const handleDelete = async (voucher: VoucherEntry) => {
+    if (voucher.status === "DRAFT") {
+      const result = await voucherService.deleteDraftOnServer(voucher.id);
+      if (!result.success) {
+        Alert.alert("Could not delete", result.message ?? "Please try again.");
+        return;
+      }
+    } else {
+      await voucherService.delete(voucher.id);
+    }
     await loadVouchers();
+  };
+
+  const handleReverse = (voucher: VoucherEntry) => {
+    Alert.alert(
+      `Reverse ${voucher.voucherNumber}?`,
+      "Posted vouchers cannot be edited or deleted. Reversing posts a mirror entry that cancels this one — both stay in the books as your audit trail.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reverse",
+          style: "destructive",
+          onPress: async () => {
+            const result = await voucherService.reverse(voucher.id);
+            if (result.success) {
+              Alert.alert("Reversed", `Reversal posted as ${result.data?.voucherNumber ?? "a new voucher"}.`);
+              await loadVouchers();
+            } else {
+              Alert.alert("Could not reverse", result.message ?? "Please try again.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const transactionVouchers = [
@@ -131,7 +163,18 @@ export default function VoucherListScreen() {
                 }
               >
                 <View style={{ flex: 1, paddingRight: accountingTheme.spacing.md }}>
-                  <Text style={styles.voucherNo}>{voucher.voucherNumber}</Text>
+                  <View style={styles.voucherTitleRow}>
+                    <Text style={styles.voucherNo}>{voucher.voucherNumber}</Text>
+                    {voucher.status === "POSTED" ? (
+                      <View style={styles.postedPill}>
+                        <Text style={styles.postedPillText}>POSTED</Text>
+                      </View>
+                    ) : voucher.status === "REVERSED" ? (
+                      <View style={styles.reversedPill}>
+                        <Text style={styles.reversedPillText}>REVERSED</Text>
+                      </View>
+                    ) : null}
+                  </View>
                   <Text style={styles.meta}>
                     {voucher.voucherType.toUpperCase()} • {formatDate(voucher.entryDate)}
                   </Text>
@@ -151,12 +194,15 @@ export default function VoucherListScreen() {
                   >
                     <Ionicons name="print-outline" size={16} color={accountingTheme.colors.primary} />
                   </Pressable>
-                  <Pressable
-                    onPress={() => handleDelete(voucher.id)}
-                    style={styles.deletePill}
-                  >
-                    <Ionicons name="trash-outline" size={16} color={accountingTheme.colors.error} />
-                  </Pressable>
+                  {voucher.status === "POSTED" ? (
+                    <Pressable onPress={() => handleReverse(voucher)} style={styles.reversePill}>
+                      <Ionicons name="arrow-undo-outline" size={16} color="#92400E" />
+                    </Pressable>
+                  ) : voucher.status === undefined || voucher.status === "DRAFT" ? (
+                    <Pressable onPress={() => handleDelete(voucher)} style={styles.deletePill}>
+                      <Ionicons name="trash-outline" size={16} color={accountingTheme.colors.error} />
+                    </Pressable>
+                  ) : null}
                 </View>
               </Card>
             ))}
@@ -280,6 +326,38 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: accountingTheme.radius.full,
     backgroundColor: "#FEE2E2",
+  },
+  reversePill: {
+    padding: 10,
+    borderRadius: accountingTheme.radius.full,
+    backgroundColor: "#FEF3C7",
+  },
+  voucherTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: accountingTheme.spacing.sm,
+  },
+  postedPill: {
+    backgroundColor: "#DCFCE7",
+    borderRadius: accountingTheme.radius.full,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  postedPillText: {
+    color: "#166534",
+    fontSize: 9,
+    fontWeight: accountingTheme.fontWeights.extraBold,
+  },
+  reversedPill: {
+    backgroundColor: "#FEE2E2",
+    borderRadius: accountingTheme.radius.full,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  reversedPillText: {
+    color: "#991B1B",
+    fontSize: 9,
+    fontWeight: accountingTheme.fontWeights.extraBold,
   },
   printPill: {
     padding: 10,

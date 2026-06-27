@@ -19,8 +19,9 @@ import {
   router,
   usePathname,
 } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets, SafeAreaView } from "react-native-safe-area-context";
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const blogItems = [
   {
     title: "Cash",
@@ -53,7 +54,11 @@ const blogItems = [
   },
 ];
 
-export default function GSTBottomBar() {
+interface GSTBottomBarProps {
+  showFab?: boolean;
+}
+
+export default function GSTBottomBar({ showFab = false }: GSTBottomBarProps) {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
 
@@ -68,23 +73,25 @@ export default function GSTBottomBar() {
   ) => {
     setBlogModal(false);
 
-    router.push(route as any);
+    router.replace(route as any);
   };
 
   return (
     <>
       {/* FLOAT BUTTON */}
 
-      <TouchableOpacity
-        activeOpacity={0.9}
-        style={styles.fab}
-      >
-        <Ionicons
-          name="add"
-          size={30}
-          color="#FFFFFF"
-        />
-      </TouchableOpacity>
+      {showFab && (
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={[styles.fab, { bottom: 66 + Math.max(insets.bottom, 8) + 16 }]}
+        >
+          <Ionicons
+            name="add"
+            size={30}
+            color="#FFFFFF"
+          />
+        </TouchableOpacity>
+      )}
 
       {/* BLOG BOTTOM SHEET */}
 
@@ -237,13 +244,14 @@ export default function GSTBottomBar() {
 
       {/* BOTTOM BAR */}
 
-      <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 8), height: 66 + Math.max(insets.bottom, 8) }]}>
+      <SafeAreaView edges={["bottom"]} style={styles.safeArea}>
+        <View style={styles.container}>
         {/* HOME */}
 
         <TouchableOpacity
           activeOpacity={0.8}
           style={styles.item}
-          onPress={() => router.push("/gst/returns")}
+          onPress={() => router.replace("/gst/returns")}
         >
           <Ionicons
             name="home"
@@ -272,7 +280,7 @@ export default function GSTBottomBar() {
         <TouchableOpacity
           activeOpacity={0.8}
           style={styles.item}
-          onPress={() => router.push("/gst/tools")}
+          onPress={() => router.replace("/gst/tools")}
         >
           <Ionicons
             name="construct"
@@ -338,19 +346,25 @@ export default function GSTBottomBar() {
             More
           </Text>
         </TouchableOpacity>
-      </View>
+        </View>
+      </SafeAreaView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderColor: "#ECECEC",
+  },
   container: {
     backgroundColor: "#FFFFFF",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-evenly",
-    borderTopWidth: 1,
-    borderColor: "#ECECEC",
+    paddingTop: 8,
+    paddingBottom: 8,
   },
 
   item: {
@@ -365,11 +379,11 @@ const styles = StyleSheet.create({
   label: {
     marginTop: 4,
 
-    fontSize: 10,
+    fontSize: fontSizes.xs,
 
     color: "#8F8BA8",
 
-    fontWeight: "500",
+    fontWeight: fontWeights.medium,
 
     textAlign: "center",
   },
@@ -392,16 +406,10 @@ const styles = StyleSheet.create({
 
   fab: {
     position: "absolute",
-
-    right: 14,
-
-    bottom: 42,
-
-    width: 46,
-
-    height: 46,
-
-    borderRadius: 23,
+    right: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
 
     backgroundColor:
       "#4C7DFF",
@@ -560,15 +568,15 @@ const styles = StyleSheet.create({
   },
 
   blogTitle: {
-    fontSize: 16,
+    fontSize: fontSizes.lg,
 
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
 
     color: "#1F2937",
   },
 
   blogSubtitle: {
-    fontSize: 12,
+    fontSize: fontSizes.sm,
 
     color: "#6B7280",
 

@@ -29,6 +29,14 @@ export default function ReportsScreen() {
   const salesReportCards: ReportCard[] = useMemo(
     () => [
       {
+        id: "salary",
+        title: "Salary",
+        icon: "cash",
+        route: undefined,
+        bg: "#ECE9F7",
+        iconColor: "#8D5BE1",
+      },
+      {
         id: "sales-monthly",
         title: "Sales Monthly",
         icon: "stats-chart",
@@ -46,7 +54,7 @@ export default function ReportsScreen() {
       },
       {
         id: "debit-notes",
-        title: "Debit Notes",
+        title: "Debit Notes Monthly",
         icon: "receipt",
         route: "/accounting/reports-debit-note",
         bg: accountingTheme.colors.warningLight,
@@ -180,11 +188,21 @@ export default function ReportsScreen() {
     Alert.alert("Coming soon", `${card.title} report will be available soon.`);
   };
 
-  const horizontalPadding = 16;
-  const gridGap = 12;
-  const columnCount = width >= 1100 ? 6 : width >= 900 ? 5 : width >= 700 ? 4 : 3;
-  const cardWidth =
-    (width - horizontalPadding * 2 - gridGap * (columnCount - 1)) / columnCount;
+  const GAP = 10;
+  const numColumns = useMemo(() => {
+    if (width >= 1100) return 6;
+    if (width >= 900) return 5;
+    if (width >= 600) return 4;
+    return 3; // Strictly 3 columns on all mobile screens
+  }, [width]);
+
+  const cardWidth = useMemo(() => {
+    const horizontalPadding = 32; // 16 on each side (spacing.lg)
+    const availableWidth = width - horizontalPadding;
+    const totalGapSpace = GAP * (numColumns - 1);
+    // Use Math.floor and subtract 1 pixel to guarantee fractional rounding errors in React Native/Yoga never cause columns to wrap.
+    return Math.floor((availableWidth - totalGapSpace) / numColumns) - 1.0;
+  }, [width, numColumns]);
 
   return (
     <View style={styles.wrapper}>
@@ -199,11 +217,11 @@ export default function ReportsScreen() {
           {salesReportCards.map((report) => (
             <Pressable
               key={report.id}
-              style={[styles.reportCard, { backgroundColor: report.bg, width: cardWidth }]}
+              style={[styles.reportCard, { width: cardWidth }]}
               onPress={() => handleCardPress(report)}
             >
-              <View style={styles.iconWrap}>
-                <Ionicons name={report.icon} size={24} color={report.iconColor} />
+              <View style={[styles.iconWrap, { backgroundColor: report.bg }]}>
+                <Ionicons name={report.icon} size={18} color={report.iconColor} />
               </View>
               <Text style={styles.reportTitle}>{report.title}</Text>
             </Pressable>
@@ -215,11 +233,11 @@ export default function ReportsScreen() {
           {receiptReportCards.map((report) => (
             <Pressable
               key={report.id}
-              style={[styles.reportCard, { backgroundColor: report.bg, width: cardWidth }]}
+              style={[styles.reportCard, { width: cardWidth }]}
               onPress={() => handleCardPress(report)}
             >
-              <View style={styles.iconWrap}>
-                <Ionicons name={report.icon} size={24} color={report.iconColor} />
+              <View style={[styles.iconWrap, { backgroundColor: report.bg }]}>
+                <Ionicons name={report.icon} size={18} color={report.iconColor} />
               </View>
               <Text style={styles.reportTitle}>{report.title}</Text>
             </Pressable>
@@ -231,11 +249,11 @@ export default function ReportsScreen() {
           {accountingReportCards.map((report) => (
             <Pressable
               key={report.id}
-              style={[styles.reportCard, { backgroundColor: report.bg, width: cardWidth }]}
+              style={[styles.reportCard, { width: cardWidth }]}
               onPress={() => handleCardPress(report)}
             >
-              <View style={styles.iconWrap}>
-                <Ionicons name={report.icon} size={24} color={report.iconColor} />
+              <View style={[styles.iconWrap, { backgroundColor: report.bg }]}>
+                <Ionicons name={report.icon} size={18} color={report.iconColor} />
               </View>
               <Text style={styles.reportTitle}>{report.title}</Text>
             </Pressable>
@@ -247,11 +265,11 @@ export default function ReportsScreen() {
           {bankCashReportCards.map((report) => (
             <Pressable
               key={report.id}
-              style={[styles.reportCard, { backgroundColor: report.bg, width: cardWidth }]}
+              style={[styles.reportCard, { width: cardWidth }]}
               onPress={() => handleCardPress(report)}
             >
-              <View style={styles.iconWrap}>
-                <Ionicons name={report.icon} size={24} color={report.iconColor} />
+              <View style={[styles.iconWrap, { backgroundColor: report.bg }]}>
+                <Ionicons name={report.icon} size={18} color={report.iconColor} />
               </View>
               <Text style={styles.reportTitle}>{report.title}</Text>
             </Pressable>
@@ -263,11 +281,11 @@ export default function ReportsScreen() {
           {financeReportCards.map((report) => (
             <Pressable
               key={report.id}
-              style={[styles.reportCard, { backgroundColor: report.bg, width: cardWidth }]}
+              style={[styles.reportCard, { width: cardWidth }]}
               onPress={() => handleCardPress(report)}
             >
-              <View style={styles.iconWrap}>
-                <Ionicons name={report.icon} size={24} color={report.iconColor} />
+              <View style={[styles.iconWrap, { backgroundColor: report.bg }]}>
+                <Ionicons name={report.icon} size={18} color={report.iconColor} />
               </View>
               <Text style={styles.reportTitle}>{report.title}</Text>
             </Pressable>
@@ -282,7 +300,7 @@ export default function ReportsScreen() {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: accountingTheme.colors.background,
   },
   container: {
     flex: 1,
@@ -293,10 +311,12 @@ const styles = StyleSheet.create({
     paddingBottom: 110,
   },
   sectionTitle: {
-    fontSize: accountingTheme.fontSizes.xl,
-    fontWeight: accountingTheme.fontWeights.extraBold,
-    color: "#32323F",
-    marginBottom: 10,
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#24406D",
+    marginTop: 10,
+    marginBottom: 6,
+    marginLeft: 4,
   },
   financeTitle: {
     marginTop: 22,
@@ -304,33 +324,32 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    rowGap: accountingTheme.spacing.md,
-    columnGap: accountingTheme.spacing.md,
+    justifyContent: "flex-start",
+    gap: 10,
   },
   reportCard: {
-    minHeight: 92,
-    borderRadius: accountingTheme.radius.md,
-    paddingTop: 10,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 10,
     paddingHorizontal: 6,
-    paddingBottom: accountingTheme.spacing.sm,
+    marginBottom: 8,
     alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: accountingTheme.colors.black,
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
   iconWrap: {
-    flex: 1,
-    alignItems: "center",
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
   },
   reportTitle: {
-    marginTop: accountingTheme.spacing.xs,
+    marginTop: 4,
     textAlign: "center",
-    fontSize: accountingTheme.fontSizes.sm,
-    fontWeight: accountingTheme.fontWeights.bold,
-    color: "#343341",
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#24406D",
   },
 });

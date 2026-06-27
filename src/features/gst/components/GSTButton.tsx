@@ -11,6 +11,7 @@ import {
 
 import theme from "../theme";
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 interface Props {
   title: string;
   onPress?: () => void;
@@ -101,9 +102,9 @@ const styles = StyleSheet.create({
   text: {
     color: "#FFFFFF",
 
-    fontSize: 18,
+    fontSize: fontSizes.xl,
 
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
 
     letterSpacing: 0.3,
   },

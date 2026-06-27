@@ -5,6 +5,7 @@ export const endpoints = {
     profile: '/user/profile',
     resendOtp: '/user/resendotp',
     signup: '/user/sign-up',
+    update: '/user/update',
     updatePasswordWithOtp: '/user/update-password-with-otp',
     verifyOtp: '/user/verify',
   },
@@ -27,21 +28,32 @@ export const endpoints = {
     byDocument: '/einvoice/einvoicedoc',
   },
 
+  // BillShield double-entry accounting (company-scoped)
+  billshield: {
+    companies: '/billshield/companies',
+    company: (companyId: string) => `/billshield/companies/${companyId}`,
+    groups: (companyId: string) => `/billshield/companies/${companyId}/groups`,
+    groupTree: (companyId: string) => `/billshield/companies/${companyId}/groups/tree`,
+    ledgers: (companyId: string) => `/billshield/companies/${companyId}/ledgers`,
+    ledgerById: (companyId: string, id: string) => `/billshield/companies/${companyId}/ledgers/${id}`,
+    ledgerStatement: (companyId: string, id: string) =>
+      `/billshield/companies/${companyId}/ledgers/${id}/statement`,
+    fiscalYears: (companyId: string) => `/billshield/companies/${companyId}/fiscal-years`,
+    vouchers: (companyId: string) => `/billshield/companies/${companyId}/vouchers`,
+    voucherById: (companyId: string, id: string) => `/billshield/companies/${companyId}/vouchers/${id}`,
+    postVoucher: (companyId: string, id: string) =>
+      `/billshield/companies/${companyId}/vouchers/${id}/post`,
+    reverseVoucher: (companyId: string, id: string) =>
+      `/billshield/companies/${companyId}/vouchers/${id}/reverse`,
+    cashbook: (companyId: string) => `/billshield/companies/${companyId}/reports/cashbook`,
+    bankbook: (companyId: string) => `/billshield/companies/${companyId}/reports/bankbook`,
+    daybook: (companyId: string) => `/billshield/companies/${companyId}/reports/daybook`,
+    trialBalance: (companyId: string) => `/billshield/companies/${companyId}/reports/trial-balance`,
+    profitLoss: (companyId: string) => `/billshield/companies/${companyId}/reports/profit-loss`,
+    balanceSheet: (companyId: string) => `/billshield/companies/${companyId}/reports/balance-sheet`,
+  },
+
   accounting: {
-    // Ledger endpoints
-    ledgers: '/accountancy/all',
-    createLedger: '/accountancy/create',
-    updateLedger: (id: string) => `/accountancy/update/${id}`,
-    deleteLedger: (id: string) => `/accountancy/delete/${id}`,
-    ledgerById: (id: string) => `/accountancy/account/${id}`,
-    ledgerByPartyId: (partyId: string) => `/accountancy/party/${partyId}`,
-    searchLedgers: '/accountancy/search',
-    customerCount: '/accountancy/customer-count',
-    inactiveCustomers: '/accountancy/inactive-customers',
-    activeCustomers: '/accountancy/favouraiteparty',
-    transactions: '/accountancy/transactions',
-    daybook: '/accountancy/daybook',
-    journalEntries: '/accountancy/journal-entries',
 
     // Party endpoints (using invoice routes)
     parties: '/invoice/parties',

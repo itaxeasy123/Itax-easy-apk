@@ -15,7 +15,11 @@ import AuthInput from '../components/AuthInput';
 import OTPInput from '../components/OTPInput';
 import { authService } from '../../../services/authService';
 import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
+import { notify } from '../../../utils/notify';
 import { validateEmail } from '../../../utils/validators/authValidator';
+
+// Seconds the user must wait before "Resend OTP" re-enables (matches OTPScreen).
+const RESEND_COOLDOWN = 60;
 
 // ─── Password Strength ────────────────────────────────────────────────────────
 type StrengthLevel = 'weak' | 'fair' | 'good' | 'strong';
@@ -125,7 +129,8 @@ export default function ForgotPasswordScreen() {
 
   // Step 2 – OTP
   const [otp, setOtp] = useState('');
-  const [timer, setTimer] = useState(180);
+  const [timer, setTimer] = useState(RESEND_COOLDOWN);
+  const [resending, setResending] = useState(false);
   const otpInputRef = useRef<TextInput>(null);
 
   // Step 3 – Password
@@ -165,6 +170,10 @@ export default function ForgotPasswordScreen() {
 
   // ── Step 1 Handler ──────────────────────────────────────────────────────────
   const handleSendOtp = async () => {
+    if (!email.trim()) {
+      setError('Please enter your email address.');
+      return;
+    }
     if (!validateEmail(email)) {
       setError('Please enter a valid email address.');
       return;
@@ -172,13 +181,16 @@ export default function ForgotPasswordScreen() {
     try {
       setLoading(true);
       setError('');
-      await authService.forgotPassword(email);
-      setTimer(180);
+      await authService.forgotPassword(email.trim());
+      setTimer(RESEND_COOLDOWN);
       goToStep(1);
+      notify('OTP sent to your email.');
     } catch (err: any) {
       setError(
-        getApiErrorMessage(err, 'Failed to send OTP.', {
+        getApiErrorMessage(err, 'Failed to send OTP. Please try again.', {
           404: 'No account found with this email. Please sign up first.',
+          429: 'Too many requests. Please wait a moment and try again.',
+          500: 'Something went wrong. Please try again later.',
         })
       );
     } finally {
@@ -205,12 +217,26 @@ export default function ForgotPasswordScreen() {
   };
 
   const handleResendOtp = async () => {
+    if (timer > 0 || resending) {
+      return;
+    }
     try {
+      setResending(true);
       setError('');
-      await authService.resendOtp(email);
-      setTimer(180);
+      await authService.forgotPassword(email.trim());
+      setOtp('');
+      setTimer(RESEND_COOLDOWN);
+      notify('OTP sent to your email.');
     } catch (err: any) {
-      setError(getApiErrorMessage(err, 'Failed to resend OTP.'));
+      setError(
+        getApiErrorMessage(err, 'Failed to resend OTP. Please try again.', {
+          404: 'No account found with this email. Please sign up first.',
+          429: 'Too many requests. Please wait a moment and try again.',
+          500: 'Something went wrong. Please try again later.',
+        })
+      );
+    } finally {
+      setResending(false);
     }
   };
 
@@ -232,10 +258,17 @@ export default function ForgotPasswordScreen() {
     try {
       setLoading(true);
       setError('');
-      await authService.updatePasswordWithOtp({ email, newPassword, otp });
+      await authService.updatePasswordWithOtp({ email: email.trim(), newPassword, otp });
+      notify('Password reset successfully.');
       router.replace({ pathname: '/otp-success', params: { mode: 'reset' } });
     } catch (err: any) {
-      setError(getApiErrorMessage(err, 'Failed to reset password.'));
+      setError(
+        getApiErrorMessage(err, 'Failed to reset password. Please try again.', {
+          400: 'Invalid or expired OTP. Please request a new one.',
+          404: 'No account found with this email.',
+          500: 'Something went wrong. Please try again later.',
+        })
+      );
     } finally {
       setLoading(false);
     }
@@ -297,12 +330,21 @@ export default function ForgotPasswordScreen() {
               {timer > 0 ? `Resend OTP in ${timer}s` : 'You can resend OTP now'}
             </Text>
 
-            {timer <= 0 && (
-              <Pressable onPress={handleResendOtp} style={styles.resendRow}>
-                <Text style={styles.resendText}>Didn&apos;t receive OTP? </Text>
-                <Text style={styles.resendLink}>Resend</Text>
-              </Pressable>
-            )}
+            <Pressable
+              disabled={timer > 0 || resending}
+              onPress={handleResendOtp}
+              style={styles.resendRow}
+            >
+              <Text style={styles.resendText}>Didn&apos;t receive OTP? </Text>
+              <Text
+                style={[
+                  styles.resendLink,
+                  (timer > 0 || resending) && styles.resendLinkDisabled,
+                ]}
+              >
+                {resending ? 'Sending...' : timer > 0 ? `Resend (${timer}s)` : 'Resend'}
+              </Text>
+            </Pressable>
           </View>
         )}
 
@@ -457,6 +499,7 @@ const styles = StyleSheet.create({
   },
   resendText: { color: '#8E9AAF', fontSize: 10 },
   resendLink: { color: '#347BE5', fontSize: 10, fontWeight: '600' },
+  resendLinkDisabled: { color: '#9AA5BD' },
   // Match
   matchRow: {
     alignItems: 'center',

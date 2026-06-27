@@ -1,45 +1,120 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import React, { useCallback, useState, useMemo } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AccountingHeader } from "../components";
+import { useFocusEffect, useRouter } from "expo-router";
+import { AccountingHeader, FiscalYearBar } from "../components";
 import { Ionicons } from "@expo/vector-icons";
-import { accountingService } from "../services/accountingService";
+import { billshieldUiService, FiscalYearInfo } from "../services/billshieldUiService";
 import { accountingTheme } from "../../../theme/accounting";
+import { exportCsv, exportExcel, exportPdf, buildPdfHtml } from "../utils/exportFile";
 
 const format = (value: number | undefined) => {
-  if (value === undefined || isNaN(value)) return "₹ 0.00";
-  return `₹ ${value.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+  if (value === undefined || isNaN(value) || value === 0) return "";
+  return `₹ ${value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
+type TbRow = { ledgerId: string; ledgerName: string; groupName: string; groupPath: string; debit: number; credit: number };
+
+const ACCOUNTING_GROUP_ORDER = [
+  "capital-account",
+  "reserves-surplus",
+  "loans-liability",
+  "current-liabilities",
+  "fixed-assets",
+  "investments",
+  "current-assets",
+  "suspense-account",
+  "sales-accounts",
+  "purchase-accounts",
+  "direct-income",
+  "direct-expenses",
+  "indirect-income",
+  "indirect-expenses",
+];
+
 export default function TrialBalanceScreen() {
-    const insets = useSafeAreaInsets();
-  const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [report, setReport] = useState<any>(null);
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const [rows, setRows] = useState<TbRow[]>([]);
+  const [totals, setTotals] = useState({ debit: 0, credit: 0 });
+  const [asOf, setAsOf] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showExport, setShowExport] = useState(false);
 
-  useEffect(() => {
-    async function loadTrialBalance() {
-      try {
-        setLoading(true);
-        setError(null);
-        // Replace with actual trial balance report endpoint
-        const response = await accountingService.getProfitAndLossReport(year, month);
-        if (response.success && response.data) {
-          setReport(response.data);
-        } else {
-          setError("Unable to load trial balance report.");
-        }
-      } catch {
-        setError("Unable to load trial balance report.");
-      } finally {
-        setLoading(false);
-      }
+  const loadTrialBalance = useCallback(async (asOfDate?: string) => {
+    setLoading(true);
+    setError(null);
+    const response = await billshieldUiService.getTrialBalance(asOfDate);
+    if (response.success) {
+      setRows(response.data.ledgers);
+      setTotals(response.data.totals);
+    } else {
+      setError(response.message ?? "Unable to load trial balance report.");
     }
-    loadTrialBalance();
-  }, [month, year]);
+    setLoading(false);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadTrialBalance(asOf);
+    }, [loadTrialBalance, asOf])
+  );
+
+  const handleFyChange = (fy: FiscalYearInfo) => {
+    setAsOf(fy.endDate);
+  };
+
+  const handleLedgerPress = (ledgerId: string, ledgerName: string) => {
+    router.navigate({
+      pathname: "/accounting/reports-bank-cash/[id]",
+      params: { id: ledgerId, name: ledgerName },
+    });
+  };
+
+  // Sort flat ledgers according to standard accounting nature structure
+  const sortedRows = useMemo(() => {
+    return [...rows].sort((a, b) => {
+      const topA = a.groupPath ? a.groupPath.split("/")[0] : "";
+      const topB = b.groupPath ? b.groupPath.split("/")[0] : "";
+
+      const indexA = ACCOUNTING_GROUP_ORDER.indexOf(topA);
+      const indexB = ACCOUNTING_GROUP_ORDER.indexOf(topB);
+
+      if (indexA !== -1 && indexB !== -1) {
+        if (indexA !== indexB) return indexA - indexB;
+      } else if (indexA !== -1) {
+        return -1;
+      } else if (indexB !== -1) {
+        return 1;
+      }
+
+      // If in same group, sort by subgroup path, then alphabetically by ledger name
+      const pathA = a.groupPath || "";
+      const pathB = b.groupPath || "";
+      if (pathA !== pathB) {
+        return pathA.localeCompare(pathB);
+      }
+      return a.ledgerName.localeCompare(b.ledgerName);
+    });
+  }, [rows]);
+
+  const flattenedExportRows = useMemo(() => {
+    const result: (string | number)[][] = [["Particular", "Group/Type", "Debit", "Credit"]];
+    sortedRows.forEach((l) => {
+      result.push([l.ledgerName, l.groupName, l.debit || "", l.credit || ""]);
+    });
+    result.push(["TOTAL", "", totals.debit, totals.credit]);
+    return result;
+  }, [sortedRows, totals]);
+
+  const handleExport = async (format: "PDF" | "CSV" | "Excel") => {
+    setShowExport(false);
+    const data = flattenedExportRows;
+    if (format === "CSV") await exportCsv("trial-balance", data);
+    else if (format === "Excel") await exportExcel("trial-balance", "Trial Balance", data);
+    else await exportPdf("trial-balance", buildPdfHtml("Trial Balance", "Exported from iTaxEasy", data));
+  };
 
   return (
     <View style={styles.container}>
@@ -47,30 +122,28 @@ export default function TrialBalanceScreen() {
         title="Trial Balance"
         showBackButton
         rightContent={
-          <Pressable>
+          <Pressable onPress={() => setShowExport(true)}>
             <Ionicons name="ellipsis-horizontal" size={20} color={accountingTheme.colors.card} />
           </Pressable>
         }
       />
 
       {/* Financial Year Bar */}
-      <View style={styles.periodBar}>
-        <View style={styles.periodLeft}>
-          <Ionicons name="calendar-outline" size={16} color={accountingTheme.colors.primary} />
-          <Text style={styles.periodText}>
-            Financial Year <Text style={styles.periodSubText}>(1 Apr 24 to 31 Mar 25)</Text>
-          </Text>
-        </View>
-        <Pressable>
-          <Text style={styles.changeText}>Change</Text>
-        </Pressable>
+      <FiscalYearBar onChange={handleFyChange} />
+
+      {/* Summary Count Bar */}
+      <View style={styles.activeCountBar}>
+        <Text style={styles.activeCountText}>
+          {loading ? "Loading..." : `${sortedRows.length} Active Ledger Accounts`}
+        </Text>
+        <Ionicons name="funnel-outline" size={14} color="#64748B" />
       </View>
 
       {/* Table Header */}
       <View style={styles.tableHeader}>
-        <Text style={[styles.thText, { flex: 2 }]}>Particular</Text>
-        <Text style={[styles.thText, { flex: 1.5, textAlign: "right" }]}>Debit</Text>
-        <Text style={[styles.thText, { flex: 1.5, textAlign: "right" }]}>Credit</Text>
+        <Text style={[styles.thText, { flex: 2.2 }]}>Particulars / Ledger Name</Text>
+        <Text style={[styles.thText, { flex: 1.4, textAlign: "right" }]}>Debit (Dr)</Text>
+        <Text style={[styles.thText, { flex: 1.4, textAlign: "right" }]}>Credit (Cr)</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -80,69 +153,67 @@ export default function TrialBalanceScreen() {
           </View>
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
+        ) : sortedRows.length === 0 ? (
+          <Text style={styles.errorText}>No ledger balances yet — post a voucher first.</Text>
         ) : (
           <View style={styles.tableCard}>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Cash in-hand</Text>
-              <Text style={styles.amount}>{format(report?.cashInHandDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.cashInHandCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Bank A/c</Text>
-              <Text style={styles.amount}>{format(report?.bankDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.bankCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Sales A/c</Text>
-              <Text style={styles.amount}>{format(report?.salesDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.salesCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Purchase A/c</Text>
-              <Text style={styles.amount}>{format(report?.purchaseDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.purchaseCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Debit Note</Text>
-              <Text style={styles.amount}>{format(report?.debitNoteDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.debitNoteCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Credit Note</Text>
-              <Text style={styles.amount}>{format(report?.creditNoteDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.creditNoteCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Capital</Text>
-              <Text style={styles.amount}>{format(report?.capitalDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.capitalCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Assets</Text>
-              <Text style={styles.amount}>{format(report?.assetsDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.assetsCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>Liabilities</Text>
-              <Text style={styles.amount}>{format(report?.liabilitiesDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.liabilitiesCredit)}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.particular}>OpeningStock</Text>
-              <Text style={styles.amount}>{format(report?.openingStockDebit)}</Text>
-              <Text style={styles.amount}>{format(report?.openingStockCredit)}</Text>
-            </View>
+            {sortedRows.map((l) => (
+              <Pressable
+                key={l.ledgerId}
+                onPress={() => handleLedgerPress(l.ledgerId, l.ledgerName)}
+                style={styles.ledgerRow}
+              >
+                <View style={styles.ledgerLeft}>
+                  <View style={styles.iconContainer}>
+                    <Ionicons name="document-text-outline" size={16} color="#3B82F6" />
+                  </View>
+                  <View style={styles.ledgerInfo}>
+                    <Text style={styles.ledgerNameText} numberOfLines={1}>{l.ledgerName}</Text>
+                    <Text style={styles.ledgerGroupText} numberOfLines={1}>{l.groupName}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={12} color="#94A3B8" style={styles.drillIcon} />
+                </View>
+                <Text style={[styles.amountText, styles.ledgerAmount, { flex: 1.4 }]}>
+                  {l.debit > 0 ? format(l.debit) : "—"}
+                </Text>
+                <Text style={[styles.amountText, styles.ledgerAmount, { flex: 1.4 }]}>
+                  {l.credit > 0 ? format(l.credit) : "—"}
+                </Text>
+              </Pressable>
+            ))}
           </View>
         )}
       </ScrollView>
 
       {/* Footer Totals */}
       <View style={styles.footer}>
-        <Text style={[styles.footerLabel, { flex: 2 }]}>Total</Text>
-        <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalDebit)}</Text>
-        <Text style={[styles.footerValue, { flex: 1.5, textAlign: "right" }]}>{format(report?.totalCredit)}</Text>
+        <Text style={[styles.footerLabel, { flex: 2.2 }]}>Grand Total</Text>
+        <Text style={[styles.footerValue, { flex: 1.4, textAlign: "right" }]}>{format(totals.debit)}</Text>
+        <Text style={[styles.footerValue, { flex: 1.4, textAlign: "right" }]}>{format(totals.credit)}</Text>
       </View>
       <View style={{ backgroundColor: accountingTheme.colors.card, height: Math.max(insets.bottom, 0) }} />
+
+      {/* Export menu */}
+      <Modal visible={showExport} transparent animationType="slide" onRequestClose={() => setShowExport(false)}>
+        <View style={styles.exportBackdrop}>
+          <Pressable style={{ flex: 1 }} onPress={() => setShowExport(false)} />
+          <View style={styles.exportSheet}>
+            <View style={styles.sheetHandleWrap}>
+              <View style={styles.sheetHandle} />
+            </View>
+            {(["PDF", "Excel", "CSV"] as const).map((fmt) => (
+              <Pressable key={fmt} style={styles.exportRow} onPress={() => handleExport(fmt)}>
+                <Ionicons
+                  name={fmt === "PDF" ? "document-outline" : fmt === "Excel" ? "document-text-outline" : "grid-outline"}
+                  size={18}
+                  color="#475569"
+                />
+                <Text style={styles.exportText}>Download ({fmt})</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -155,44 +226,33 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 40,
   },
-  periodBar: {
+  activeCountBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: accountingTheme.colors.card,
-    paddingHorizontal: accountingTheme.spacing.lg,
-    paddingVertical: 10,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
   },
-  periodLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: accountingTheme.spacing.sm,
-  },
-  periodText: {
-    fontSize: accountingTheme.fontSizes.md,
-    fontWeight: accountingTheme.fontWeights.semiBold,
-    color: "#1E293B",
-  },
-  periodSubText: {
-    fontSize: 11,
-    fontWeight: accountingTheme.fontWeights.regular,
-    color: accountingTheme.colors.textSecondary,
-  },
-  changeText: {
-    fontSize: accountingTheme.fontSizes.sm,
-    fontWeight: accountingTheme.fontWeights.semiBold,
-    color: accountingTheme.colors.primary,
+  activeCountText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#64748B",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   tableHeader: {
     flexDirection: "row",
     backgroundColor: accountingTheme.colors.primary,
-    paddingHorizontal: accountingTheme.spacing.lg,
-    paddingVertical: accountingTheme.spacing.md,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   thText: {
     color: accountingTheme.colors.card,
-    fontSize: accountingTheme.fontSizes.sm,
-    fontWeight: accountingTheme.fontWeights.semiBold,
+    fontSize: 13,
+    fontWeight: "700",
   },
   loaderWrap: {
     padding: 40,
@@ -202,46 +262,109 @@ const styles = StyleSheet.create({
     color: accountingTheme.colors.error,
     textAlign: "center",
     marginTop: accountingTheme.spacing.xxl,
+    fontWeight: "500",
   },
   tableCard: {
-    backgroundColor: accountingTheme.colors.card,
+    backgroundColor: "#FFFFFF",
   },
-  row: {
+  ledgerRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: accountingTheme.spacing.md,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: accountingTheme.colors.borderLight,
+    borderBottomColor: "#F1F5F9",
   },
-  particular: {
-    flex: 2,
-    fontSize: accountingTheme.fontSizes.sm,
-    color: "#475569",
-    fontWeight: accountingTheme.fontWeights.medium,
+  ledgerLeft: {
+    flex: 2.2,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  amount: {
-    flex: 1.5,
-    fontSize: accountingTheme.fontSizes.sm,
-    color: accountingTheme.colors.text,
-    fontWeight: accountingTheme.fontWeights.bold,
+  iconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#EFF6FF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  ledgerInfo: {
+    flex: 1,
+    marginRight: 4,
+  },
+  ledgerNameText: {
+    fontSize: 13,
+    color: "#1E293B",
+    fontWeight: "600",
+  },
+  ledgerGroupText: {
+    fontSize: 11,
+    color: "#64748B",
+    marginTop: 2,
+    fontWeight: "500",
+  },
+  drillIcon: {
+    marginLeft: 4,
+  },
+  amountText: {
+    fontSize: 13,
     textAlign: "right",
+  },
+  ledgerAmount: {
+    fontWeight: "600",
+    color: "#334155",
   },
   footer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: accountingTheme.colors.primary,
-    paddingHorizontal: accountingTheme.spacing.lg,
-    paddingVertical: accountingTheme.spacing.lg,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   footerLabel: {
     color: accountingTheme.colors.card,
-    fontSize: accountingTheme.fontSizes.lg,
-    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: 14,
+    fontWeight: "800",
+    textTransform: "uppercase",
   },
   footerValue: {
     color: accountingTheme.colors.card,
-    fontSize: accountingTheme.fontSizes.sm,
-    fontWeight: accountingTheme.fontWeights.bold,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  exportBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(15, 23, 42, 0.45)",
+    justifyContent: "flex-end",
+  },
+  exportSheet: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingVertical: 12,
+    paddingBottom: 32,
+  },
+  sheetHandleWrap: {
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  sheetHandle: {
+    width: 36,
+    height: 4,
+    backgroundColor: "#CBD5E1",
+    borderRadius: 2,
+  },
+  exportRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+  },
+  exportText: {
+    fontSize: 15,
+    color: "#1E293B",
+    fontWeight: "600",
   },
 });

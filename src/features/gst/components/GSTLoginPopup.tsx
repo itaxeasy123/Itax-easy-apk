@@ -1,58 +1,18 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  Modal,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-import {
-  Ionicons,
-} from "@expo/vector-icons";
-
-import {
-  useGSTLoginStore,
-} from "../store/gstLoginStore";
+import React, { useEffect, useState } from 'react';
+import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { fontSizes, fontWeights } from '../../../theme/typography';
+import { useGSTLoginStore } from '../store/gstLoginStore';
 
 interface Props {
   visible: boolean;
-
   onClose: () => void;
-
   onLogin?: () => void;
 }
 
-export default function GSTLoginPopup({
-  visible,
-  onClose,
-  onLogin,
-}: Props) {
-  /*
-  |--------------------------------------------------------------------------
-  | STORE
-  |--------------------------------------------------------------------------
-  */
-
-  const {
-    loginData,
-    setLoginData,
-  } =
-    useGSTLoginStore();
-
-  /*
-  |--------------------------------------------------------------------------
-  | STATES
-  |--------------------------------------------------------------------------
-  */
-
-  const [gstin, setGSTIN] =
-    useState("");
+export default function GSTLoginPopup({ visible, onClose, onLogin }: Props) {
+  const { loginData, setLoginData } = useGSTLoginStore();
+  const [gstin, setGSTIN] = useState('');
 
   const [username, setUsername] =
     useState("");
@@ -289,8 +249,8 @@ const styles =
 
     title: {
       textAlign: "center",
-      fontSize: 13,
-      fontWeight: "500",
+      fontSize: fontSizes.md,
+      fontWeight: fontWeights.medium,
       color: "#333333",
       marginTop: 12,
       marginBottom: 14,
@@ -302,8 +262,8 @@ const styles =
       borderColor: "#D1D5DB",
       borderRadius: 8,
       paddingHorizontal: 10,
-      fontSize: 12,
-      fontWeight: "500",
+      fontSize: fontSizes.sm,
+      fontWeight: fontWeights.medium,
       color: "#111827",
       marginBottom: 12,
       backgroundColor:
@@ -330,8 +290,8 @@ const styles =
 
     sessionButtonText: {
       color: "#FFFFFF",
-      fontSize: 12,
-      fontWeight: "600",
+      fontSize: fontSizes.sm,
+      fontWeight: fontWeights.semibold,
     },
 
     loginButton: {
@@ -347,7 +307,7 @@ const styles =
 
     loginButtonText: {
       color: "#FFFFFF",
-      fontSize: 13,
-      fontWeight: "700",
+      fontSize: fontSizes.md,
+      fontWeight: fontWeights.bold,
     },
   });

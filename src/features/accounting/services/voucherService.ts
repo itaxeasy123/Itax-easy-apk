@@ -1,65 +1,97 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiClient } from "../../../api/client";
-import { endpoints } from "../../../api/endpoints";
+/**
+ * Vouchers — now read/written through the on-device SQLite engine
+ * (../local/engine). The app's VoucherEntry shape is preserved so the
+ * screens are unchanged.
+ */
 import { VoucherEntry, VoucherLine, VoucherType } from "../types/accountingTypes";
+import { companyService } from "./companyService";
+import * as engine from "../local/engine";
 
-const VOUCHER_CACHE_KEY = "accounting_vouchers_cache";
-type RawVoucher = Record<string, unknown> & { lines?: unknown[] };
+/** App voucher types → BillShield voucher type codes. */
+const VOUCHER_TYPE_CODE: Record<string, string> = {
+  journal: "JRN",
+  payment: "PMT",
+  receipt: "RCT",
+  contra: "CNT",
+  sales: "SAL",
+  purchase: "PUR",
+  debitNote: "DRN",
+  creditNote: "CRN",
+};
+
+/** BillShield voucher type names → app VoucherType keys. */
+const SERVER_NAME_TO_TYPE: Record<string, VoucherType> = {
+  journal: "journal",
+  payment: "payment",
+  receipt: "receipt",
+  contra: "contra",
+  sales: "sales",
+  purchase: "purchase",
+  "debit note": "debitNote",
+  "credit note": "creditNote",
+};
 
 const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-const normalizeVoucher = (voucher: unknown): VoucherEntry => {
-  const source = (voucher ?? {}) as RawVoucher;
+/** Maps an engine voucher row to the app's VoucherEntry shape. */
+const fromEngineVoucher = (raw: any): VoucherEntry => {
+  const lines = Array.isArray(raw?.lines) ? raw.lines : [];
+  const totalDebit = lines.reduce((s: number, l: any) => s + Number(l?.debit ?? 0), 0);
+  const totalCredit = lines.reduce((s: number, l: any) => s + Number(l?.credit ?? 0), 0);
   return {
-    id: String(source.id ?? makeId()),
-    voucherNumber: String(source.voucherNumber ?? source.voucherNo ?? ""),
-    voucherType: (source.voucherType ?? "journal") as VoucherType,
-    entryDate: String(source.entryDate ?? new Date().toISOString()),
-    narration: String(source.narration ?? ""),
-    lines: Array.isArray(source.lines)
-      ? source.lines.map((line) => {
-          const lineSource = (line ?? {}) as Record<string, unknown>;
-          return {
-            id: String(lineSource.id ?? makeId()),
-            ledgerId: String(lineSource.ledgerId ?? ""),
-            ledgerName: String(lineSource.ledgerName ?? ""),
-            side: (lineSource.side ?? lineSource.transactionType ?? "debit") as VoucherLine["side"],
-            amount: Number(lineSource.amount ?? 0),
-          };
-        })
-      : [],
-    totalDebit: Number(source.totalDebit ?? 0),
-    totalCredit: Number(source.totalCredit ?? 0),
-    createdAt: String(source.createdAt ?? new Date().toISOString()),
-    updatedAt: String(source.updatedAt ?? new Date().toISOString()),
+    id: String(raw?.id ?? makeId()),
+    voucherNumber: String(raw?.voucherNo ?? "Draft"),
+    voucherType:
+      SERVER_NAME_TO_TYPE[String(raw?.voucherType?.name ?? "journal").toLowerCase()] ?? "journal",
+    entryDate: String(raw?.voucherDate ?? new Date().toISOString()),
+    narration: String(raw?.narration ?? ""),
+    lines: lines.map((l: any) => ({
+      id: String(l?.id ?? makeId()),
+      ledgerId: String(l?.ledgerId ?? ""),
+      ledgerName: String(l?.ledgerName ?? l?.ledger?.name ?? ""),
+      side: Number(l?.debit ?? 0) > 0 ? "debit" : "credit",
+      amount: Number(l?.debit ?? 0) > 0 ? Number(l?.debit) : Number(l?.credit ?? 0),
+    })),
+    totalDebit,
+    totalCredit,
+    status: raw?.status,
+    createdAt: String(raw?.createdAt ?? new Date().toISOString()),
+    updatedAt: String(raw?.updatedAt ?? new Date().toISOString()),
   };
-};
-
-const readVouchers = async (): Promise<VoucherEntry[]> => {
-  const stored = await AsyncStorage.getItem(VOUCHER_CACHE_KEY);
-  if (!stored) return [];
-  try {
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed.map(normalizeVoucher) : [];
-  } catch {
-    return [];
-  }
-};
-
-const writeVouchers = async (vouchers: VoucherEntry[]) => {
-  await AsyncStorage.setItem(VOUCHER_CACHE_KEY, JSON.stringify(vouchers));
 };
 
 export const voucherService = {
   getAll: async () => {
-    const data = await readVouchers();
+    const companyId = await companyService.ensureCompanyId();
+    const data = (await engine.listVouchers(companyId)).map(fromEngineVoucher);
     return { success: true, data };
   },
 
+  /** Kept for call-site compatibility — vouchers come from the local DB. */
+  getAllFromServer: async (): Promise<{ success: boolean; data: VoucherEntry[]; message?: string }> => {
+    try {
+      const companyId = await companyService.ensureCompanyId();
+      const data = (await engine.listVouchers(companyId)).map(fromEngineVoucher);
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, data: [], message: error?.message ?? "Unable to load vouchers" };
+    }
+  },
+
+  reverse: async (voucherId: string): Promise<{ success: boolean; data?: VoucherEntry; message?: string }> => {
+    try {
+      const companyId = await companyService.ensureCompanyId();
+      const reversed = await engine.reverseVoucher(companyId, 0, voucherId);
+      return { success: true, data: reversed ? fromEngineVoucher(reversed) : undefined };
+    } catch (error: any) {
+      return { success: false, message: error?.message ?? "Unable to reverse voucher" };
+    }
+  },
+
   getById: async (id: string) => {
-    const vouchers = await readVouchers();
-    const voucher = vouchers.find((item) => item.id === id);
-    return { success: true, data: voucher };
+    const companyId = await companyService.ensureCompanyId();
+    const voucher = await engine.getVoucher(companyId, id);
+    return { success: true, data: voucher ? fromEngineVoucher(voucher) : undefined };
   },
 
   create: async (data: {
@@ -68,55 +100,53 @@ export const voucherService = {
     entryDate: string;
     narration: string;
     lines: VoucherLine[];
+    gstLines?: {
+      hsnSac?: string;
+      description?: string;
+      taxableValue: number;
+      cgst?: number;
+      sgst?: number;
+      igst?: number;
+      cess?: number;
+    }[];
   }) => {
-    const vouchers = await readVouchers();
-    const totalDebit = data.lines
-      .filter((line) => line.side === "debit")
-      .reduce((sum, line) => sum + Number(line.amount || 0), 0);
-    const totalCredit = data.lines
-      .filter((line) => line.side === "credit")
-      .reduce((sum, line) => sum + Number(line.amount || 0), 0);
-
-    const voucher: VoucherEntry = {
-      id: makeId(),
-      voucherNumber: data.voucherNumber,
-      voucherType: data.voucherType,
-      entryDate: data.entryDate,
-      narration: data.narration,
-      lines: data.lines.map((line) => ({
-        ...line,
-        id: line.id || makeId(),
-      })),
-      totalDebit,
-      totalCredit,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const next = [voucher, ...vouchers];
-    await writeVouchers(next);
-
     try {
-      await apiClient.post(endpoints.accounting.journalEntries, {
-        entryDate: data.entryDate,
-        description: data.narration,
-        transactions: data.lines.map((line) => ({
+      const companyId = await companyService.ensureCompanyId();
+      const created = await engine.createVoucher(companyId, 0, {
+        voucherTypeCode: VOUCHER_TYPE_CODE[data.voucherType] ?? "JRN",
+        voucherDate: data.entryDate,
+        narration: data.narration,
+        post: true,
+        lines: data.lines.map((line) => ({
           ledgerId: line.ledgerId,
-          amount: Number(line.amount || 0),
-          transactionType: line.side,
+          debit: line.side === "debit" ? Number(line.amount || 0) : 0,
+          credit: line.side === "credit" ? Number(line.amount || 0) : 0,
         })),
+        ...(data.gstLines?.length ? { gstLines: data.gstLines } : {}),
       });
-    } catch {
-      // Keep the local voucher cache working even if the backend sync is temporarily unavailable.
+      return { success: true, data: created ? fromEngineVoucher(created) : undefined };
+    } catch (error: any) {
+      return { success: false, message: error?.message ?? "Unable to save voucher" };
     }
-
-    return { success: true, data: voucher };
   },
 
   delete: async (id: string) => {
-    const vouchers = await readVouchers();
-    const next = vouchers.filter((voucher) => voucher.id !== id);
-    await writeVouchers(next);
-    return { success: true };
+    try {
+      const companyId = await companyService.ensureCompanyId();
+      await engine.deleteDraftVoucher(companyId, id);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, message: error?.message ?? "Unable to delete voucher" };
+    }
+  },
+
+  deleteDraftOnServer: async (id: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const companyId = await companyService.ensureCompanyId();
+      await engine.deleteDraftVoucher(companyId, id);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, message: error?.message ?? "Unable to delete draft" };
+    }
   },
 };

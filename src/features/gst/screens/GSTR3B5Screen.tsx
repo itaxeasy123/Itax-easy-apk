@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import GSTHeader from "../components/GSTHeader";
 import {
   View,
   Text,
@@ -10,8 +11,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import GSTBottomBar from "../components/GSTBottomBar";
+import GSTBottomBar from "../components/GSTBottomBar";;
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const initialRows = [
   {
     id: 1,
@@ -65,13 +67,7 @@ export default function GSTR3B5Screen() {
     <View style={styles.container}>
       {/* HEADER */}
 
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push("/gst/gstr3b-online")}>
-          <Ionicons name="chevron-back" size={22} color="#FFF" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>GSTR 3B - 5 (Inward Supplies)</Text>
-      </View>
+      <GSTHeader title="GSTR 3B - 5 (Inward Supplies)" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -173,8 +169,8 @@ const styles = StyleSheet.create({
   natureHeader: {
   flex: 2,
   color: "#FFF",
-  fontSize: 12,
-  fontWeight: "700",
+  fontSize: fontSizes.sm,
+  fontWeight: fontWeights.bold,
   textAlign: "center",
   paddingVertical: 12,
 },
@@ -182,8 +178,8 @@ const styles = StyleSheet.create({
 taxHeader: {
   flex: 1,
   color: "#FFF",
-  fontSize: 12,
-  fontWeight: "700",
+  fontSize: fontSizes.sm,
+  fontWeight: fontWeights.bold,
   textAlign: "center",
   paddingVertical: 12,
 },
@@ -207,16 +203,16 @@ inputColumn: {
 viewHeader: {
   width: 60,
   color: "#FFF",
-  fontSize: 12,
-  fontWeight: "700",
+  fontSize: fontSizes.sm,
+  fontWeight: fontWeights.bold,
   textAlign: "center",
   paddingVertical: 12,
 },
   headerTitle: {
     color: "#FFF",
-    fontSize: 13,
+    fontSize: fontSizes.md,
     marginLeft: 8,
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
     flex: 1,
     lineHeight: 18,
   },
@@ -227,11 +223,11 @@ viewHeader: {
   },
 
   descriptionText: {
-    fontSize: 13,
+    fontSize: fontSizes.md,
     textAlign: "left",
     color: "#333",
     lineHeight: 18,
-    fontWeight: "500",
+    fontWeight: fontWeights.medium,
     paddingLeft: 4,
   },
 
@@ -251,19 +247,19 @@ viewHeader: {
   headerCell: {
     flex: 1,
     color: "#FFF",
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     textAlign: "center",
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
     paddingTop: 18,
   },
 
   valueHeader: {
     width: 100,
     color: "#FFF",
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     textAlign: "center",
     paddingTop: 12,
-    fontWeight: "700",
+    fontWeight: fontWeights.bold,
   },
 
   tableRow: {
@@ -297,7 +293,7 @@ viewHeader: {
   },
 
   rowText: {
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     lineHeight: 18,
     color: "#333",
   },
@@ -307,7 +303,7 @@ viewHeader: {
     borderColor: "#CFCFCF",
     backgroundColor: "#F7F7F7",
     height: 42,
-    fontSize: 13,
+    fontSize: fontSizes.md,
     paddingHorizontal: 8,
   },
 
@@ -338,8 +334,8 @@ viewHeader: {
 
   buttonText: {
     color: "#FFF",
-    fontWeight: "600",
-    fontSize: 12,
+    fontWeight: fontWeights.semibold,
+    fontSize: fontSizes.sm,
   },
 
   overlay: {
@@ -365,13 +361,13 @@ viewHeader: {
     borderWidth: 1,
     borderColor: "#D3D3D3",
     backgroundColor: "#F8F8F8",
-    fontSize: 12,
+    fontSize: fontSizes.sm,
     paddingHorizontal: 6,
   },
 
   modalTitle: {
     color: "#FFF",
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
 
   modalBody: {
@@ -411,6 +407,6 @@ viewHeader: {
 
   modalBtnText: {
     color: "#FFF",
-    fontWeight: "600",
+    fontWeight: fontWeights.semibold,
   },
 });

@@ -213,7 +213,7 @@ export default function ReceiptUnpaidInvoicesScreen() {
       setSaving(true);
       setError(null);
 
-      await voucherService.create({
+      const result = await voucherService.create({
         voucherNumber: safeString(receiptNumber),
         voucherType: "receipt",
         entryDate: new Date().toISOString(),
@@ -222,6 +222,11 @@ export default function ReceiptUnpaidInvoicesScreen() {
           .join(", ") || selectedParty.partyName}`,
         lines: [debitLedger, creditLedger],
       });
+
+      if (!result.success) {
+        setError(result.message ?? "Unable to proceed.");
+        return;
+      }
 
       router.replace("/accounting/vouchers");
     } catch (err) {

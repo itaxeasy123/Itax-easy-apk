@@ -24,6 +24,13 @@ import {
   Item
 } from '../types/accountingTypes';
 import { voucherService } from './voucherService';
+import { companyService } from './companyService';
+import * as engine from '../local/engine';
+import {
+  getBalancesByLedger,
+  groupIdForLedgerType,
+  toLegacyLedger,
+} from './billshieldAdapter';
 
 const toNumber = (value: unknown): number => {
   if (typeof value === 'number') return value;
@@ -123,6 +130,24 @@ export const accountingService = {
     };
   },
 
+  // Toggle the per-user "inventory" feature flag. The backend update endpoint
+  // requires a non-empty firstName, so we pass it through alongside the flag
+  // (all other fields are left untouched — Prisma ignores undefined values).
+  setInventoryEnabled: async (
+    enabled: boolean,
+    firstName: string
+  ): Promise<ApiResponse<null>> => {
+    const response = await apiClient.put(endpoints.auth.update, {
+      firstName,
+      inventory: enabled,
+    });
+    return {
+      success: Boolean(response.data?.success),
+      data: null,
+      message: response.data?.message,
+    };
+  },
+
   getInvoiceSummary: async (): Promise<
     ApiResponse<{
       total_sales: number;
@@ -147,27 +172,39 @@ export const accountingService = {
   },
 
   getLedgers: async (): Promise<ListResponse<Ledger>> => {
-    const response = await apiClient.get(endpoints.accounting.ledgers);
+    const companyId = await companyService.ensureCompanyId();
+    const [rows, balances] = await Promise.all([
+      engine.listLedgers(companyId),
+      getBalancesByLedger(companyId).catch(() => new Map<string, number>()),
+    ]);
     return {
-      success: Boolean(response.data?.success),
-      data: Array.isArray(response.data?.ledgers)
-        ? response.data.ledgers.map(normalizeLedger)
-        : [],
-      message: response.data?.message,
+      success: true,
+      data: rows.map((ledger) => toLegacyLedger(ledger, balances)),
     };
   },
 
   createLedger: async (data: {
     ledgerName: string;
-    ledgerType: LedgerType;
+    ledgerType?: LedgerType;
+    groupId?: string;
+    partyId?: string;
     openingBalance: number;
+    openingBalanceType?: 'DR' | 'CR';
   }): Promise<ApiResponse<Ledger>> => {
-    const response = await apiClient.post(endpoints.accounting.createLedger, data);
-    return {
-      success: Boolean(response.data?.success),
-      data: normalizeLedger(response.data?.ledger ?? response.data),
-      message: response.data?.message,
-    };
+    const companyId = await companyService.ensureCompanyId();
+    const groupId = data.groupId ?? (data.ledgerType ? await groupIdForLedgerType(companyId, data.ledgerType) : '');
+    if (!groupId) {
+      throw new Error('Either groupId or ledgerType is required.');
+    }
+    const created = await engine.createLedger(companyId, {
+      name: data.ledgerName,
+      groupId,
+      partyId: data.partyId ?? undefined,
+      openingBalance: Math.abs(data.openingBalance ?? 0),
+      openingBalanceType: data.openingBalanceType ?? ((data.openingBalance ?? 0) < 0 ? 'CR' : 'DR'),
+    });
+    const full = await engine.getLedgerById(companyId, created.id);
+    return { success: true, data: toLegacyLedger(full) };
   },
 
   updateLedger: async (
@@ -175,47 +212,88 @@ export const accountingService = {
     data: Partial<{
       ledgerName: string;
       ledgerType: LedgerType;
+      groupId: string;
+      partyId: string | null;
       openingBalance: number;
+      openingBalanceType: 'DR' | 'CR';
     }>
   ): Promise<ApiResponse<Ledger>> => {
-    const response = await apiClient.put(endpoints.accounting.updateLedger(id), data);
-    return {
-      success: Boolean(response.data?.success),
-      data: normalizeLedger(response.data?.ledger ?? response.data),
-      message: response.data?.message,
-    };
+    const companyId = await companyService.ensureCompanyId();
+    const payload: Record<string, unknown> = {};
+    if (data.ledgerName !== undefined) payload.name = data.ledgerName;
+    if (data.groupId !== undefined) {
+      payload.groupId = data.groupId;
+    } else if (data.ledgerType !== undefined) {
+      payload.groupId = await groupIdForLedgerType(companyId, data.ledgerType);
+    }
+    if (data.partyId !== undefined) payload.partyId = data.partyId;
+    if (data.openingBalance !== undefined) {
+      payload.openingBalance = Math.abs(data.openingBalance);
+    }
+    if (data.openingBalanceType !== undefined) {
+      payload.openingBalanceType = data.openingBalanceType;
+    } else if (data.openingBalance !== undefined) {
+      payload.openingBalanceType = data.openingBalance < 0 ? 'CR' : 'DR';
+    }
+    const updated = await engine.updateLedger(companyId, id, payload as any);
+    return { success: true, data: toLegacyLedger(updated) };
   },
 
   deleteLedger: async (id: string): Promise<ApiResponse<any>> => {
-    const response = await apiClient.delete(endpoints.accounting.deleteLedger(id));
-    return response.data;
+    const companyId = await companyService.ensureCompanyId();
+    await engine.deleteLedger(companyId, id);
+    return { success: true } as ApiResponse<any>;
   },
 
   getLedgerById: async (id: string): Promise<ApiResponse<Ledger>> => {
-    const response = await apiClient.get(endpoints.accounting.ledgerById(id));
-    return {
-      success: Boolean(response.data?.success),
-      data: response.data?.ledger ? normalizeLedger(response.data.ledger) : undefined,
-      message: response.data?.message,
-    };
+    const companyId = await companyService.ensureCompanyId();
+    const ledger = await engine.getLedgerById(companyId, id);
+    return { success: Boolean(ledger), data: ledger ? toLegacyLedger(ledger) : undefined };
   },
 
   getLedgerByPartyId: async (
     partyId: string,
-    year?: number,
-    month?: number
+    _year?: number,
+    _month?: number
   ): Promise<ApiResponse<Ledger>> => {
-    const response = await apiClient.get(endpoints.accounting.ledgerByPartyId(partyId), {
-      params: {
-        ...(year !== undefined ? { year } : {}),
-        ...(month !== undefined ? { month } : {}),
-      },
-    });
+    // BillShield ledgers are continuous (no per-month rows); year/month
+    // params from the old API are no longer meaningful.
+    const ledgers = await accountingService.getLedgers();
+    const ledger = (ledgers.data ?? []).find((l) => l.partyId === partyId);
     return {
-      success: Boolean(response.data?.success),
-      data: response.data?.ledger ? normalizeLedger(response.data.ledger) : undefined,
-      message: response.data?.message,
+      success: Boolean(ledger),
+      data: ledger,
+      message: ledger ? undefined : 'Ledger not found',
     };
+  },
+
+  // Ensure a party has its own ledger account linked via partyId. A customer
+  // becomes an accountsReceivable (Sundry Debtors) ledger; a supplier becomes
+  // an accountsPayable (Sundry Creditors) ledger. Idempotent — returns the
+  // existing linked ledger if one already exists.
+  ensurePartyLedger: async (party: {
+    id: string;
+    partyName: string;
+    type: PartyType;
+  }): Promise<ApiResponse<Ledger | null>> => {
+    const companyId = await companyService.ensureCompanyId();
+
+    const ledgers = await accountingService.getLedgers();
+    const existing = (ledgers.data ?? []).find((l) => l.partyId === party.id);
+    if (existing) {
+      return { success: true, data: existing };
+    }
+
+    const ledgerType: LedgerType =
+      party.type === 'supplier' ? 'accountsPayable' : 'accountsReceivable';
+    const groupId = await groupIdForLedgerType(companyId, ledgerType);
+    const created = await engine.createLedger(companyId, {
+      name: party.partyName,
+      groupId,
+      partyId: party.id,
+    });
+    const full = await engine.getLedgerById(companyId, created.id);
+    return { success: true, data: full ? toLegacyLedger(full) : null };
   },
 
   getParties: async (): Promise<ListResponse<Party>> => {
@@ -287,6 +365,39 @@ export const accountingService = {
     }>
   ): Promise<ApiResponse<Party>> => {
     const response = await apiClient.put(endpoints.accounting.updateParty(id), data);
+
+    // Auto-update/sync local ledger details in the background if they changed
+    if (response.data?.success) {
+      try {
+        const partyLedgerRes = await accountingService.getLedgerByPartyId(id);
+        if (partyLedgerRes.success && partyLedgerRes.data) {
+          const ledger = partyLedgerRes.data;
+          const ledgerPayload: Partial<{
+            ledgerName: string;
+            ledgerType: LedgerType;
+          }> = {};
+
+          if (data.partyName !== undefined && data.partyName.trim() !== ledger.ledgerName) {
+            ledgerPayload.ledgerName = data.partyName.trim();
+          }
+
+          if (data.type !== undefined) {
+            const targetLedgerType: LedgerType =
+              data.type === 'supplier' ? 'accountsPayable' : 'accountsReceivable';
+            if (ledger.ledgerType !== targetLedgerType) {
+              ledgerPayload.ledgerType = targetLedgerType;
+            }
+          }
+
+          if (Object.keys(ledgerPayload).length > 0) {
+            await accountingService.updateLedger(ledger.id, ledgerPayload);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to sync local party ledger on update:', err);
+      }
+    }
+
     return {
       success: Boolean(response.data?.success),
       data: response.data?.party ? normalizeParty(response.data.party) : undefined,
@@ -295,7 +406,37 @@ export const accountingService = {
   },
 
   deleteParty: async (id: string): Promise<ApiResponse<any>> => {
+    // 1. Get the linked ledger before deleting the party
+    let linkedLedger: Ledger | undefined;
+    try {
+      const res = await accountingService.getLedgerByPartyId(id);
+      if (res.success && res.data) {
+        linkedLedger = res.data;
+      }
+    } catch (err) {
+      console.warn('Failed to retrieve ledger before deleteParty:', err);
+    }
+
+    // 2. Perform the remote delete call
     const response = await apiClient.delete(endpoints.accounting.deleteParty(id));
+
+    // 3. Handle the local SQLite ledger
+    if (response.data?.success && linkedLedger) {
+      try {
+        // Try to delete the ledger. If it has transactions, this will throw an error.
+        await accountingService.deleteLedger(linkedLedger.id);
+      } catch (err) {
+        // If it has transactions and cannot be deleted, we unlink it from the party
+        // by setting partyId = null so that accounting history is preserved safely.
+        console.log('Ledger has active transactions; unlinking partyId instead of deleting:', err);
+        try {
+          await accountingService.updateLedger(linkedLedger.id, { partyId: null });
+        } catch (updateErr) {
+          console.warn('Failed to unlink partyId from ledger:', updateErr);
+        }
+      }
+    }
+
     return response.data;
   },
 
@@ -425,18 +566,21 @@ export const accountingService = {
 
   getActiveCustomers: async (
     ledgerType: LedgerType,
-    year: number,
-    month: number
+    _year: number,
+    _month: number
   ): Promise<ApiResponse<{ activeCustomers: any[]; count: number }>> => {
-    const parties = await accountingService.getParties();
-    const filtered = (parties.data ?? []).filter((party) =>
-      party.ledgers?.some(
-        (ledger) =>
-          ledger.ledgerType === ledgerType &&
-          ledger.year === year &&
-          ledger.month === month
-      )
+    // Parties are "active" if they have a BillShield ledger of the wanted
+    // type linked via partyId (the old per-month ledger rows are gone).
+    const [parties, ledgers] = await Promise.all([
+      accountingService.getParties(),
+      accountingService.getLedgers(),
+    ]);
+    const partyIdsWithLedger = new Set(
+      (ledgers.data ?? [])
+        .filter((ledger) => ledger.ledgerType === ledgerType && ledger.partyId)
+        .map((ledger) => ledger.partyId)
     );
+    const filtered = (parties.data ?? []).filter((party) => partyIdsWithLedger.has(party.id));
 
     return {
       success: true,
@@ -487,40 +631,44 @@ export const accountingService = {
 
   getDayBook: async (): Promise<ApiResponse<DayBook[]>> => {
     try {
-      const response = await apiClient.get(endpoints.accounting.daybook);
-      const backendDaybook = Array.isArray(response.data?.daybook)
-        ? response.data.daybook.map((transaction: any) => {
-            const transactionDate = formatDayBookDate(transaction?.date ?? transaction?.transactionDate);
-            const side = (transaction?.transactionType ?? 'debit') as Transaction['transactionType'];
+      const companyId = await companyService.ensureCompanyId();
+      const vouchersList = await engine.dayBook(companyId);
+      // The daybook returns vouchers with balanced lines — flatten to one
+      // row per line, the shape the screen expects.
+      const backendDaybook: DayBook[] = vouchersList.flatMap((voucher: any) => {
+        const transactionDate = formatDayBookDate(voucher?.voucherDate);
+        const narration = String(voucher?.narration ?? '');
+        const voucherNumber = String(voucher?.voucherNo ?? '');
+        const voucherType = String(voucher?.voucherType?.name ?? 'Journal').toLowerCase() as VoucherType;
+        const lines = Array.isArray(voucher?.lines) ? voucher.lines : [];
 
-            return {
-              id: String(transaction?.id ?? ''),
-              ledgerId: String(transaction?.ledgerId ?? ''),
-              ledgerName: String(transaction?.ledger?.ledgerName ?? transaction?.ledgerId ?? ''),
-              transactionDate,
-              entryDate: transactionDate,
-              amount: toNumber(transaction?.amount ?? 0),
-              transactionType: side,
-              description: String(
-                transaction?.journalEntry?.description ??
-                  transaction?.ledger?.ledgerName ??
-                  transaction?.ledgerId ??
-                  'Transaction'
-              ),
-              narration: String(transaction?.journalEntry?.description ?? ''),
-              side,
-            } as DayBook;
-          })
-        : [];
+        return lines.map((line: any) => {
+          const debit = toNumber(line?.debit);
+          const side: Transaction['transactionType'] = debit > 0 ? 'debit' : 'credit';
+          return {
+            id: String(line?.id ?? ''),
+            ledgerId: String(line?.ledgerId ?? ''),
+            ledgerName: String(line?.ledgerName ?? line?.ledger?.name ?? ''),
+            transactionDate,
+            entryDate: transactionDate,
+            amount: debit > 0 ? debit : toNumber(line?.credit),
+            transactionType: side,
+            description: narration || voucherNumber || String(line?.ledgerName ?? line?.ledger?.name ?? 'Voucher'),
+            voucherType,
+            voucherNumber,
+            narration,
+            side,
+          } as DayBook;
+        });
+      });
 
       if (backendDaybook.length > 0) {
         return {
-          success: Boolean(response.data?.success),
+          success: true,
           data: backendDaybook.sort(
             (a: DayBook, b: DayBook) =>
               new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime()
           ),
-          message: response.data?.message,
         };
       }
 
@@ -528,11 +676,10 @@ export const accountingService = {
       const voucherEntries = (vouchers.data ?? []).flatMap(normalizeDayBookFromVoucher);
 
       return {
-        success: Boolean(response.data?.success),
+        success: true,
         data: voucherEntries.sort(
           (a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime()
         ),
-        message: response.data?.message,
       };
     } catch {
       return { success: false, data: [] };

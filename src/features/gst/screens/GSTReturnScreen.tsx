@@ -29,8 +29,12 @@ import {
 } from "../store/gstBusinessProfileStore";
 import GSTLoginPopup from "../components/GSTLoginPopup";
 import GSTBottomBar from "../components/GSTBottomBar";
+import useGSTDashboard from "../hooks/useGSTDashboard";
+import GSTHeader from "../components/GSTHeader";
+import GSTFilterModal from "../components/GSTFilterModal";
 
 
+import { fontSizes, fontWeights } from "../../../theme/typography";
 const GSTR1_STATUS = [
   {
     month: "Oct - 2024",
@@ -71,10 +75,12 @@ export default function GSTReturnScreen() {
 
   const [modalVisible, setModalVisible] =
     useState(false);
+  const [filterVisible, setFilterVisible] = useState(false);
 const {
   businessProfile,
 } =
   useGSTBusinessProfileStore();
+const { assessmentYear: defaultYear } = useGSTDashboard();
 
     const [
   showGSTLoginPopup,
@@ -84,12 +90,12 @@ const {
   const assessmentYear = useMemo(() => {
     return (
       params.assessmentYear ||
-      "2024-25"
+      defaultYear
     );
-  }, [params]);
+  }, [params, defaultYear]);
 
   const handleBack = () => {
-    router.push("/gst" as any);
+    router.push("/dashboard" as any);
   };
 
   const handleGSTLogin = () => {
@@ -129,28 +135,7 @@ const {
         }
       >
         {/* HEADER */}
-
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={handleBack}
-          >
-            <Ionicons
-              name="arrow-back"
-              size={22}
-              color="#FFF"
-            />
-          </TouchableOpacity>
-
-          <Text
-            style={styles.headerTitle}
-          >
-            Regular
-          </Text>
-
-          <Text style={styles.year}>
-            {assessmentYear}
-          </Text>
-        </View>
+        <GSTHeader title="Regular" rightComponent={<TouchableOpacity onPress={() => setFilterVisible(true)}><Text style={{ color: "#FFF", fontSize: fontSizes.md, fontWeight: fontWeights.semibold }}>{assessmentYear} ▼</Text></TouchableOpacity>} onBack={handleBack} />
 
         {/* RETURN DASHBOARD */}
 
@@ -511,6 +496,7 @@ const {
             )}
           </View>
         </View>
+        <GSTFilterModal visible={filterVisible} onClose={() => setFilterVisible(false)} />
       </ScrollView>
 
       {/* BOTTOM BAR */}
@@ -524,7 +510,7 @@ const {
           right: 0,
         }}
       >
-        <GSTBottomBar />
+        <GSTBottomBar showFab={true} />
       </View>
       {/* MODAL */}
 
@@ -728,9 +714,9 @@ const styles =
     headerTitle: {
       color: "#FFFFFF",
 
-      fontSize: 16,
+      fontSize: fontSizes.lg,
 
-      fontWeight: "600",
+      fontWeight: fontWeights.semibold,
 
       marginLeft: 12,
     },
@@ -738,7 +724,7 @@ const styles =
     year: {
       color: "#FFFFFF",
 
-      fontSize: 12,
+      fontSize: fontSizes.sm,
 
       position: "absolute",
 
@@ -780,7 +766,7 @@ const styles =
     dashboardText: {
       color: "#FFF",
 
-      fontSize: 12,
+      fontSize: fontSizes.sm,
     },
 
     profileCard: {
@@ -846,17 +832,17 @@ const styles =
     label: {
       width: 55,
 
-      fontSize: 14,
+      fontSize: fontSizes.md,
 
-      fontWeight: "700",
+      fontWeight: fontWeights.bold,
 
       color: "#333",
     },
 
     value: {
-      fontSize: 14,
+      fontSize: fontSizes.md,
 
-      fontWeight: "500",
+      fontWeight: fontWeights.medium,
 
       color: "#333",
     },
@@ -864,11 +850,11 @@ const styles =
     financialYear: {
       marginTop: 4,
 
-      fontSize: 14,
+      fontSize: fontSizes.md,
 
       color: "#333",
 
-      fontWeight: "500",
+      fontWeight: fontWeights.medium,
     },
 
     actionsContainer: {
@@ -912,9 +898,9 @@ const styles =
     },
 
     actionTitle: {
-      fontSize: 13,
+      fontSize: fontSizes.md,
 
-      fontWeight: "700",
+      fontWeight: fontWeights.bold,
 
       marginTop: 8,
 
@@ -922,7 +908,7 @@ const styles =
     },
 
     actionSub: {
-      fontSize: 10,
+      fontSize: fontSizes.xs,
 
       color: "#6B7280",
 
@@ -934,9 +920,9 @@ const styles =
 
       marginHorizontal: 16,
 
-      fontSize: 16,
+      fontSize: fontSizes.lg,
 
-      fontWeight: "700",
+      fontWeight: fontWeights.bold,
     },
 
     returnRow: {
@@ -973,7 +959,7 @@ const styles =
     returnHeaderText: {
       color: "#FFF",
 
-      fontWeight: "700",
+      fontWeight: fontWeights.bold,
     },
 
     statusItem: {
@@ -995,13 +981,13 @@ const styles =
     statusMonth: {
       color: "#FFF",
 
-      fontSize: 12,
+      fontSize: fontSizes.sm,
     },
 
     statusText: {
       color: "#FFF",
 
-      fontWeight: "700",
+      fontWeight: fontWeights.bold,
 
       marginTop: 4,
     },
@@ -1118,15 +1104,15 @@ returnIconBox: {
 },
 
 returnTitleUI: {
-  fontSize: 16,
+  fontSize: fontSizes.lg,
 
-  fontWeight: "600",
+  fontWeight: fontWeights.semibold,
 
   color: "#1F2937",
 },
 
 returnSubUI: {
-  fontSize: 12,
+  fontSize: fontSizes.sm,
 
   color: "#6B7280",
 

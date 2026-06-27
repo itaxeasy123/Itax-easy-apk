@@ -1,12 +1,14 @@
 // FILE:
 // app/EditAmendedAdvanceReceivedScreen.tsx
 
+import DynamicForm from "../components/DynamicForm";
+import { FormField } from "../types/form.types";
 import React, {
   useEffect,
   useState,
 } from "react";
 
-import {
+import { SafeAreaView,  
   View,
   Text,
   StyleSheet,
@@ -14,7 +16,8 @@ import {
   ScrollView,
   TextInput,
   Alert,
-} from "react-native";
+  } from "react-native";
+import GSTHeader from "../components/GSTHeader";
 
 import {
   ArrowLeft,
@@ -29,6 +32,29 @@ import {
 import GSTBottomBar from "../components/GSTBottomBar";
 
 export default function EditAmendedAdvanceReceivedScreen() {
+  const formSchema: FormField[] = [
+    { key: 'deemedExports', label: 'Deemed Exports', type: 'checkbox' },
+    { key: 'sezSupplyWithPayment', label: 'SEZ Supplies with payment', type: 'checkbox' },
+    { key: 'sezSupplyWithoutPayment', label: 'SEZ Supplies without payment', type: 'checkbox' },
+    { key: 'reverseCharge', label: 'Supply attract reverse charge', type: 'checkbox' },
+    { key: 'intraStateSupply', label: 'Intra-State Supplies attracting IGST', type: 'checkbox' },
+    { key: 'recipientGSTIN', label: 'Recipient GSTIN', type: 'text' },
+    { key: 'recipientName', label: 'Recipient Name', type: 'text' },
+    { key: 'revisedInvoiceNo', label: 'Revised Invoice No', type: 'text' },
+    { key: 'revisedInvoiceDate', label: 'Revised Invoice Date', type: 'date' },
+    { key: 'totalInvoiceValue', label: 'Total Invoice Value', type: 'number' },
+    { key: 'taxableValue', label: 'Taxable Value', type: 'number' },
+    { key: 'integratedTax', label: 'Integrated Tax', type: 'number' },
+    { key: 'centralTax', label: 'Central Tax', type: 'number' },
+    { key: 'stateTax', label: 'State Tax', type: 'number' },
+    { key: 'cess', label: 'Cess', type: 'number' },
+  ];
+
+  const onSubmit = (formData: any) => {
+    console.log("Saving Data:", formData);
+    router.back();
+  };
+
 
   // ROUTE PARAMS
   const params =
@@ -295,443 +321,46 @@ export default function EditAmendedAdvanceReceivedScreen() {
 
   };
 
+    const initialFormData = editData ? {
+    recipientGSTIN: "23BPLM0446C1D4",
+    recipientName: "MUNICIPAL CORPORATION GWALIOR",
+    revisedInvoiceNo: editData.invoiceNo || "",
+    revisedInvoiceDate: editData.invoiceDate || "",
+    revisedOriginalInvoiceDate: editData.invoiceDate || "",
+    totalInvoiceValue: String(
+          editData.totalInvoiceValue || ""
+        ),
+    taxableValue: String(
+          editData.taxableValue || ""
+        ),
+    integratedTax: String(
+          editData.integratedTax || ""
+        ),
+    centralTax: String(
+          editData.centralTax || ""
+        ),
+    stateTax: String(
+          editData.stateTax || ""
+        ),
+    cess: String(
+          editData.cess || ""
+        ),
+  } : {};
+
   return (
-    <View style={styles.container}>
-
-      {/* HEADER */}
-      <View style={styles.header}>
-
-        <TouchableOpacity
-          style={
-            styles.backButton
-          }
-          onPress={() =>
-            router.push(
-              "/gst/amended-advance-received"
-            )
-          }
-        >
-
-          <ArrowLeft
-            size={18}
-            color="#ffffff"
-          />
-
-        </TouchableOpacity>
-
-        <Text
-          style={
-            styles.headerTitle
-          }
-        >
-          11A-Amended Tax Liability
-          {"\n"}
-          (Advanced Received)
-        </Text>
-
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={
-          false
-        }
-        contentContainerStyle={{
-          paddingBottom: 120,
-        }}
-      >
-
-        {/* CHECKBOX */}
-        <View style={styles.topBox}>
-
-          {renderCheckbox(
-            "Deemed Exports",
-            deemedExports,
-            setDeemedExports
-          )}
-
-          {renderCheckbox(
-            "SEZ Supplies with payment",
-            sezSupplyWithPayment,
-            setSezSupplyWithPayment
-          )}
-
-          {renderCheckbox(
-            "SEZ Supplies without payment",
-            sezSupplyWithoutPayment,
-            setSezSupplyWithoutPayment
-          )}
-
-          {renderCheckbox(
-            "Supply attract reverse charge",
-            reverseCharge,
-            setReverseCharge
-          )}
-
-          {renderCheckbox(
-            "Intra-State Supplies attracting IGST",
-            intraStateSupply,
-            setIntraStateSupply
-          )}
-
-          <Text style={styles.noteText}>
-            Is the supply eligible to be taxed at a
-            differential percentage (%) of the
-            existing rate of tax, as notified by
-            the Government?
-          </Text>
-
-        </View>
-
-        {/* FORM */}
-        <View
-          style={
-            styles.formContainer
-          }
-        >
-
-          {/* GSTIN */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Recipient GSTIN/UIN
-            </Text>
-
-            <TextInput
-              value={
-                recipientGSTIN
-              }
-              onChangeText={
-                setRecipientGSTIN
-              }
-              style={
-                styles.input
-              }
-            />
-
-          </View>
-
-          {/* NAME */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Recipient Name
-            </Text>
-
-            <TextInput
-              value={
-                recipientName
-              }
-              onChangeText={
-                setRecipientName
-              }
-              style={
-                styles.input
-              }
-            />
-
-          </View>
-
-          {/* INVOICE NO */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Revised/Original Invoice No.
-            </Text>
-
-            <TextInput
-              value={
-                revisedInvoiceNo
-              }
-              onChangeText={
-                setRevisedInvoiceNo
-              }
-              style={
-                styles.input
-              }
-            />
-
-          </View>
-
-          {/* DATE */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Revised/Original Invoice Date
-            </Text>
-
-            <View
-              style={
-                styles.dateInputWrapper
-              }
-            >
-
-              <TextInput
-                value={
-                  revisedInvoiceDate
-                }
-                onChangeText={
-                  setRevisedInvoiceDate
-                }
-                style={
-                  styles.dateInput
-                }
-              />
-
-              <Text
-                style={
-                  styles.calendarIcon
-                }
-              >
-                🗓
-              </Text>
-
-            </View>
-
-          </View>
-
-          {/* ORIGINAL DATE */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Revised/Original Invoice Date
-            </Text>
-
-            <TextInput
-              value={
-                revisedOriginalInvoiceDate
-              }
-              onChangeText={
-                setRevisedOriginalInvoiceDate
-              }
-              style={
-                styles.input
-              }
-            />
-
-          </View>
-
-          {/* TOTAL */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Total Invoice Value
-            </Text>
-
-            <TextInput
-              value={
-                totalInvoiceValue
-              }
-              onChangeText={
-                setTotalInvoiceValue
-              }
-              style={
-                styles.input
-              }
-              keyboardType="numeric"
-            />
-
-          </View>
-
-          {/* TAXABLE */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Taxable Value
-            </Text>
-
-            <TextInput
-              value={
-                taxableValue
-              }
-              onChangeText={
-                setTaxableValue
-              }
-              style={
-                styles.input
-              }
-              keyboardType="numeric"
-            />
-
-          </View>
-
-          {/* IGST */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Integrated Tax
-            </Text>
-
-            <TextInput
-              value={
-                integratedTax
-              }
-              onChangeText={
-                setIntegratedTax
-              }
-              style={
-                styles.input
-              }
-              keyboardType="numeric"
-            />
-
-          </View>
-
-          {/* CGST */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Central Tax
-            </Text>
-
-            <TextInput
-              value={
-                centralTax
-              }
-              onChangeText={
-                setCentralTax
-              }
-              style={
-                styles.input
-              }
-              keyboardType="numeric"
-            />
-
-          </View>
-
-          {/* SGST */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              State/UT Tax
-            </Text>
-
-            <TextInput
-              value={
-                stateTax
-              }
-              onChangeText={
-                setStateTax
-              }
-              style={
-                styles.input
-              }
-              keyboardType="numeric"
-            />
-
-          </View>
-
-          {/* CESS */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Cess
-            </Text>
-
-            <TextInput
-              value={cess}
-              onChangeText={
-                setCess
-              }
-              style={
-                styles.input
-              }
-              keyboardType="numeric"
-            />
-
-          </View>
-
-          {/* SAVE */}
-          <TouchableOpacity
-            style={
-              styles.saveButton
-            }
-            onPress={handleSave}
-          >
-
-            <Text
-              style={
-                styles.saveButtonText
-              }
-            >
-              Save
-            </Text>
-
-          </TouchableOpacity>
-
-        </View>
-
-      </ScrollView>
+    <SafeAreaView style={{flex: 1, backgroundColor: "#f0f2f5"}}>
+      <View style={styles.container}>
+        <GSTHeader title="11A-Amended Tax Liability (Advances Received)" />
+
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <DynamicForm schema={formSchema} onSubmit={onSubmit} submitLabel="Save" initialData={initialFormData} />
+        </ScrollView>
 
       {/* BOTTOM BAR */}
       <GSTBottomBar />
 
     </View>
+    </SafeAreaView>
   );
 }
 

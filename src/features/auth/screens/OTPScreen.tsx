@@ -4,87 +4,112 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import AuthScaffold, { PrimaryButton } from '../components/AuthScaffold';
 import OTPInput from '../components/OTPInput';
-import { authService } from '../../../services/authService';
+import { confirmOtp, sendOtp } from '../services/firebasePhone';
+import { apkAuthService } from '../../../services/apkAuthService';
 import { useAuthStore } from '../../../store/authStore';
 import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
+import { notify } from '../../../utils/notify';
+
+// Seconds the user must wait between OTP sends before "Resend" re-enables.
+const RESEND_COOLDOWN = 60;
 
 export default function OTPScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
+    mode?: string; // 'signup' | 'login'
+    phone?: string; // E.164, used for Firebase resend
+    phoneDisplay?: string; // last 10 digits, shown to the user
+    fullName?: string;
     email?: string;
-    mode?: string;
-    newPassword?: string;
-    password?: string;
   }>();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const setSession = useAuthStore((state) => state.setSession);
   const inputRef = useRef<TextInput>(null);
   const [otp, setOtp] = useState('');
-  const [timer, setTimer] = useState(180); // ✅ 3 minutes
+  const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    if (timer <= 0) {
+    if (cooldown <= 0) {
       return;
     }
 
-    const id = setTimeout(() => setTimer((value) => value - 1), 1000);
+    const id = setTimeout(() => setCooldown((value) => value - 1), 1000);
     return () => clearTimeout(id);
-  }, [timer]);
-
-  const subtitle =
-    params.mode === 'reset'
-      ? 'OTP verification code has been sent to your registered email.'
-      : 'Enter OTP. We have sent you OTP received on your email.';
+  }, [cooldown]);
 
   const handleVerify = async () => {
+    if (otp.length !== 6) {
+      setError('Please enter the 6-digit OTP.');
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
 
-      if (params.mode === 'reset') {
-        await authService.updatePasswordWithOtp({
-          email: params.email ?? '',
-          newPassword: params.newPassword ?? '',
-          otp,
-        });
+      // 1) Confirm the SMS code with Firebase (on-device) → Firebase ID token
+      const idToken = await confirmOtp(otp);
 
-        router.replace({
-          params: { mode: 'reset' },
-          pathname: '/otp-success',
-        });
-        return;
-      }
-
-      await authService.verifyOtp({
-        email: params.email ?? '',
-        otp,
+      // 2) Exchange it at our backend (registers on first contact, else logs in)
+      const result = await apkAuthService.firebaseAuth({
+        idToken,
+        fullName: params.mode === 'signup' ? params.fullName : undefined,
+        email: params.mode === 'signup' ? params.email || undefined : undefined,
       });
 
-      const loginResult = await authService.login({
-        email: params.email ?? '',
-        password: params.password ?? '',
-      });
-
-      setAuth(loginResult.user, loginResult.token);
-      router.replace({
-        params: { mode: params.mode ?? 'signup' },
-        pathname: '/otp-success',
-      });
+      // 3) Persist session and enter the app
+      await setSession(result.user as any, result.accessToken, result.refreshToken);
+      router.replace('/dashboard');
     } catch (verifyError: any) {
-      setError(getApiErrorMessage(verifyError, 'OTP verification failed.'));
+      const code = verifyError?.code as string | undefined;
+      if (code === 'auth/invalid-verification-code') {
+        setError('Invalid OTP. Please check the code and try again.');
+      } else if (code === 'auth/code-expired' || code === 'auth/session-expired') {
+        setError('This OTP has expired. Please resend a new one.');
+      } else if (verifyError?.response) {
+        setError(
+          getApiErrorMessage(verifyError, 'Verification failed. Please try again.', {
+            400: 'Could not verify. Please request a new OTP.',
+            401: 'Verification token rejected. Please request a new OTP.',
+            409: 'This account already exists. Please try logging in.',
+            500: 'Something went wrong. Please try again later.',
+          })
+        );
+      } else {
+        setError(verifyError?.message || 'OTP verification failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleResend = async () => {
+    if (cooldown > 0 || resending) {
+      return;
+    }
+
     try {
+      setResending(true);
       setError('');
-      await authService.resendOtp(params.email ?? '');
-      setTimer(180);
+      if (!params.phone) {
+        setError('Missing phone number. Please go back and try again.');
+        return;
+      }
+      await sendOtp(params.phone);
+      setOtp('');
+      setCooldown(RESEND_COOLDOWN);
+      notify('OTP sent successfully');
     } catch (resendError: any) {
-      setError(getApiErrorMessage(resendError, 'Failed to resend OTP.'));
+      const code = resendError?.code as string | undefined;
+      if (code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please wait a while and try again.');
+      } else {
+        setError(resendError?.message || 'Failed to resend OTP. Please try again.');
+      }
+    } finally {
+      setResending(false);
     }
   };
 
@@ -95,9 +120,11 @@ export default function OTPScreen() {
     >
       <View style={styles.centerCard}>
         <Text style={styles.cardTitle}>Enter OTP</Text>
-        <Text style={styles.cardSubtitle}>{subtitle}</Text>
-        {params.email ? (
-          <Text style={styles.emailText}>{params.email}</Text>
+        <Text style={styles.cardSubtitle}>
+          Enter the 6-digit code we sent via SMS to your mobile number.
+        </Text>
+        {params.phoneDisplay ? (
+          <Text style={styles.emailText}>+91 {params.phoneDisplay}</Text>
         ) : null}
 
         <Pressable
@@ -117,7 +144,9 @@ export default function OTPScreen() {
         </Pressable>
 
         <Text style={styles.timerText}>
-          {timer > 0 ? `wait for ${timer} sec` : 'You can resend OTP now'}
+          {cooldown > 0
+            ? `You can resend OTP in ${cooldown} sec`
+            : 'You can resend OTP now'}
         </Text>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -128,9 +157,24 @@ export default function OTPScreen() {
           onPress={handleVerify}
         />
 
-        <Pressable onPress={handleResend} style={styles.resendRow}>
+        <Pressable
+          disabled={cooldown > 0 || resending}
+          onPress={handleResend}
+          style={styles.resendRow}
+        >
           <Text style={styles.resendText}>Did not get OTP code? </Text>
-          <Text style={styles.resendLink}>Resend OTP</Text>
+          <Text
+            style={[
+              styles.resendLink,
+              (cooldown > 0 || resending) && styles.resendLinkDisabled,
+            ]}
+          >
+            {resending
+              ? 'Sending...'
+              : cooldown > 0
+                ? `Resend OTP (${cooldown}s)`
+                : 'Resend OTP'}
+          </Text>
         </Pressable>
       </View>
     </AuthScaffold>
@@ -200,6 +244,9 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '600',
   },
+  resendLinkDisabled: {
+    color: '#9AA5BD',
+  },
   errorText: {
     color: '#D64A4A',
     fontSize: 10,
@@ -207,4 +254,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

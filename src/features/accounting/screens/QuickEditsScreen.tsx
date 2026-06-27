@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View, Pressable } from "react-
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 
-import { AccountingHeader, Button, Card, Loading } from "../components";
+import { AccountingHeader, Button, Card, DateField, Loading } from "../components";
 import { accountingService } from "../services/accountingService";
 import { Party } from "../types/accountingTypes";
 import { formatMoney, todayInputValue } from "./voucherFlowUtils";
@@ -173,7 +173,7 @@ export default function QuickEditsScreen() {
           <Text style={styles.panelTitle}>Edit Invoice Date & Number</Text>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Select Date</Text>
-            <TextInput value={invoiceDate} onChangeText={setInvoiceDate} style={styles.input} />
+            <DateField value={invoiceDate} onChange={setInvoiceDate} placeholder="Select invoice date" />
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Invoice Number</Text>
@@ -181,7 +181,7 @@ export default function QuickEditsScreen() {
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Due Date</Text>
-            <TextInput value={dueDate} onChangeText={setDueDate} style={styles.input} />
+            <DateField value={dueDate} onChange={setDueDate} placeholder="Select due date" />
           </View>
           <Button title="Save" onPress={() => setError(null)} />
         </Card>
@@ -199,7 +199,7 @@ export default function QuickEditsScreen() {
           <Text style={styles.panelTitle}>Edit Invoice Date & Number</Text>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Select Date</Text>
-            <TextInput value={purchaseInvoiceDate} onChangeText={setPurchaseInvoiceDate} style={styles.input} />
+            <DateField value={purchaseInvoiceDate} onChange={setPurchaseInvoiceDate} placeholder="Select invoice date" />
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Invoice Number</Text>
@@ -207,7 +207,7 @@ export default function QuickEditsScreen() {
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Due Date</Text>
-            <TextInput value={dueDate} onChangeText={setDueDate} style={styles.input} />
+            <DateField value={dueDate} onChange={setDueDate} placeholder="Select due date" />
           </View>
           <Button title="Save" onPress={() => setError(null)} />
         </Card>
@@ -229,7 +229,7 @@ export default function QuickEditsScreen() {
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Select Date</Text>
-            <TextInput value={bankDate} onChangeText={setBankDate} style={styles.input} />
+            <DateField value={bankDate} onChange={setBankDate} placeholder="Select date" />
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Select Bank</Text>
@@ -341,7 +341,7 @@ export default function QuickEditsScreen() {
           <Text style={styles.panelTitle}>Edit Invoice Date & Number</Text>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Select Date</Text>
-            <TextInput value={receiptInvoiceDate} onChangeText={setReceiptInvoiceDate} style={styles.input} />
+            <DateField value={receiptInvoiceDate} onChange={setReceiptInvoiceDate} placeholder="Select invoice date" />
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Invoice Number</Text>
@@ -349,7 +349,7 @@ export default function QuickEditsScreen() {
           </View>
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Due Date</Text>
-            <TextInput value={receiptDueDate} onChangeText={setReceiptDueDate} style={styles.input} />
+            <DateField value={receiptDueDate} onChange={setReceiptDueDate} placeholder="Select due date" />
           </View>
           <Button title="Save" onPress={() => setError(null)} />
         </Card>

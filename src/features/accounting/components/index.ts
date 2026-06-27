@@ -7,3 +7,5 @@ export { default as Button } from './Button';
 export { default as ListItem } from './ListItem';
 export { default as AccountingHeader } from './AccountingHeader';
 export { default as SalesReportSwitcher } from './SalesReportSwitcher';
+export { default as DateField, isValidIsoDate, DATE_FORMAT } from './DateField';
+export { default as FiscalYearBar } from './FiscalYearBar';

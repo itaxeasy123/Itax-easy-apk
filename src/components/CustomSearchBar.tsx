@@ -6,7 +6,7 @@ interface CustomSearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
-  style?: StyleProp<ViewStyle>;
+  style?: any;
 }
 
 export default function CustomSearchBar({

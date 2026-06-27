@@ -1,3 +1,5 @@
+import { fontSizes, fontWeights } from './typography';
+
 export const accountingTheme = {
   colors: {
     primary: '#2563EB',
@@ -41,46 +43,37 @@ export const accountingTheme = {
   },
   typography: {
     eyebrow: {
-      fontSize: 15,
-      fontWeight: '700' as const,
+      fontSize: fontSizes.md,
+      fontWeight: fontWeights.bold,
       letterSpacing: 0.4,
     },
     title: {
-      fontSize: 20,
-      fontWeight: '800' as const,
+      fontSize: fontSizes.xxl,
+      fontWeight: fontWeights.extraBold,
     },
     sectionTitle: {
-      fontSize: 16,
-      fontWeight: '700' as const,
+      fontSize: fontSizes.lg,
+      fontWeight: fontWeights.bold,
     },
     body: {
-      fontSize: 15,
-      fontWeight: '500' as const,
+      fontSize: fontSizes.md,
+      fontWeight: fontWeights.medium,
     },
     caption: {
-      fontSize: 12,
-      fontWeight: '400' as const,
+      fontSize: fontSizes.sm,
+      fontWeight: fontWeights.regular,
     },
     small: {
-      fontSize: 10,
-      fontWeight: '600' as const,
+      fontSize: fontSizes.xs,
+      fontWeight: fontWeights.semibold,
     },
   },
   fontSizes: {
-    xs: 10,
-    sm: 12,
-    md: 13,
-    lg: 14,
-    xl: 16,
-    xxl: 18,
+    ...fontSizes,
     xxxl: 20,
-    display: 24,
   },
   fontWeights: {
-    regular: "400" as const,
-    medium: "500" as const,
-    semiBold: "600" as const,
-    bold: "700" as const,
-    extraBold: "800" as const,
-  }
+    ...fontWeights,
+    semiBold: fontWeights.semibold,
+  },
 };

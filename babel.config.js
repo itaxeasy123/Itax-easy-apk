@@ -40,7 +40,7 @@ module.exports = function (api) {
             '@features': './src/features',
             '@store': './src/store',
           },
-        },
+        }, 
       ],
       'react-native-reanimated/plugin',
     ],

@@ -1,8 +1,9 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -14,10 +15,11 @@ import Modal from 'react-native-modal';
 import ScreenContainer from '../../../shared/components/ScreenContainer';
 import SurfaceCard from '../../../shared/components/SurfaceCard';
 import { AuthUser, useAuthStore } from '../../../store/authStore';
+import { useBusinessStore } from '../../../store/businessStore';
+import { apkAuthService } from '../../../services/apkAuthService';
+import { Business } from '../../../services/apkBusinessService';
 import { colors, fontSizes, fontWeights, radius, spacing } from '../../../theme';
 
-
-const IMAGE_KEY = 'profile_image';
 
 function getFullName(user: AuthUser | null) {
   if (!user) return 'User';
@@ -36,29 +38,49 @@ export default function ProfileScreen() {
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
+  const token = useAuthStore((state) => state.token);
+  const setAuth = useAuthStore((state) => state.setAuth);
   const profileImage = useAuthStore((state) => state.profileImage);
   const setProfileImage = useAuthStore((state) => state.setProfileImage);
 
+  const businesses = useBusinessStore((state) => state.businesses);
+  const loadBusinesses = useBusinessStore((state) => state.load);
+
   const [isModalVisible, setModalVisible] = useState(false);
 
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
+  // Refresh the user profile + businesses from the new backend each time the
+  // screen is focused.
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      (async () => {
+        try {
+          const fresh = await apkAuthService.getMe();
+          if (active && token) await setAuth(fresh as any, token);
+        } catch {
+          // keep cached values on failure
+        }
+        loadBusinesses(true);
+      })();
+      return () => {
+        active = false;
+      };
+    }, [token, setAuth, loadBusinesses])
+  );
+
+  const toggleModal = () => setModalVisible(!isModalVisible);
 
   const pickFromLibrary = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
     if (!permission.granted) {
       Alert.alert('Permission required', 'Allow gallery access');
       return;
     }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.7,
       allowsEditing: false,
     });
-
     if (!result.canceled) {
       setProfileImage(result.assets[0].uri);
     }
@@ -67,18 +89,15 @@ export default function ProfileScreen() {
 
   const takePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
-
     if (!permission.granted) {
       Alert.alert('Permission required', 'Allow camera access');
       return;
     }
-
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.7,
       allowsEditing: false,
     });
-
     if (!result.canceled) {
       setProfileImage(result.assets[0].uri);
     }
@@ -116,9 +135,9 @@ export default function ProfileScreen() {
           <View style={styles.headerSpacer} />
         </View>
 
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {/* ── My Account (Module 2) ── */}
         <SurfaceCard style={styles.profileCard}>
-          
-          {/* ✅ Avatar with Edit Icon */}
           <Pressable onPress={toggleModal}>
             <View style={{ position: 'relative', marginBottom: 14 }}>
               <View style={[styles.avatar, { marginBottom: 0 }]}>
@@ -138,25 +157,21 @@ export default function ProfileScreen() {
           </Pressable>
 
           <Text style={styles.nameText}>{fullName}</Text>
-          <Text style={styles.emailText}>
-            {user?.email || 'No email available'}
-          </Text>
+          <Text style={styles.emailText}>{user?.email || 'No email available'}</Text>
 
           <View style={styles.infoBlock}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Phone</Text>
-              <Text style={styles.infoValue}>
-                {user?.phone || 'Not added'}
-              </Text>
+              <Text style={styles.infoValue}>{user?.phone || 'Not added'}</Text>
             </View>
-
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Gender</Text>
-              <Text style={styles.infoValue}>
-                {user?.gender || 'Not added'}
-              </Text>
+              <Text style={styles.infoLabel}>Time Zone</Text>
+              <Text style={styles.infoValue}>{user?.timeZone || 'Asia/Kolkata'}</Text>
             </View>
-
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Language</Text>
+              <Text style={styles.infoValue}>{user?.language || 'en'}</Text>
+            </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Status</Text>
               <Text style={styles.infoValue}>
@@ -165,12 +180,68 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          <Pressable onPress={handleLogout} style={styles.logoutButton}>
-            <Text style={styles.logoutText}>Logout</Text>
+          <Pressable onPress={() => router.push('/edit-profile')} style={styles.editProfileButton}>
+            <Feather name="edit-2" size={14} color="#347BE5" />
+            <Text style={styles.editProfileText}>Edit Profile</Text>
           </Pressable>
         </SurfaceCard>
 
-        {/* ✅ Bottom Sheet for Image Options */}
+        {/* ── My Business (Module 3, optional) ── */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>My Business</Text>
+          <Pressable onPress={() => router.push('/business-form')}>
+            <Text style={styles.addLink}>+ Add</Text>
+          </Pressable>
+        </View>
+
+        {businesses.length === 0 ? (
+          <SurfaceCard style={styles.emptyBusinessCard}>
+            <Ionicons name="business-outline" size={28} color="#9AA5BD" />
+            <Text style={styles.emptyBusinessText}>
+              No business yet. Add one to use Accounting, GST and Inventory.
+            </Text>
+            <Pressable style={styles.setupButton} onPress={() => router.push('/business-form')}>
+              <Text style={styles.setupButtonText}>Set up business</Text>
+            </Pressable>
+          </SurfaceCard>
+        ) : (
+          businesses.map((b: Business) => (
+            <Pressable key={b.id} onPress={() => router.push(`/business-form?id=${b.id}`)}>
+              <SurfaceCard style={styles.businessCard}>
+                <View style={styles.businessRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.businessName}>{b.name}</Text>
+                    <Text style={styles.businessMeta}>
+                      {b.stateCode ? `${b.stateCode} · ` : ''}{b.currency}
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      b.status === 'active' ? styles.statusActive : styles.statusDraft,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.statusText,
+                        b.status === 'active' ? styles.statusTextActive : styles.statusTextDraft,
+                      ]}
+                    >
+                      {b.status === 'active' ? 'Active' : 'Draft'}
+                    </Text>
+                  </View>
+                  <Feather name="chevron-right" size={18} color="#9AA5BD" />
+                </View>
+              </SurfaceCard>
+            </Pressable>
+          ))
+        )}
+
+        <Pressable onPress={handleLogout} style={styles.logoutButton}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </Pressable>
+        </ScrollView>
+
         <Modal
           isVisible={isModalVisible}
           onBackdropPress={toggleModal}
@@ -180,24 +251,20 @@ export default function ProfileScreen() {
         >
           <View style={styles.modalContent}>
             <View style={styles.modalHandle} />
-            
             <Pressable style={styles.modalOption} onPress={pickFromLibrary}>
               <Ionicons name="images-outline" size={24} color={colors.text} />
               <Text style={styles.modalOptionText}>Upload picture</Text>
             </Pressable>
-
             <Pressable style={styles.modalOption} onPress={takePhoto}>
               <Ionicons name="camera-outline" size={24} color={colors.text} />
               <Text style={styles.modalOptionText}>Take photo</Text>
             </Pressable>
-
             <Pressable style={styles.modalOption} onPress={removePhoto}>
               <Ionicons name="trash-outline" size={24} color={colors.danger} />
               <Text style={[styles.modalOptionText, { color: colors.danger }]}>Remove picture</Text>
             </Pressable>
           </View>
         </Modal>
-
       </View>
     </ScreenContainer>
   );
@@ -231,6 +298,9 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+  scrollContent: {
+    paddingBottom: 32,
   },
   profileCard: {
     alignItems: 'center',
@@ -287,6 +357,91 @@ const styles = StyleSheet.create({
     maxWidth: '58%',
     textAlign: 'right',
   },
+  editProfileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 18,
+    paddingVertical: 10,
+    width: '100%',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#347BE5',
+  },
+  editProfileText: {
+    color: '#347BE5',
+    fontSize: 14,
+    fontWeight: fontWeights.semibold,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 24,
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    color: colors.primaryDark,
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.bold,
+  },
+  addLink: {
+    color: '#347BE5',
+    fontSize: 14,
+    fontWeight: fontWeights.semibold,
+  },
+  emptyBusinessCard: {
+    alignItems: 'center',
+    padding: 22,
+    gap: 10,
+  },
+  emptyBusinessText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  setupButton: {
+    backgroundColor: '#347BE5',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginTop: 4,
+  },
+  setupButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: fontWeights.bold,
+  },
+  businessCard: {
+    padding: 16,
+    marginBottom: 10,
+  },
+  businessRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  businessName: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: fontWeights.semibold,
+  },
+  businessMeta: {
+    color: colors.textMuted,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  statusBadge: {
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  statusActive: { backgroundColor: '#E3F6EB' },
+  statusDraft: { backgroundColor: '#FDF0E1' },
+  statusText: { fontSize: 11, fontWeight: fontWeights.bold },
+  statusTextActive: { color: '#1E9E5A' },
+  statusTextDraft: { color: '#C9821C' },
   logoutButton: {
     backgroundColor: colors.danger,
     borderRadius: 14,

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput , Platform } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput , Platform, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useRouter } from "expo-router";
 import { AccountingHeader } from "../components";
+import { companyService } from "../services/companyService";
 
 export default function CompanyCreateScreen() {
     const insets = useSafeAreaInsets();
@@ -14,9 +15,46 @@ export default function CompanyCreateScreen() {
   const [gstNumber, setGstNumber] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [email, setEmail] = useState("");
+  const [pan, setPan] = useState("");
+  const [stateCode, setStateCode] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [showAddress, setShowAddress] = useState(false);
   const [showOtherInfo, setShowOtherInfo] = useState(false);
+
+  const handleSave = async () => {
+    if (Platform.OS === "web" && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    if (!businessName.trim()) {
+      setError("Business name is required.");
+      return;
+    }
+    try {
+      setSaving(true);
+      setError(null);
+      const result = await companyService.createCompany({
+        name: businessName.trim(),
+        gstin: gstNumber.trim() || undefined,
+        pan: pan.trim() || undefined,
+        stateCode: stateCode.trim() || undefined,
+      });
+      if (!result.success || !result.data?.id) {
+        setError("Could not create the company. Please try again.");
+        return;
+      }
+      Alert.alert(
+        "Company created",
+        `"${result.data.name}" is ready — chart of accounts, voucher types and the fiscal year were set up automatically. It is now your active company.`
+      );
+      router.back();
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? "Could not create the company.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -111,16 +149,41 @@ export default function CompanyCreateScreen() {
         </Pressable>
         {showOtherInfo && (
           <View style={styles.accordionContent}>
-            {/* Other info fields placeholder if needed later */}
-            <Text style={styles.placeholderText}>Other Info fields will go here</Text>
+            <View style={styles.inputWrap}>
+              <TextInput
+                style={styles.input}
+                placeholder="PAN (Optional)"
+                value={pan}
+                onChangeText={setPan}
+                autoCapitalize="characters"
+                placeholderTextColor="#94A3B8"
+              />
+            </View>
+            <View style={styles.inputWrap}>
+              <TextInput
+                style={styles.input}
+                placeholder="State Code (e.g. 23, Optional)"
+                value={stateCode}
+                onChangeText={setStateCode}
+                keyboardType="number-pad"
+                placeholderTextColor="#94A3B8"
+              />
+            </View>
           </View>
         )}
+
+        {error ? (
+          <View style={styles.errorBox}>
+            <Ionicons name="alert-circle" size={18} color="#DC2626" />
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
       </ScrollView>
 
       {/* Sticky Bottom Save Button */}
       <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 0) + 16 }]}>
-        <Pressable style={styles.saveBtn} onPress={() => { if (Platform.OS === "web" && document.activeElement instanceof HTMLElement) { document.activeElement.blur(); } router.back(); }}>
-          <Text style={styles.saveBtnText}>Save</Text>
+        <Pressable style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleSave} disabled={saving}>
+          <Text style={styles.saveBtnText}>{saving ? "Creating..." : "Save"}</Text>
         </Pressable>
       </View>
     </View>
@@ -194,6 +257,20 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: "#94A3B8",
     fontStyle: "italic",
+  },
+  errorBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEE2E2",
+    borderRadius: 8,
+    padding: 12,
+    margin: 16,
+    gap: 8,
+  },
+  errorText: {
+    color: "#DC2626",
+    flex: 1,
+    fontSize: 13,
   },
   bottomBar: {
     position: "absolute",

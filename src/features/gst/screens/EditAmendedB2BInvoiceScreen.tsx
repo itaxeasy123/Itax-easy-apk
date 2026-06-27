@@ -2,7 +2,23 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { Datepicker } from '@ui-kitten/components';
+import { CalendarIcon } from '../../../components/ui/icon';
 
+const parseDateString = (val: string | undefined) => {
+  if (!val) return undefined;
+  let d = new Date(val);
+  if (isNaN(d.getTime()) && typeof val === 'string') {
+    const parts = val.split(/[\/\-]/);
+    if (parts.length === 3) {
+      d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+    }
+  }
+  return isNaN(d.getTime()) ? undefined : d;
+};
+
+
+import GSTHeader from "../components/GSTHeader";
 import {
   View,
   Text,
@@ -179,7 +195,7 @@ export default function EditAmendedB2BInvoiceScreen() {
 
     }
 
-  }, []);
+  }, [params?.invoiceData]);
 
   // SAVE
   const handleSave = () => {
@@ -297,35 +313,7 @@ export default function EditAmendedB2BInvoiceScreen() {
     <View style={styles.container}>
 
       {/* HEADER */}
-      <View style={styles.header}>
-
-        <TouchableOpacity
-          style={
-            styles.backButton
-          }
-          onPress={() =>
-            router.push(
-              "/gst/amended-b2b-invoices"
-            )
-          }
-        >
-
-          <ArrowLeft
-            size={18}
-            color="#ffffff"
-          />
-
-        </TouchableOpacity>
-
-        <Text
-          style={
-            styles.headerTitle
-          }
-        >
-          9A-Amended B2B Invoices
-        </Text>
-
-      </View>
+      <GSTHeader title="9A-Amended B2B Invoices" />
 
       <ScrollView
         showsVerticalScrollIndicator={
@@ -398,98 +386,13 @@ export default function EditAmendedB2BInvoiceScreen() {
               Recipient GSTIN/UIN
             </Text>
 
-            <TextInput
-              value={
-                recipientGSTIN
-              }
-              onChangeText={
-                setRecipientGSTIN
-              }
-              style={
-                styles.input
-              }
-            />
-
-          </View>
-
-          {/* NAME */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Recipient Name
-            </Text>
-
-            <TextInput
-              value={
-                recipientName
-              }
-              onChangeText={
-                setRecipientName
-              }
-              style={
-                styles.input
-              }
-            />
-
-          </View>
-
-          {/* INVOICE */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Revised/original Invoice No.
-            </Text>
-
-            <TextInput
-              value={
-                revisedInvoiceNo
-              }
-              onChangeText={
-                setRevisedInvoiceNo
-              }
-              style={
-                styles.input
-              }
-            />
-
-          </View>
-
-          {/* DATE */}
-          <View
-            style={
-              styles.inputBox
-            }
-          >
-
-            <Text
-              style={styles.label}
-            >
-              Revised/Original Invoice Date
-            </Text>
-
-            <TextInput
-              value={
-                revisedInvoiceDate
-              }
-              onChangeText={
-                setRevisedInvoiceDate
-              }
-              style={
-                styles.input
-              }
-            />
+            <Datepicker
+                date={parseDateString(revisedInvoiceDate)}
+                onSelect={(nextDate) => setRevisedInvoiceDate(nextDate.toISOString().split('T')[0])}
+                placeholder="Select Date"
+                style={styles.input}
+                min={new Date(1990, 0, 1)} max={new Date(2050, 11, 31)} accessoryRight={() => (<View style={{ paddingRight: 8 }}><CalendarIcon size={20} color="#64748b" /></View>)}
+              />
 
           </View>
 
@@ -506,17 +409,13 @@ export default function EditAmendedB2BInvoiceScreen() {
               Revised/Original Invoice Date
             </Text>
 
-            <TextInput
-              value={
-                revisedOriginalInvoiceDate
-              }
-              onChangeText={
-                setRevisedOriginalInvoiceDate
-              }
-              style={
-                styles.input
-              }
-            />
+            <Datepicker
+                date={parseDateString(revisedOriginalInvoiceDate)}
+                onSelect={(nextDate) => setRevisedOriginalInvoiceDate(nextDate.toISOString().split('T')[0])}
+                placeholder="Select Date"
+                style={styles.input}
+                min={new Date(1990, 0, 1)} max={new Date(2050, 11, 31)} accessoryRight={() => (<View style={{ paddingRight: 8 }}><CalendarIcon size={20} color="#64748b" /></View>)}
+              />
 
           </View>
 

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Button, Card, Header, Loading } from "../components";
+import { Button, Card, DateField, Header, Loading, isValidIsoDate } from "../components";
 import AccountingHeader from "../components/AccountingHeader";
 import { accountingService } from "../services/accountingService";
 import { voucherService } from "../services/voucherService";
@@ -29,7 +29,27 @@ type EditableLine = {
   amount: string;
 };
 
-const voucherTypes: VoucherType[] = ["journal", "payment", "receipt", "contra", "sales", "purchase"];
+const voucherTypes: VoucherType[] = [
+  "journal",
+  "payment",
+  "receipt",
+  "contra",
+  "sales",
+  "purchase",
+  "debitNote",
+  "creditNote",
+];
+
+const VOUCHER_TYPE_LABEL: Record<VoucherType, string> = {
+  journal: "journal",
+  payment: "payment",
+  receipt: "receipt",
+  contra: "contra",
+  sales: "sales",
+  purchase: "purchase",
+  debitNote: "debit note",
+  creditNote: "credit note",
+};
 
 const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -45,12 +65,22 @@ export default function VoucherCreateScreen() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showLines, setShowLines] = useState(false);
+  const [showLines, setShowLines] = useState(true);
   const [lines, setLines] = useState<EditableLine[]>([
     { id: makeId(), ledgerId: "", ledgerName: "", side: "debit", amount: "" },
     { id: makeId(), ledgerId: "", ledgerName: "", side: "credit", amount: "" },
   ]);
   const [activeLineId, setActiveLineId] = useState<string | null>(null);
+  const [ledgerSearch, setLedgerSearch] = useState("");
+
+  // GST invoice detail (sales/purchase vouchers) — feeds GSTR reports
+  const [showGst, setShowGst] = useState(false);
+  const [gstHsn, setGstHsn] = useState("");
+  const [gstTaxable, setGstTaxable] = useState("");
+  const [gstCgst, setGstCgst] = useState("");
+  const [gstSgst, setGstSgst] = useState("");
+  const [gstIgst, setGstIgst] = useState("");
+  const supportsGst = ["sales", "purchase", "debitNote", "creditNote"].includes(voucherType);
 
   useEffect(() => {
     async function loadLedgers() {
@@ -77,6 +107,19 @@ export default function VoucherCreateScreen() {
       .reduce((sum, line) => sum + (Number(line.amount) || 0), 0);
     return { totalDebit, totalCredit, difference: totalDebit - totalCredit };
   }, [lines]);
+
+  useEffect(() => {
+    setLedgerSearch("");
+  }, [activeLineId]);
+
+  const filteredLedgersForSelection = useMemo(() => {
+    const query = ledgerSearch.trim().toLowerCase();
+    if (!query) return ledgers;
+    return ledgers.filter((ledger) =>
+      (ledger.ledgerName || "").toLowerCase().includes(query) ||
+      (ledger.ledgerType || "").toLowerCase().includes(query)
+    );
+  }, [ledgers, ledgerSearch]);
 
   const updateLine = (id: string, patch: Partial<EditableLine>) => {
     setLines((current) =>
@@ -110,8 +153,8 @@ export default function VoucherCreateScreen() {
       setError("Voucher number is required.");
       return;
     }
-    if (!entryDate.trim()) {
-      setError("Entry date is required.");
+    if (!entryDate.trim() || !isValidIsoDate(entryDate.trim())) {
+      setError("Please pick a valid entry date (YYYY-MM-DD).");
       return;
     }
     if (!narration.trim()) {
@@ -148,13 +191,32 @@ export default function VoucherCreateScreen() {
       setError(null);
       setSuccessMessage(null);
 
-      await voucherService.create({
+      const gstLines =
+        supportsGst && Number(gstTaxable) > 0
+          ? [
+              {
+                hsnSac: gstHsn.trim() || undefined,
+                taxableValue: Number(gstTaxable) || 0,
+                cgst: Number(gstCgst) || 0,
+                sgst: Number(gstSgst) || 0,
+                igst: Number(gstIgst) || 0,
+              },
+            ]
+          : undefined;
+
+      const result = await voucherService.create({
         voucherNumber: voucherNumber.trim(),
         voucherType,
         entryDate: new Date(entryDate).toISOString(),
         narration: narration.trim(),
         lines: cleanLines,
+        gstLines,
       });
+
+      if (!result.success) {
+        setError(result.message ?? "Unable to create voucher.");
+        return;
+      }
 
       setSuccessMessage("Voucher created successfully.");
       router.replace("/accounting/vouchers");
@@ -191,12 +253,7 @@ export default function VoucherCreateScreen() {
 
         <View style={styles.field}>
           <Text style={styles.label}>Entry Date</Text>
-          <TextInput
-            value={entryDate}
-            onChangeText={setEntryDate}
-            style={styles.input}
-            placeholder="YYYY-MM-DD"
-          />
+          <DateField value={entryDate} onChange={setEntryDate} placeholder="Select entry date" />
         </View>
 
         <View style={styles.field}>
@@ -209,7 +266,7 @@ export default function VoucherCreateScreen() {
                 onPress={() => setVoucherType(type)}
               >
                 <Text style={[styles.typeText, voucherType === type && styles.typeTextActive]}>
-                  {type}
+                  {VOUCHER_TYPE_LABEL[type]}
                 </Text>
               </Pressable>
             ))}
@@ -248,7 +305,7 @@ export default function VoucherCreateScreen() {
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Lines</Text>
             <Pressable onPress={() => setShowLines((current) => !current)}>
-              <Text style={styles.linkText}>{showLines ? "Close" : "Add"}</Text>
+              <Text style={styles.linkText}>{showLines ? "Hide" : "Show"}</Text>
             </Pressable>
           </View>
 
@@ -308,7 +365,13 @@ export default function VoucherCreateScreen() {
                   {activeLineId === line.id ? (
                     <Card style={styles.ledgerListCard}>
                       <Text style={styles.ledgerListTitle}>Choose a ledger</Text>
-                      {ledgers.map((ledger) => (
+                      <TextInput
+                        value={ledgerSearch}
+                        onChangeText={setLedgerSearch}
+                        placeholder="Search ledger by name or type..."
+                        style={[styles.input, { marginBottom: 10, paddingHorizontal: 12, paddingVertical: 8, fontSize: 13 }]}
+                      />
+                      {filteredLedgersForSelection.map((ledger) => (
                         <Pressable
                           key={ledger.id}
                           style={styles.ledgerOption}
@@ -320,6 +383,11 @@ export default function VoucherCreateScreen() {
                           </Text>
                         </Pressable>
                       ))}
+                      {filteredLedgersForSelection.length === 0 ? (
+                        <Text style={{ fontSize: 13, color: '#94A3B8', textAlign: 'center', marginTop: 10 }}>
+                          No ledgers found
+                        </Text>
+                      ) : null}
                     </Card>
                   ) : null}
                 </Card>
@@ -329,6 +397,78 @@ export default function VoucherCreateScreen() {
             </>
           ) : null}
         </Card>
+
+        {supportsGst ? (
+          <Card>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitle}>GST Details (for GSTR)</Text>
+              <Pressable onPress={() => setShowGst((current) => !current)}>
+                <Text style={styles.linkText}>{showGst ? "Close" : "Add"}</Text>
+              </Pressable>
+            </View>
+
+            {showGst ? (
+              <>
+                <View style={styles.field}>
+                  <Text style={styles.label}>HSN / SAC</Text>
+                  <TextInput
+                    value={gstHsn}
+                    onChangeText={setGstHsn}
+                    style={styles.input}
+                    placeholder="e.g. 8471"
+                    keyboardType="number-pad"
+                  />
+                </View>
+                <View style={styles.field}>
+                  <Text style={styles.label}>Taxable Value</Text>
+                  <TextInput
+                    value={gstTaxable}
+                    onChangeText={setGstTaxable}
+                    style={styles.input}
+                    placeholder="Amount before tax"
+                    keyboardType="decimal-pad"
+                  />
+                </View>
+                <View style={styles.gstTaxRow}>
+                  <View style={styles.gstTaxField}>
+                    <Text style={styles.label}>CGST</Text>
+                    <TextInput
+                      value={gstCgst}
+                      onChangeText={setGstCgst}
+                      style={styles.input}
+                      placeholder="0"
+                      keyboardType="decimal-pad"
+                    />
+                  </View>
+                  <View style={styles.gstTaxField}>
+                    <Text style={styles.label}>SGST</Text>
+                    <TextInput
+                      value={gstSgst}
+                      onChangeText={setGstSgst}
+                      style={styles.input}
+                      placeholder="0"
+                      keyboardType="decimal-pad"
+                    />
+                  </View>
+                  <View style={styles.gstTaxField}>
+                    <Text style={styles.label}>IGST</Text>
+                    <TextInput
+                      value={gstIgst}
+                      onChangeText={setGstIgst}
+                      style={styles.input}
+                      placeholder="0"
+                      keyboardType="decimal-pad"
+                    />
+                  </View>
+                </View>
+                <Text style={styles.gstHint}>
+                  Note: the GST amounts must also appear as voucher lines against the GST Output/Input
+                  ledgers — this section is the invoice-level break-up used for GST returns.
+                </Text>
+              </>
+            ) : null}
+          </Card>
+        ) : null}
 
         {error ? (
           <View style={styles.errorBox}>
@@ -523,6 +663,19 @@ const styles = StyleSheet.create({
   },
   amountRow: {
     marginTop: accountingTheme.spacing.md,
+  },
+  gstTaxRow: {
+    flexDirection: "row",
+    gap: accountingTheme.spacing.sm,
+  },
+  gstTaxField: {
+    flex: 1,
+  },
+  gstHint: {
+    fontSize: 11,
+    color: accountingTheme.colors.textSecondary,
+    fontStyle: "italic",
+    marginBottom: accountingTheme.spacing.sm,
   },
   ledgerListCard: {
     marginTop: accountingTheme.spacing.md,

@@ -19,7 +19,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.itaxeasy.TaxShax"
+      "package": "com.itaxeasy.TaxShax",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -27,6 +28,8 @@
     },
     "plugins": [
       "expo-router",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
       [
         "expo-splash-screen",
         {
@@ -40,7 +43,15 @@
         }
       ],
       "expo-web-browser",
-      "expo-font"
+      "expo-font",
+      "@react-native-community/datetimepicker",
+      "expo-sqlite",
+      [
+        "./plugins/withReactNativeArchitectures",
+        {
+          "architectures": "arm64-v8a"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
@@ -49,8 +60,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "1b7c14bc-f417-41eb-9d18-5fa63ac13562"
+        "projectId": "52aca66f-6cbe-4cb3-8e89-47d6cb2ca773"
       }
-    }
+    },
+    "owner": "akshatgg"
   }
 }

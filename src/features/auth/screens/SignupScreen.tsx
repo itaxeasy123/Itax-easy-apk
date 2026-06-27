@@ -2,24 +2,23 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { authService } from '../../../services/authService';
-import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
-import {
-  validateEmail,
-  validatePassword,
-} from '../../../utils/validators/authValidator';
+import { validateEmail } from '../../../utils/validators/authValidator';
 import AuthInput from '../components/AuthInput';
 import AuthScaffold, { PrimaryButton, SignupIllustration } from '../components/AuthScaffold';
+import {
+  isFirebaseAvailable,
+  isValidIndianMobile,
+  sendOtp,
+  toE164India,
+} from '../services/firebasePhone';
 
 export default function SignupScreen() {
   const router = useRouter();
   const [form, setForm] = useState({
-    confirmPassword: '',
     email: '',
     fullName: '',
     gender: '' as '' | 'female' | 'male' | 'other',
     mobileNumber: '',
-    password: '',
   });
   const [isGenderOpen, setIsGenderOpen] = useState(false);
   const [error, setError] = useState('');
@@ -33,70 +32,60 @@ export default function SignupScreen() {
 
   const handleSignup = async () => {
     try {
-      setLoading(true);
       setError('');
 
-      if (!form.fullName.trim()) {
-        setError('Please enter your full name.');
-        setLoading(false);
+      if (form.fullName.trim().length < 3) {
+        setError('Please enter your full name (at least 3 characters).');
         return;
       }
 
-      if (!validateEmail(form.email)) {
+      // Email is optional (SRS Module 1) — only validate when provided.
+      if (form.email.trim() && !validateEmail(form.email)) {
         setError('Please enter a valid email address.');
-        setLoading(false);
         return;
       }
 
-      if (!form.gender) {
-        setError('Please select a gender.');
-        setLoading(false);
-        return;
-      }
-
-      if (!form.mobileNumber.trim()) {
-        setError('Please enter your mobile number.');
-        setLoading(false);
-        return;
-      }
-
-      if (!validatePassword(form.password)) {
-        setError('Password must be at least 6 characters long.');
-        setLoading(false);
-        return;
-      }
-
-      if (form.password !== form.confirmPassword) {
-        setError('Password and confirm password do not match.');
-        setLoading(false);
+      if (!isValidIndianMobile(form.mobileNumber)) {
+        setError('Please enter a valid 10 digit mobile number.');
         return;
       }
 
       if (!isTermsAccepted) {
         setError('Please agree to the Terms & Conditions.');
-        setLoading(false);
         return;
       }
 
-      await authService.signup({
-        email: form.email,
-        fullName: form.fullName,
-        gender: form.gender,
-        password: form.password,
-        phone: form.mobileNumber,
-      });
+      if (!isFirebaseAvailable()) {
+        setError('Phone verification is unavailable in this build. Please update the app.');
+        return;
+      }
+
+      setLoading(true);
+      const phoneE164 = toE164India(form.mobileNumber);
+      await sendOtp(phoneE164);
 
       router.navigate({
-        params: { email: form.email, mode: 'signup', password: form.password },
+        params: {
+          mode: 'signup',
+          phone: phoneE164,
+          phoneDisplay: form.mobileNumber.replace(/\D/g, '').slice(-10),
+          fullName: form.fullName.trim(),
+          email: form.email.trim(),
+        },
         pathname: '/otp',
       });
     } catch (signupError: any) {
-      setError(
-        getApiErrorMessage(signupError, 'Signup failed. Please check the details.', {
-          409: 'This email or phone number is already registered.',
-          400: 'Please check the entered details and try again.',
-        })
-      );
+      console.log('SEND OTP ERROR:', signupError);
+      const code = signupError?.code as string | undefined;
+      if (code === 'auth/invalid-phone-number') {
+        setError('Please enter a valid mobile number.');
+      } else if (code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please wait a while and try again.');
+      } else if (code === 'auth/network-request-failed') {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError(signupError?.message || 'Could not send OTP. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -126,8 +115,9 @@ export default function SignupScreen() {
           value={form.fullName}
         />
         <AuthInput
+          keyboardType="email-address"
           onChangeText={updateField('email')}
-          placeholder="Email"
+          placeholder="Email (optional)"
           value={form.email}
         />
 
@@ -144,7 +134,7 @@ export default function SignupScreen() {
             >
               {form.gender
                 ? form.gender[0].toUpperCase() + form.gender.slice(1)
-                : 'Select Gender'}
+                : 'Select Gender (optional)'}
             </Text>
             <Text style={styles.genderCaret}>{isGenderOpen ? '⌃' : '⌄'}</Text>
           </Pressable>
@@ -184,34 +174,22 @@ export default function SignupScreen() {
           placeholder="Mobile Number"
           value={form.mobileNumber}
         />
-        <AuthInput
-          onChangeText={updateField('password')}
-          placeholder="Password"
-          secureToggle
-          value={form.password}
-        />
-        <AuthInput
-          onChangeText={updateField('confirmPassword')}
-          placeholder="Confirm Password"
-          secureToggle
-          value={form.confirmPassword}
-        />
       </View>
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
       <View style={styles.termsRow}>
         <Pressable onPress={() => setIsTermsAccepted(!isTermsAccepted)} style={styles.checkbox}>
-          <MaterialCommunityIcons 
-            name={isTermsAccepted ? "checkbox-marked" : "checkbox-blank-outline"} 
-            size={20} 
-            color={isTermsAccepted ? "#347BE5" : "#60708A"} 
+          <MaterialCommunityIcons
+            name={isTermsAccepted ? "checkbox-marked" : "checkbox-blank-outline"}
+            size={20}
+            color={isTermsAccepted ? "#347BE5" : "#60708A"}
           />
         </Pressable>
         <Text style={styles.termsText}>
           By signing up, you agree to our{' '}
-          <Text 
-            style={styles.termsLink} 
+          <Text
+            style={styles.termsLink}
             onPress={() => Linking.openURL('https://itaxeasy.com/tc')}
           >
             Terms & Conditions
@@ -220,7 +198,7 @@ export default function SignupScreen() {
         </Text>
       </View>
 
-      <PrimaryButton label="Signup" loading={loading} onPress={handleSignup} />
+      <PrimaryButton label="Send OTP" loading={loading} onPress={handleSignup} />
 
       <Text style={styles.bottomText}>
         Have an account?{' '}
